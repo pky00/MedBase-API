@@ -1,0 +1,296 @@
+# MedBase-API Cursor Rules
+
+## Project Context
+This is **MedBase-API**, a FastAPI backend for a free clinic management system. The clinic:
+- Does NOT charge patients (no billing, invoicing, or payments)
+- Relies on donations for medicine, equipment, and medical devices
+- Has no in-house laboratory (patients upload external lab results as documents)
+- All system users are admins with full access (no role-based permissions)
+
+## Technology Stack
+- **Backend**: FastAPI (Python 3.11+)
+- **Database**: PostgreSQL with UUID primary keys
+- **ORM**: SQLAlchemy 2.0 (async with asyncpg)
+- **Validation**: Pydantic v2
+- **Auth**: JWT tokens (python-jose) with bcrypt password hashing
+- **Migrations**: Alembic
+- **Containerization**: Docker & Docker Compose
+
+## Code Style & Conventions
+
+### Python
+- Use type hints for all function parameters and return types
+- Use async/await for database operations
+- Follow PEP 8 naming conventions
+- Use Pydantic models for request/response validation
+- Keep functions focused and single-purpose
+
+### Architecture Pattern: Service Layer
+
+This project uses a **service layer pattern** to separate concerns:
+
+- **Routers (Controllers)**: Handle HTTP requests, authentication, input validation, and HTTP responses
+- **Services**: Handle all business logic and database operations
+
+**Service Rules:**
+- Only create service methods that are actually used by routers
+- Do NOT add speculative "helper" methods or CRUD operations that aren't needed yet
+- Add new service methods only when a router endpoint requires them
+
+```python
+# Router example - thin controller, delegates to service
+@router.post("/", response_model=PatientResponse)
+async def create_patient(
+    patient_data: PatientCreate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    patient_service = PatientService(db)
+    
+    # Validation in router
+    if await patient_service.get_by_email(patient_data.email):
+        raise HTTPException(status_code=400, detail="Email already exists")
+    
+    # Delegate to service for DB operations
+    return await patient_service.create(patient_data, created_by=current_user.username)
+```
+
+```python
+# Service example - handles business logic and DB operations
+class PatientService:
+    def __init__(self, db: AsyncSession):
+        self.db = db
+    
+    async def create(self, data: PatientCreate, created_by: str) -> Patient:
+        patient = Patient(**data.model_dump(), created_by=created_by)
+        self.db.add(patient)
+        await self.db.commit()
+        await self.db.refresh(patient)
+        return patient
+    
+    async def get_by_id(self, patient_id: UUID) -> Patient | None:
+        result = await self.db.execute(select(Patient).where(Patient.id == patient_id))
+        return result.scalar_one_or_none()
+```
+
+### FastAPI Patterns
+```python
+# Router structure
+from fastapi import APIRouter, Depends, HTTPException, status
+from app.services.patient_service import PatientService
+
+router = APIRouter(prefix="/patients", tags=["patients"])
+
+@router.get("/", response_model=list[PatientResponse])
+async def get_patients(db: AsyncSession = Depends(get_db)):
+    patient_service = PatientService(db)
+    patients, total = await patient_service.list_patients()
+    ...
+```
+
+### Database Models
+- All tables use UUID primary keys (uuid_generate_v4())
+- All tables have audit columns: id, created_at, created_by, updated_at, updated_by
+- created_by and updated_by store usernames (VARCHAR), not UUIDs
+- Use SQLAlchemy 2.0 style with mapped_column()
+
+### Pydantic Schemas
+- Suffix with purpose: `PatientCreate`, `PatientUpdate`, `PatientResponse`
+- Use `from __future__ import annotations` for forward references
+- Separate schemas for create, update, and response
+
+## Domain Rules - CRITICAL
+
+### Never Implement
+- Billing, invoicing, or payment systems
+- Price calculations or financial transactions
+- Role-based access control (all users are admins)
+- In-house laboratory management (lab_tests, lab_orders, lab_results)
+- Complex scheduling (departments, rooms, doctor schedules)
+
+### Always Remember
+- **Donations are central**: Medicine, equipment, and medical devices can come from donors
+- **Medical devices vs Equipment**:
+  - `medical_devices` = Prescribable to patients (wheelchairs, walkers, braces)
+  - `equipment` = Clinic use only (monitors, surgical tools)
+- **Doctors can be from donors**: A doctor may be sponsored/provided by a donor organization
+- **Lab results are documents**: External lab results uploaded as patient_documents with type 'lab_result'
+
+## Database Enums (Use These Exact Values)
+
+```python
+# gender_type
+class GenderType(str, Enum):
+    male = "male"
+    female = "female"
+
+# appointment_status
+class AppointmentStatus(str, Enum):
+    scheduled = "scheduled"
+    completed = "completed"
+    cancelled = "cancelled"
+    no_show = "no_show"
+    rescheduled = "rescheduled"
+
+# appointment_type
+class AppointmentType(str, Enum):
+    consultation = "consultation"
+    follow_up = "follow_up"
+    emergency = "emergency"
+    checkup = "checkup"
+
+# prescription_status
+class PrescriptionStatus(str, Enum):
+    pending = "pending"
+    dispensed = "dispensed"
+    cancelled = "cancelled"
+
+# severity
+class Severity(str, Enum):
+    mild = "mild"
+    moderate = "moderate"
+    severe = "severe"
+    life_threatening = "life_threatening"
+
+# equipment_condition
+class EquipmentCondition(str, Enum):
+    new = "new"
+    excellent = "excellent"
+    good = "good"
+    fair = "fair"
+    needs_repair = "needs_repair"
+    out_of_service = "out_of_service"
+
+# donor_type
+class DonorType(str, Enum):
+    individual = "individual"
+    organization = "organization"
+    government = "government"
+    ngo = "ngo"
+    pharmaceutical_company = "pharmaceutical_company"
+
+# donation_type
+class DonationType(str, Enum):
+    medicine = "medicine"
+    equipment = "equipment"
+    medical_device = "medical_device"
+    mixed = "mixed"
+```
+
+## File Structure
+```
+MedBase-API/
+├── .cursorrules
+├── CLAUDE.md
+├── README.md
+├── Makefile              # Dev commands (make help)
+├── requirements.txt      # For Docker (pip)
+├── environment.yaml      # For local dev (Conda)
+├── env.example           # Local env template
+├── env.prod.example      # Production env template
+├── Dockerfile
+├── docker-compose.yml
+├── .dockerignore
+├── sql scripts/
+│   └── medbase_initial.sql
+├── app/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── config.py
+│   ├── models/          # SQLAlchemy models
+│   ├── schemas/         # Pydantic schemas
+│   ├── routers/         # API endpoints (thin controllers)
+│   ├── services/        # Business logic & DB operations
+│   │   ├── __init__.py
+│   │   ├── auth_service.py
+│   │   └── user_service.py
+│   └── utils/
+│       ├── database.py      # DB connection & Base
+│       ├── dependencies.py  # Auth dependencies
+│       └── security.py      # JWT & password utils
+├── alembic/
+└── tests/
+```
+
+## API Design Guidelines
+
+### Endpoints
+- Use plural nouns: `/patients`, `/doctors`, `/appointments`
+- Use HTTP methods correctly: GET (read), POST (create), PUT (full update), PATCH (partial update), DELETE
+- Return appropriate status codes: 200, 201, 204, 400, 401, 404, 422
+
+### Response Format
+```python
+# Success with data
+{"data": {...}, "message": "Success"}
+
+# List responses
+{"data": [...], "total": 100, "page": 1, "per_page": 20}
+
+# Error responses
+{"detail": "Error message"}
+```
+
+### Common Patterns
+```python
+# Import dependencies from utils
+from app.utils.database import get_db
+from app.utils.dependencies import get_current_user
+
+# Dependency for current user (in app/utils/dependencies.py)
+async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)) -> User:
+    ...
+
+# Database session dependency (in app/utils/database.py)
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    async with async_session() as session:
+        yield session
+```
+
+### Authentication
+- No public registration endpoint - users are created by authenticated users
+- `POST /api/v1/users/` requires authentication to create new users
+- `POST /api/v1/auth/login` for JWT token retrieval
+- **Default admin**: username `admin`, password `admin` (created by initial migration)
+
+## User Preferences
+- Keep implementations simple and practical
+- Prefer enums over VARCHAR for constrained values
+- Remove unnecessary complexity
+- Focus on core functionality first
+- Iterate in small increments
+
+## When Asked to Add Features
+1. First check if it aligns with the free clinic context
+2. Check if it contradicts any domain rules above
+3. Keep it minimal - only add what's explicitly requested
+4. Use existing patterns and conventions in the codebase
+
+## Testing Guidelines
+
+### Test Philosophy
+- **Never modify production code to accommodate tests** - tests should test the code as-is
+- Only modify production code if there is an actual bug discovered during testing
+- Tests should be self-contained and not require special handling in the application
+
+### Test Structure
+- Tests are in the `tests/` directory
+- Use `pytest` with `pytest-asyncio` for async tests
+- Test database: `medbase_clinic_test` (PostgreSQL)
+- Tests create data via API calls, not direct database manipulation
+- Use fixtures for common setup (client, auth headers, test users)
+
+### Running Tests
+```bash
+make test  # Runs tests and saves results to tests/test_results.log
+```
+
+### Test Fixtures
+- `client`: AsyncClient for making API requests
+- `admin_headers`: Auth headers for the default admin user
+- `test_user`: Creates a test user via API and returns user dict with password
+- `auth_headers`: Auth headers for the test user
+
+## Documentation Sync
+When adding or updating rules in `.cursorrules`, always add the same changes to `CLAUDE.md` to keep both files synchronized.
+

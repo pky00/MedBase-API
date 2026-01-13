@@ -1,0 +1,690 @@
+{
+	"info": {
+		"_postman_id": "a1c164ba-06ea-4ad8-9d40-a4f8003814c6",
+		"name": "MedBase API",
+		"description": "# MedBase API Collection\n\nAPI for MedBase Clinic Management System - a free clinic that relies on donations.\n\n## Setup\n\n1. Start the API: `make docker-up` or `make run`\n2. Import this collection into Postman\n3. Set the `base_url` variable (default: `http://localhost:8000`)\n4. Run \"Login\" first to get an access token (auto-saved to `access_token` variable)\n\n## Authentication\n\nAll endpoints except `/auth/login` require a Bearer token. The collection automatically uses the `{{access_token}}` variable after login.\n\n## Test Workflow\n\n1. Login → Get token\n2. Create User → Creates a new user\n3. Get Current User → Verify your profile\n4. List Users → See all users\n5. Update/Delete as needed",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16158873"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has access_token\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('access_token');",
+									"    pm.expect(jsonData.token_type).to.eql('bearer');",
+									"});",
+									"",
+									"// Save token for subsequent requests",
+									"var jsonData = pm.response.json();",
+									"if (jsonData.access_token) {",
+									"    pm.collectionVariables.set(\"access_token\", jsonData.access_token);",
+									"    console.log(\"Token saved successfully\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "admin",
+									"description": "Username"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"description": "Password"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Authenticate and get JWT access token.\n\n**Request Body** (form-urlencoded):\n- `username`: User's username\n- `password`: User's password\n\n**Response**:\n```json\n{\n    \"access_token\": \"eyJhbGciOiJIUzI1...\",\n    \"token_type\": \"bearer\"\n}\n```\n\nThe token is automatically saved to the `access_token` collection variable."
+					},
+					"response": [
+						{
+							"name": "Successful Login",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "username",
+											"value": "admin",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "admin",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/auth/login",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"login"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"body": "{\n    \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"token_type\": \"bearer\"\n}"
+						}
+					]
+				}
+			],
+			"description": "Authentication endpoints for login and token management."
+		},
+		{
+			"name": "Users - Current User",
+			"item": [
+				{
+					"name": "Get Current User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has user data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('username');",
+									"    pm.expect(jsonData).to.have.property('email');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"me"
+							]
+						},
+						"description": "Get the profile of the currently authenticated user.\n\n**Response**:\n```json\n{\n    \"id\": \"uuid\",\n    \"username\": \"admin\",\n    \"email\": \"admin@example.com\",\n    \"first_name\": \"Admin\",\n    \"last_name\": \"User\",\n    \"is_active\": true,\n    \"last_login_at\": \"2024-01-01T00:00:00\",\n    \"created_at\": \"2024-01-01T00:00:00\",\n    \"updated_at\": \"2024-01-01T00:00:00\"\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Current User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"User data updated\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.first_name).to.eql('Updated');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\": \"Updated\",\n    \"last_name\": \"Name\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"me"
+							]
+						},
+						"description": "Update the current user's profile. Only provided fields are updated.\n\n**Request Body** (all optional):\n```json\n{\n    \"email\": \"newemail@example.com\",\n    \"first_name\": \"New First\",\n    \"last_name\": \"New Last\",\n    \"is_active\": true\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"current_password\": \"admin\",\n    \"new_password\": \"newpassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/me/change-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"me",
+								"change-password"
+							]
+						},
+						"description": "Change the current user's password.\n\n**Request Body**:\n```json\n{\n    \"current_password\": \"oldpassword\",\n    \"new_password\": \"newpassword123\"\n}\n```\n\n**Note**: New password must be at least 8 characters.\n\n**Response**: 204 No Content on success."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for managing the currently authenticated user's profile."
+		},
+		{
+			"name": "Users - CRUD",
+			"item": [
+				{
+					"name": "Create User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"User created with correct data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData.username).to.eql('newuser');",
+									"});",
+									"",
+									"// Save user ID for later use",
+									"var jsonData = pm.response.json();",
+									"if (jsonData.id) {",
+									"    pm.collectionVariables.set(\"created_user_id\", jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"newuser\",\n    \"email\": \"newuser@example.com\",\n    \"password\": \"password123\",\n    \"first_name\": \"New\",\n    \"last_name\": \"User\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								""
+							]
+						},
+						"description": "Create a new user. Requires authentication (only existing users can create new users).\n\n**Request Body**:\n```json\n{\n    \"username\": \"newuser\",\n    \"email\": \"newuser@example.com\",\n    \"password\": \"password123\",\n    \"first_name\": \"New\",\n    \"last_name\": \"User\"\n}\n```\n\n**Validation**:\n- `username`: 3-50 characters, unique\n- `email`: Valid email, unique\n- `password`: Minimum 8 characters\n- `first_name`: 1-100 characters\n- `last_name`: 1-100 characters"
+					},
+					"response": []
+				},
+				{
+					"name": "List Users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has pagination\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('data');",
+									"    pm.expect(jsonData).to.have.property('total');",
+									"    pm.expect(jsonData).to.have.property('page');",
+									"    pm.expect(jsonData).to.have.property('per_page');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/?page=1&per_page=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								""
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "per_page",
+									"value": "20",
+									"description": "Items per page (default: 20, max: 100)"
+								}
+							]
+						},
+						"description": "List all users with pagination.\n\n**Query Parameters**:\n- `page`: Page number (default: 1)\n- `per_page`: Items per page (default: 20, max: 100)\n\n**Response**:\n```json\n{\n    \"data\": [\n        {\n            \"id\": \"uuid\",\n            \"username\": \"admin\",\n            \"email\": \"admin@example.com\",\n            ...\n        }\n    ],\n    \"total\": 10,\n    \"page\": 1,\n    \"per_page\": 20\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has user data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('username');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/{{created_user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{created_user_id}}"
+							]
+						},
+						"description": "Get a specific user by their UUID.\n\n**Path Parameters**:\n- `user_id`: User's UUID\n\n**Response**: User object or 404 if not found."
+					},
+					"response": []
+				},
+				{
+					"name": "Update User by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"User updated\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.first_name).to.eql('Updated');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\": \"Updated\",\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/{{created_user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{created_user_id}}"
+							]
+						},
+						"description": "Update a user by their UUID. Only provided fields are updated.\n\n**Path Parameters**:\n- `user_id`: User's UUID\n\n**Request Body** (all optional):\n```json\n{\n    \"email\": \"newemail@example.com\",\n    \"first_name\": \"New First\",\n    \"last_name\": \"New Last\",\n    \"is_active\": true\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/{{created_user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{created_user_id}}"
+							]
+						},
+						"description": "Delete a user by their UUID.\n\n**Path Parameters**:\n- `user_id`: User's UUID\n\n**Note**: You cannot delete your own account.\n\n**Response**: 204 No Content on success."
+					},
+					"response": []
+				}
+			],
+			"description": "CRUD operations for user management."
+		},
+		{
+			"name": "Health",
+			"item": [
+				{
+					"name": "Health Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"API is healthy\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql('healthy');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Check if the API is running and healthy.\n\n**Response**:\n```json\n{\n    \"status\": \"healthy\",\n    \"app_name\": \"MedBase-API\",\n    \"debug\": false\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "Root",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						},
+						"description": "Root endpoint - Welcome message.\n\n**Response**:\n```json\n{\n    \"message\": \"Welcome to MedBase API\",\n    \"status\": \"healthy\",\n    \"version\": \"1.0.0\"\n}\n```"
+					},
+					"response": []
+				}
+			],
+			"description": "Health check endpoints."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://127.0.0.1:8000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "created_user_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

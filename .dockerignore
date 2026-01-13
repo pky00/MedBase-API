@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv
+venv
+ENV
+env
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+.cursor
+
+# Testing
+.pytest_cache
+.coverage
+htmlcov
+
+# Environment
+.env
+*.env.local
+
+# Documentation
+*.md
+!README.md
+
+# Alembic versions (use migrations in production)
+alembic/versions/*.py
+!alembic/versions/__init__.py
+
+# Misc
+*.log
+.DS_Store
+Thumbs.db
+
