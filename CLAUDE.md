@@ -18,6 +18,13 @@
 - **Migrations**: Alembic
 - **Containerization**: Docker & Docker Compose
 
+## Migration Workflow
+
+- **Do NOT create migration files** - the user will create them
+- When a new migration is needed (new model, schema change), ask the user to run `make migrate-create msg="description"`
+- Once the user confirms the migration is created, you may edit it if needed (e.g., to add default data)
+- Never auto-generate or write migration files directly
+
 ## Development Setup
 
 Use `make help` to see all available commands.
@@ -263,6 +270,18 @@ MedBase-API/
 └── tests/                 # (empty - for tests)
 ```
 
+## Logging Guidelines
+
+Add logging to track code execution and help debug issues:
+
+- Use Python's `logging` module with appropriate log levels:
+  - `INFO`: Service method calls, important operations (create, update, delete)
+  - `WARNING`: Handled errors, validation failures, not found cases
+  - `ERROR`: Exceptions, unexpected failures
+- Log at service layer entry points (not every line)
+- Include relevant context (IDs, usernames) but never sensitive data (passwords, tokens)
+- Example: `logger.info(f"Creating doctor: {doctor_data.first_name} {doctor_data.last_name}")`
+
 ## Service Layer Pattern
 
 The project follows a **service layer architecture**:
@@ -292,6 +311,7 @@ Request → Router (auth + validation) → Service (business logic + DB) → Res
 - **Never modify production code to accommodate tests** - tests should test the code as-is
 - Only modify production code if there is an actual bug discovered during testing
 - Tests should be self-contained and not require special handling in the application
+- **Always add database verification** - verify data in the database after API operations, not just response codes
 
 ### Test Structure
 - Tests are in the `tests/` directory
@@ -299,6 +319,7 @@ Request → Router (auth + validation) → Service (business logic + DB) → Res
 - Test database: `medbase_clinic_test` (PostgreSQL)
 - Tests create data via API calls, not direct database manipulation
 - Use fixtures for common setup (client, auth headers, test users)
+- Use `db_session` fixture to query database for verification
 
 ### Running Tests
 ```bash
@@ -310,6 +331,29 @@ make test  # Runs tests and saves results to tests/test_results.log
 - `admin_headers`: Auth headers for the default admin user
 - `test_user`: Creates a test user via API and returns user dict with password
 - `auth_headers`: Auth headers for the test user
+- `db_session`: AsyncSession for database queries/verification
+
+### When Tests Fail
+1. **Evaluate the cause** - determine if failure is due to:
+   - Test setup issue (wrong fixture, incorrect assertion, test logic error)
+   - Actual bug in the API code
+2. **Fix test issues without permission** - if the test itself is incorrect, fix it
+3. **Ask permission for API bugs** - if there's a bug in the API code:
+   - List all discovered bugs to the user
+   - Wait for user permission before modifying any API/production code
+   - Never silently fix API bugs
+
+## Feature Implementation Checklist
+
+When implementing a new feature/entity, create ALL of the following:
+- [ ] **Model** (`app/models/`) - SQLAlchemy model with proper types and relationships
+- [ ] **Model Registration** - Add model to `app/models/__init__.py` AND `alembic/env.py` imports
+- [ ] **Schemas** (`app/schemas/`) - Pydantic schemas (Create, Update, Response, ListResponse)
+- [ ] **Service** (`app/services/`) - Business logic and CRUD operations
+- [ ] **Router** (`app/routers/`) - API endpoints, register in `__init__.py` and `main.py`
+- [ ] **Migration** - Ask user to run `make migrate-create`, then edit if needed
+- [ ] **Tests** (`tests/`) - Comprehensive tests with database verification
+- [ ] **Postman** - Add requests to `MedBase.postman_collection.json`
 
 ## Important Notes for AI Assistants
 
@@ -326,4 +370,6 @@ make test  # Runs tests and saves results to tests/test_results.log
 11. **Two dependency files** - `requirements.txt` for Docker, `environment.yaml` for local Conda dev
 12. **Keep docs in sync** - When updating `.cursorrules`, also update `CLAUDE.md`
 13. **Test philosophy** - Never modify production code to accommodate tests; only fix actual bugs
+14. **Test failure workflow** - Fix test issues freely, but ask permission before fixing API bugs
+15. **Feature checklist** - When adding features, include model, schemas, service, router, migration, tests, and Postman requests
 

@@ -75,7 +75,7 @@ After running migrations, a default admin user is created:
 |-------|-------|
 | Username | `admin` |
 | Password | `admin` |
-| Email | `admin@medbase.local` |
+| Email | `admin@medbase.example` |
 
 **⚠️ Change the password immediately in production!**
 
@@ -109,25 +109,110 @@ make run-prod
 
 ## API Documentation
 
-Once running, access:
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-- **Health Check**: http://localhost:8000/health
+Once running, access the interactive API documentation:
+
+| Documentation | URL | Description |
+|---------------|-----|-------------|
+| **Swagger UI** | http://localhost:8000/docs | Interactive API explorer with "Try it out" feature |
+| **ReDoc** | http://localhost:8000/redoc | Clean, responsive API documentation |
+| **OpenAPI JSON** | http://localhost:8000/openapi.json | Raw OpenAPI 3.0 specification |
+| **Health Check** | http://localhost:8000/health | API health status |
+
+### ReDoc Features
+
+ReDoc provides a three-panel responsive layout:
+- **Left panel**: Navigation menu with all endpoints grouped by tags
+- **Middle panel**: Endpoint details, request/response schemas
+- **Right panel**: Code samples and response examples
+
+### Authentication
+
+All endpoints (except `/health` and login) require JWT authentication:
+
+1. **Get Token**: `POST /api/v1/auth/login` with username/password
+2. **Use Token**: Add header `Authorization: Bearer <your_token>`
+
+Token expires after 30 minutes (configurable via `ACCESS_TOKEN_EXPIRE_MINUTES`).
 
 ## API Endpoints
 
 ### Authentication
-- `POST /api/v1/auth/login` - Login and get JWT token
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/auth/login` | Login and get JWT token |
 
 ### Users
-- `POST /api/v1/users/` - Create new user (requires auth)
-- `GET /api/v1/users/me` - Get current user profile
-- `PATCH /api/v1/users/me` - Update current user profile
-- `POST /api/v1/users/me/change-password` - Change password
-- `GET /api/v1/users/` - List all users
-- `GET /api/v1/users/{id}` - Get user by ID
-- `PATCH /api/v1/users/{id}` - Update user
-- `DELETE /api/v1/users/{id}` - Delete user
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/users/` | Create new user (requires auth) |
+| `GET` | `/api/v1/users/me` | Get current user profile |
+| `PATCH` | `/api/v1/users/me` | Update current user profile |
+| `POST` | `/api/v1/users/me/change-password` | Change password |
+| `GET` | `/api/v1/users/` | List all users |
+| `GET` | `/api/v1/users/{id}` | Get user by ID |
+| `PATCH` | `/api/v1/users/{id}` | Update user |
+| `DELETE` | `/api/v1/users/{id}` | Delete user |
+
+### Patients
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/patients/` | Create new patient |
+| `GET` | `/api/v1/patients/` | List patients (with search) |
+| `GET` | `/api/v1/patients/{id}` | Get patient by ID |
+| `GET` | `/api/v1/patients/number/{number}` | Get patient by patient number |
+| `PATCH` | `/api/v1/patients/{id}` | Update patient |
+| `DELETE` | `/api/v1/patients/{id}` | Delete patient |
+
+### Patient Allergies & Medical History
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/patients/{id}/allergies/` | Add allergy |
+| `GET` | `/api/v1/patients/{id}/allergies/` | List allergies |
+| `POST` | `/api/v1/patients/{id}/medical-history/` | Add medical history |
+| `GET` | `/api/v1/patients/{id}/medical-history/` | List medical history |
+
+### Doctors
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/doctors/` | Create doctor |
+| `GET` | `/api/v1/doctors/` | List doctors (filter by specialization) |
+| `GET` | `/api/v1/doctors/{id}` | Get doctor by ID |
+| `PATCH` | `/api/v1/doctors/{id}` | Update doctor |
+| `DELETE` | `/api/v1/doctors/{id}` | Delete doctor |
+
+### Appointments
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/appointments/` | Create appointment |
+| `GET` | `/api/v1/appointments/` | List appointments (filter by patient/doctor/date) |
+| `PATCH` | `/api/v1/appointments/{id}` | Update appointment status |
+
+### Prescriptions
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/prescriptions/` | Create prescription |
+| `GET` | `/api/v1/prescriptions/` | List prescriptions |
+| `PATCH` | `/api/v1/prescriptions/{id}` | Update/dispense prescription |
+
+### Donations
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/donors/` | Create donor |
+| `GET` | `/api/v1/donors/` | List donors |
+| `POST` | `/api/v1/donations/` | Record donation |
+| `GET` | `/api/v1/donations/` | List donations |
+
+### Inventory
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/medicines/` | Add medicine to catalog |
+| `GET` | `/api/v1/medicines/` | List medicines |
+| `POST` | `/api/v1/equipment/` | Add equipment |
+| `GET` | `/api/v1/equipment/` | List equipment |
+| `POST` | `/api/v1/medical-devices/` | Add medical device |
+| `GET` | `/api/v1/medical-devices/` | List medical devices |
+
+> 📖 **See full API documentation at** `/docs` **or** `/redoc` **for complete endpoint details, request/response schemas, and examples.**
 
 ## Project Structure
 

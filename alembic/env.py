@@ -7,7 +7,36 @@ from alembic import context
 
 # Import your models and config
 from app.utils.database import Base
-from app.models import User  # Import all models here
+from app.models import (
+    User,
+    Doctor,
+    Patient,
+    PatientAllergy,
+    PatientMedicalHistory,
+    Donor,
+    MedicineCategory,
+    Medicine,
+    MedicineInventory,
+    MedicineExpiry,
+    EquipmentCategory,
+    Equipment,
+    MedicalDeviceCategory,
+    MedicalDevice,
+    MedicalDeviceInventory,
+    Appointment,
+    VitalSign,
+    MedicalRecord,
+    Donation,
+    DonationMedicineItem,
+    DonationEquipmentItem,
+    DonationMedicalDeviceItem,
+    Prescription,
+    PrescriptionItem,
+    PrescribedDevice,
+    PatientDocument,
+    InventoryTransaction,
+    SystemSetting,
+)
 from app.config import get_settings
 
 # this is the Alembic Config object
@@ -69,4 +98,3 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     run_migrations_online()
-

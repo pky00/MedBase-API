@@ -92,20 +92,20 @@ async def change_password(
 @router.get("/", response_model=UserListResponse)
 async def list_users(
     page: int = Query(1, ge=1),
-    per_page: int = Query(20, ge=1, le=100),
+    size: int = Query(20, ge=1, le=100),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """List all users with pagination."""
     user_service = UserService(db)
     
-    users, total = await user_service.list_users(page=page, per_page=per_page)
+    users, total = await user_service.list_users(page=page, size=size)
     
     return UserListResponse(
         data=users,
         total=total,
         page=page,
-        per_page=per_page
+        size=size
     )
 
 

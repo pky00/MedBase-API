@@ -64,13 +64,18 @@ def create_test_database():
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cursor = conn.cursor()
     
-    # Drop all tables
+    # Drop all tables and types (enums)
     cursor.execute("""
         DO $$ DECLARE
             r RECORD;
         BEGIN
+            -- Drop all tables
             FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
                 EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE';
+            END LOOP;
+            -- Drop all enum types
+            FOR r IN (SELECT typname FROM pg_type WHERE typcategory = 'E' AND typnamespace = 'public'::regnamespace) LOOP
+                EXECUTE 'DROP TYPE IF EXISTS ' || quote_ident(r.typname) || ' CASCADE';
             END LOOP;
         END $$;
     """)
@@ -138,17 +143,9 @@ TestSessionLocal = async_sessionmaker(
 
 @pytest_asyncio.fixture
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
-    """Create a database session for each test with transaction rollback."""
-    async with test_engine.connect() as connection:
-        # Start a transaction
-        transaction = await connection.begin()
-        
-        # Create a session bound to this connection
-        async with AsyncSession(bind=connection, expire_on_commit=False) as session:
-            yield session
-        
-        # Rollback the transaction after test
-        await transaction.rollback()
+    """Create a database session for querying/verifying database state."""
+    async with TestSessionLocal() as session:
+        yield session
 
 
 @pytest_asyncio.fixture
