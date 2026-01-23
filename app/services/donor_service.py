@@ -4,8 +4,22 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.donor import Donor
 from app.schemas.donor import DonorCreate, DonorUpdate
+from app.utils.sort import apply_sorting
 
 logger = logging.getLogger(__name__)
+
+# Fields that can be sorted on
+DONOR_SORTABLE_FIELDS = [
+    'name',
+    'donor_code',
+    'donor_type',
+    'contact_person',
+    'email',
+    'city',
+    'is_active',
+    'created_at',
+    'updated_at',
+]
 
 
 class DonorService:
@@ -33,8 +47,10 @@ class DonorService:
         donor_type: str | None = None,
         is_active: bool | None = None,
         search: str | None = None,
+        sort_by: str | None = None,
+        sort_order: str | None = None,
     ) -> tuple[list[Donor], int]:
-        logger.info(f"Listing donors: page={page}, size={size}, donor_type={donor_type}")
+        logger.info(f"Listing donors: page={page}, size={size}, donor_type={donor_type}, sort_by={sort_by}")
         query = select(Donor)
         count_query = select(func.count(Donor.id))
 
@@ -54,8 +70,19 @@ class DonorService:
         total_result = await self.db.execute(count_query)
         total = total_result.scalar()
 
+        # Apply sorting using the utility
+        query = apply_sorting(
+            query=query,
+            model=Donor,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            allowed_fields=DONOR_SORTABLE_FIELDS,
+            default_field='name',
+            default_order='asc'
+        )
+
         offset = (page - 1) * size
-        query = query.offset(offset).limit(size).order_by(Donor.name)
+        query = query.offset(offset).limit(size)
         result = await self.db.execute(query)
         donors = list(result.scalars().all())
 
@@ -88,4 +115,3 @@ class DonorService:
         logger.info(f"Deleting donor: {donor.id}")
         await self.db.delete(donor)
         await self.db.commit()
-

@@ -40,22 +40,25 @@ class PatientService:
         return result.scalar_one_or_none()
     
     async def list_patients(
-        self, 
-        page: int = 1, 
+        self,
+        page: int = 1,
         size: int = 20,
-        search: str | None = None
+        search: str | None = None,
+        sort_by: str | None = None,
+        sort_order: str = "asc"
     ) -> tuple[list[Patient], int]:
         """
         Get paginated list of patients.
         Search can match patient_number, first_name, last_name, phone, or email.
+        Supports sorting by any patient field.
         Returns tuple of (patients, total_count).
         """
-        logger.info(f"Listing patients: page={page}, size={size}, search={search}")
-        
+        logger.info(f"Listing patients: page={page}, size={size}, search={search}, sort_by={sort_by}, sort_order={sort_order}")
+
         # Build query
         query = select(Patient)
         count_query = select(func.count(Patient.id))
-        
+
         # Filter by search term if provided
         if search:
             search_filter = (
@@ -67,21 +70,31 @@ class PatientService:
             )
             query = query.where(search_filter)
             count_query = count_query.where(search_filter)
-        
+
         # Count total
         count_result = await self.db.execute(count_query)
         total = count_result.scalar()
-        
+
+        # Apply sorting
+        if sort_by and hasattr(Patient, sort_by):
+            column = getattr(Patient, sort_by)
+            if sort_order.lower() == "desc":
+                query = query.order_by(column.desc())
+            else:
+                query = query.order_by(column.asc())
+        else:
+            # Default sorting
+            query = query.order_by(Patient.last_name, Patient.first_name)
+
         # Get paginated patients
         offset = (page - 1) * size
         result = await self.db.execute(
             query
-            .order_by(Patient.last_name, Patient.first_name)
             .offset(offset)
             .limit(size)
         )
         patients = list(result.scalars().all())
-        
+
         logger.info(f"Found {len(patients)} patients (total: {total})")
         return patients, total
     

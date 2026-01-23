@@ -355,6 +355,61 @@ When implementing a new feature/entity, create ALL of the following:
 - [ ] **Tests** (`tests/`) - Comprehensive tests with database verification
 - [ ] **Postman** - Add requests to `MedBase.postman_collection.json`
 
+## UI/UX Patterns for Item Lists (Parent-Child Relationships)
+
+When implementing parent entities with child items (e.g., Donations with donation items, Prescriptions with prescription items):
+
+### Frontend Patterns
+1. **Expandable Form Approach**: Items are displayed in an expandable section within the parent form
+   - Collapsible/expandable section using Angular control flow
+   - Section header shows item count (e.g., "Medicine Items (3)")
+   - Expand/collapse icon for better UX
+
+2. **Save Strategy**: Items are saved **on parent save**, not immediately
+   - Changes to items are tracked in memory (form state)
+   - All item changes (add/edit/delete) are submitted when parent form is saved
+   - Validation occurs before parent save
+
+3. **Delete Behavior**: **Soft delete** for all deletions
+   - Add `is_deleted` boolean field to all item tables (default: false)
+   - When item is "deleted", mark `is_deleted = true` instead of hard delete
+   - Filter out deleted items in queries: `WHERE is_deleted = false`
+   - UI shows "Deleted" badge for items marked for deletion (until parent save)
+   - Applies to all entities, not just items
+
+### Backend Patterns
+1. **Eager Loading**: Parent GET endpoints return items using SQLAlchemy `selectinload()`
+   ```python
+   result = await session.execute(
+       select(Donation)
+       .options(selectinload(Donation.medicine_items))
+       .where(Donation.id == donation_id)
+   )
+   ```
+
+2. **Schema Updates**: Response schemas include nested items
+   ```python
+   class DonationResponse(BaseModel):
+       id: UUID4
+       # ... other fields ...
+       medicine_items: List[DonationMedicineItemResponse] = []
+       equipment_items: List[DonationEquipmentItemResponse] = []
+       medical_device_items: List[DonationMedicalDeviceItemResponse] = []
+   ```
+
+3. **Soft Delete Implementation**:
+   - Add `is_deleted` column to models: `is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)`
+   - Update queries to filter: `select(Model).where(Model.is_deleted == False)`
+   - Update instead of delete: `item.is_deleted = True`
+   - Apply to all CRUD operations across the system
+
+### Implementation Notes
+- Item lists are view-only in view mode, editable in edit mode
+- New items have temporary IDs (negative numbers or 'temp-uuid') until saved
+- Validation errors show inline for each item
+- Empty state message when no items exist
+- Add button disabled in view mode
+
 ## Important Notes for AI Assistants
 
 1. **This is a FREE clinic** - never add billing/payment features
@@ -372,4 +427,5 @@ When implementing a new feature/entity, create ALL of the following:
 13. **Test philosophy** - Never modify production code to accommodate tests; only fix actual bugs
 14. **Test failure workflow** - Fix test issues freely, but ask permission before fixing API bugs
 15. **Feature checklist** - When adding features, include model, schemas, service, router, migration, tests, and Postman requests
+16. **Item lists UI/UX** - Use expandable forms, save on parent save, implement soft delete for all deletions
 

@@ -64,21 +64,26 @@ async def list_patients(
     page: int = Query(1, ge=1, description="Page number"),
     size: int = Query(20, ge=1, le=100, description="Items per page"),
     search: str | None = Query(None, description="Search by name, patient number, phone, or email"),
+    sort_by: str | None = Query(None, description="Field to sort by"),
+    sort_order: str = Query("asc", regex="^(asc|desc)$", description="Sort order (asc or desc)"),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """
     Get paginated list of patients.
-    
+
     Supports search by patient_number, first_name, last_name, phone, or email.
+    Supports sorting by any patient field.
     """
     logger.info(f"Listing patients request from user: {current_user.username}")
-    
+
     patient_service = PatientService(db)
     patients, total = await patient_service.list_patients(
         page=page,
         size=size,
-        search=search
+        search=search,
+        sort_by=sort_by,
+        sort_order=sort_order
     )
     
     return PatientListResponse(

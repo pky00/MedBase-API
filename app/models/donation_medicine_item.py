@@ -2,7 +2,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, date
 from decimal import Decimal
-from sqlalchemy import String, Text, DateTime, Date, Integer, Numeric, ForeignKey, func
+from sqlalchemy import String, Text, DateTime, Date, Integer, Numeric, ForeignKey, Boolean, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.utils.database import Base
@@ -34,7 +34,8 @@ class DonationMedicineItem(Base):
     estimated_unit_value: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
     total_value: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
     condition_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
-    
+    is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
     # Audit columns
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
     created_by: Mapped[str | None] = mapped_column(String(50), nullable=True)

@@ -9,6 +9,15 @@ from app.schemas.donation import (
     DonationUpdate,
     DonationResponse,
     DonationListResponse,
+    DonationMedicineItemCreate,
+    DonationMedicineItemUpdate,
+    DonationMedicineItemResponse,
+    DonationEquipmentItemCreate,
+    DonationEquipmentItemUpdate,
+    DonationEquipmentItemResponse,
+    DonationMedicalDeviceItemCreate,
+    DonationMedicalDeviceItemUpdate,
+    DonationMedicalDeviceItemResponse,
 )
 from app.services.donation_service import DonationService
 from app.services.donor_service import DonorService
@@ -113,4 +122,229 @@ async def delete_donation(
             detail="Donation not found",
         )
     await service.delete(donation)
+
+
+# Medicine Item Endpoints
+@router.post("/{donation_id}/medicine-items", response_model=DonationMedicineItemResponse, status_code=status.HTTP_201_CREATED)
+async def add_medicine_item(
+    donation_id: UUID,
+    item_data: DonationMedicineItemCreate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Add medicine item to donation."""
+    service = DonationService(db)
+
+    # Verify donation exists
+    donation = await service.get_by_id(donation_id)
+    if not donation:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Donation not found",
+        )
+
+    item = await service.add_medicine_item(
+        donation_id,
+        item_data,
+        created_by=current_user.username
+    )
+    return item
+
+
+@router.patch("/{donation_id}/medicine-items/{item_id}", response_model=DonationMedicineItemResponse)
+async def update_medicine_item(
+    donation_id: UUID,
+    item_id: UUID,
+    item_data: DonationMedicineItemUpdate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update medicine item."""
+    service = DonationService(db)
+
+    item = await service.update_medicine_item(
+        item_id,
+        item_data,
+        updated_by=current_user.username
+    )
+
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Medicine item not found",
+        )
+
+    return item
+
+
+@router.delete("/{donation_id}/medicine-items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_medicine_item(
+    donation_id: UUID,
+    item_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Soft delete medicine item."""
+    service = DonationService(db)
+
+    success = await service.soft_delete_medicine_item(
+        item_id,
+        updated_by=current_user.username
+    )
+
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Medicine item not found",
+        )
+
+
+# Equipment Item Endpoints
+@router.post("/{donation_id}/equipment-items", response_model=DonationEquipmentItemResponse, status_code=status.HTTP_201_CREATED)
+async def add_equipment_item(
+    donation_id: UUID,
+    item_data: DonationEquipmentItemCreate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Add equipment item to donation."""
+    service = DonationService(db)
+
+    # Verify donation exists
+    donation = await service.get_by_id(donation_id)
+    if not donation:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Donation not found",
+        )
+
+    item = await service.add_equipment_item(
+        donation_id,
+        item_data,
+        created_by=current_user.username
+    )
+    return item
+
+
+@router.patch("/{donation_id}/equipment-items/{item_id}", response_model=DonationEquipmentItemResponse)
+async def update_equipment_item(
+    donation_id: UUID,
+    item_id: UUID,
+    item_data: DonationEquipmentItemUpdate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update equipment item."""
+    service = DonationService(db)
+
+    item = await service.update_equipment_item(
+        item_id,
+        item_data,
+        updated_by=current_user.username
+    )
+
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Equipment item not found",
+        )
+
+    return item
+
+
+@router.delete("/{donation_id}/equipment-items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_equipment_item(
+    donation_id: UUID,
+    item_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Soft delete equipment item."""
+    service = DonationService(db)
+
+    success = await service.soft_delete_equipment_item(
+        item_id,
+        updated_by=current_user.username
+    )
+
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Equipment item not found",
+        )
+
+
+# Medical Device Item Endpoints
+@router.post("/{donation_id}/medical-device-items", response_model=DonationMedicalDeviceItemResponse, status_code=status.HTTP_201_CREATED)
+async def add_medical_device_item(
+    donation_id: UUID,
+    item_data: DonationMedicalDeviceItemCreate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Add medical device item to donation."""
+    service = DonationService(db)
+
+    # Verify donation exists
+    donation = await service.get_by_id(donation_id)
+    if not donation:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Donation not found",
+        )
+
+    item = await service.add_medical_device_item(
+        donation_id,
+        item_data,
+        created_by=current_user.username
+    )
+    return item
+
+
+@router.patch("/{donation_id}/medical-device-items/{item_id}", response_model=DonationMedicalDeviceItemResponse)
+async def update_medical_device_item(
+    donation_id: UUID,
+    item_id: UUID,
+    item_data: DonationMedicalDeviceItemUpdate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update medical device item."""
+    service = DonationService(db)
+
+    item = await service.update_medical_device_item(
+        item_id,
+        item_data,
+        updated_by=current_user.username
+    )
+
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Medical device item not found",
+        )
+
+    return item
+
+
+@router.delete("/{donation_id}/medical-device-items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_medical_device_item(
+    donation_id: UUID,
+    item_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Soft delete medical device item."""
+    service = DonationService(db)
+
+    success = await service.soft_delete_medical_device_item(
+        item_id,
+        updated_by=current_user.username
+    )
+
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Medical device item not found",
+        )
 

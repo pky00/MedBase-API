@@ -50,10 +50,12 @@ async def list_donors(
     donor_type: str | None = None,
     is_active: bool | None = None,
     search: str | None = None,
+    sort_by: str | None = Query(None, description="Field to sort by"),
+    sort_order: str | None = Query(None, regex="^(asc|desc)$", description="Sort order: asc or desc"),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """List all donors with pagination and filtering."""
+    """List all donors with pagination, filtering, and sorting."""
     donor_service = DonorService(db)
     donors, total = await donor_service.list_donors(
         page=page,
@@ -61,6 +63,8 @@ async def list_donors(
         donor_type=donor_type,
         is_active=is_active,
         search=search,
+        sort_by=sort_by,
+        sort_order=sort_order,
     )
     return DonorListResponse(data=donors, total=total, page=page, size=size)
 

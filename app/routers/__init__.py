@@ -20,6 +20,7 @@ from app.routers.prescription_items import router as prescription_items_router
 from app.routers.patient_documents import router as patient_documents_router
 from app.routers.system_settings import router as system_settings_router
 from app.routers.prescribed_devices import router as prescribed_devices_router
+from app.routers.inventory_transactions import router as inventory_transactions_router
 
 __all__ = [
     "auth_router",
@@ -44,4 +45,5 @@ __all__ = [
     "patient_documents_router",
     "system_settings_router",
     "prescribed_devices_router",
+    "inventory_transactions_router",
 ]

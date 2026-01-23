@@ -26,6 +26,7 @@ from app.routers import (
     patient_documents_router,
     system_settings_router,
     prescribed_devices_router,
+    inventory_transactions_router,
 )
 
 settings = get_settings()
@@ -124,6 +125,10 @@ tags_metadata = [
         "name": "System Settings",
         "description": "System configuration and settings.",
     },
+    {
+        "name": "Inventory Transactions",
+        "description": "Track inventory movements for medicines, devices, and equipment.",
+    },
 ]
 
 app = FastAPI(
@@ -209,6 +214,7 @@ app.include_router(prescription_items_router, prefix="/api/v1")
 app.include_router(patient_documents_router, prefix="/api/v1")
 app.include_router(system_settings_router, prefix="/api/v1")
 app.include_router(prescribed_devices_router, prefix="/api/v1")
+app.include_router(inventory_transactions_router, prefix="/api/v1")
 
 
 @app.get("/", tags=["Health"])

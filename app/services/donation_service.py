@@ -1,11 +1,24 @@
 import logging
-from datetime import date
+from datetime import date, datetime
 from uuid import UUID
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from app.models.donation import Donation
+from app.models.donation_medicine_item import DonationMedicineItem
+from app.models.donation_equipment_item import DonationEquipmentItem
+from app.models.donation_medical_device_item import DonationMedicalDeviceItem
 from app.models.enums import DonationType
-from app.schemas.donation import DonationCreate, DonationUpdate
+from app.schemas.donation import (
+    DonationCreate,
+    DonationUpdate,
+    DonationMedicineItemCreate,
+    DonationMedicineItemUpdate,
+    DonationEquipmentItemCreate,
+    DonationEquipmentItemUpdate,
+    DonationMedicalDeviceItemCreate,
+    DonationMedicalDeviceItemUpdate
+)
 
 logger = logging.getLogger(__name__)
 
@@ -15,8 +28,17 @@ class DonationService:
         self.db = db
 
     async def get_by_id(self, donation_id: UUID) -> Donation | None:
+        """Get donation by ID with items (filtering out deleted items)"""
+        logger.info(f"Fetching donation with ID: {donation_id}")
+
         result = await self.db.execute(
-            select(Donation).where(Donation.id == donation_id)
+            select(Donation)
+            .options(
+                selectinload(Donation.medicine_items).where(DonationMedicineItem.is_deleted == False),
+                selectinload(Donation.equipment_items).where(DonationEquipmentItem.is_deleted == False),
+                selectinload(Donation.medical_device_items).where(DonationMedicalDeviceItem.is_deleted == False)
+            )
+            .where(Donation.id == donation_id)
         )
         return result.scalar_one_or_none()
 
@@ -49,8 +71,14 @@ class DonationService:
         date_from: date | None = None,
         date_to: date | None = None,
     ) -> tuple[list[Donation], int]:
+        """List donations with items (filtering out deleted items)"""
         logger.info(f"Listing donations: page={page}, size={size}")
-        query = select(Donation)
+
+        query = select(Donation).options(
+            selectinload(Donation.medicine_items).where(DonationMedicineItem.is_deleted == False),
+            selectinload(Donation.equipment_items).where(DonationEquipmentItem.is_deleted == False),
+            selectinload(Donation.medical_device_items).where(DonationMedicalDeviceItem.is_deleted == False)
+        )
         count_query = select(func.count(Donation.id))
 
         if donor_id:
@@ -110,4 +138,217 @@ class DonationService:
         logger.info(f"Deleting donation: {donation.donation_number}")
         await self.db.delete(donation)
         await self.db.commit()
+
+    # Medicine Item Management
+    async def add_medicine_item(
+        self,
+        donation_id: UUID,
+        item_data: DonationMedicineItemCreate,
+        created_by: str
+    ) -> DonationMedicineItem:
+        """Add medicine item to donation"""
+        logger.info(f"Adding medicine item to donation {donation_id}")
+
+        item = DonationMedicineItem(
+            **item_data.model_dump(),
+            donation_id=donation_id,
+            created_by=created_by,
+            updated_by=created_by
+        )
+        self.db.add(item)
+        await self.db.commit()
+        await self.db.refresh(item)
+        return item
+
+    async def update_medicine_item(
+        self,
+        item_id: UUID,
+        item_data: DonationMedicineItemUpdate,
+        updated_by: str
+    ) -> DonationMedicineItem | None:
+        """Update medicine item"""
+        logger.info(f"Updating medicine item {item_id}")
+
+        result = await self.db.execute(
+            select(DonationMedicineItem).where(DonationMedicineItem.id == item_id)
+        )
+        item = result.scalar_one_or_none()
+
+        if not item:
+            return None
+
+        for key, value in item_data.model_dump(exclude_unset=True).items():
+            setattr(item, key, value)
+
+        item.updated_by = updated_by
+        item.updated_at = datetime.utcnow()
+
+        await self.db.commit()
+        await self.db.refresh(item)
+        return item
+
+    async def soft_delete_medicine_item(
+        self,
+        item_id: UUID,
+        updated_by: str
+    ) -> bool:
+        """Soft delete medicine item"""
+        logger.info(f"Soft deleting medicine item {item_id}")
+
+        result = await self.db.execute(
+            select(DonationMedicineItem).where(DonationMedicineItem.id == item_id)
+        )
+        item = result.scalar_one_or_none()
+
+        if not item:
+            return False
+
+        item.is_deleted = True
+        item.updated_by = updated_by
+        item.updated_at = datetime.utcnow()
+
+        await self.db.commit()
+        return True
+
+    # Equipment Item Management
+    async def add_equipment_item(
+        self,
+        donation_id: UUID,
+        item_data: DonationEquipmentItemCreate,
+        created_by: str
+    ) -> DonationEquipmentItem:
+        """Add equipment item to donation"""
+        logger.info(f"Adding equipment item to donation {donation_id}")
+
+        item = DonationEquipmentItem(
+            **item_data.model_dump(),
+            donation_id=donation_id,
+            created_by=created_by,
+            updated_by=created_by
+        )
+        self.db.add(item)
+        await self.db.commit()
+        await self.db.refresh(item)
+        return item
+
+    async def update_equipment_item(
+        self,
+        item_id: UUID,
+        item_data: DonationEquipmentItemUpdate,
+        updated_by: str
+    ) -> DonationEquipmentItem | None:
+        """Update equipment item"""
+        logger.info(f"Updating equipment item {item_id}")
+
+        result = await self.db.execute(
+            select(DonationEquipmentItem).where(DonationEquipmentItem.id == item_id)
+        )
+        item = result.scalar_one_or_none()
+
+        if not item:
+            return None
+
+        for key, value in item_data.model_dump(exclude_unset=True).items():
+            setattr(item, key, value)
+
+        item.updated_by = updated_by
+        item.updated_at = datetime.utcnow()
+
+        await self.db.commit()
+        await self.db.refresh(item)
+        return item
+
+    async def soft_delete_equipment_item(
+        self,
+        item_id: UUID,
+        updated_by: str
+    ) -> bool:
+        """Soft delete equipment item"""
+        logger.info(f"Soft deleting equipment item {item_id}")
+
+        result = await self.db.execute(
+            select(DonationEquipmentItem).where(DonationEquipmentItem.id == item_id)
+        )
+        item = result.scalar_one_or_none()
+
+        if not item:
+            return False
+
+        item.is_deleted = True
+        item.updated_by = updated_by
+        item.updated_at = datetime.utcnow()
+
+        await self.db.commit()
+        return True
+
+    # Medical Device Item Management
+    async def add_medical_device_item(
+        self,
+        donation_id: UUID,
+        item_data: DonationMedicalDeviceItemCreate,
+        created_by: str
+    ) -> DonationMedicalDeviceItem:
+        """Add medical device item to donation"""
+        logger.info(f"Adding medical device item to donation {donation_id}")
+
+        item = DonationMedicalDeviceItem(
+            **item_data.model_dump(),
+            donation_id=donation_id,
+            created_by=created_by,
+            updated_by=created_by
+        )
+        self.db.add(item)
+        await self.db.commit()
+        await self.db.refresh(item)
+        return item
+
+    async def update_medical_device_item(
+        self,
+        item_id: UUID,
+        item_data: DonationMedicalDeviceItemUpdate,
+        updated_by: str
+    ) -> DonationMedicalDeviceItem | None:
+        """Update medical device item"""
+        logger.info(f"Updating medical device item {item_id}")
+
+        result = await self.db.execute(
+            select(DonationMedicalDeviceItem).where(DonationMedicalDeviceItem.id == item_id)
+        )
+        item = result.scalar_one_or_none()
+
+        if not item:
+            return None
+
+        for key, value in item_data.model_dump(exclude_unset=True).items():
+            setattr(item, key, value)
+
+        item.updated_by = updated_by
+        item.updated_at = datetime.utcnow()
+
+        await self.db.commit()
+        await self.db.refresh(item)
+        return item
+
+    async def soft_delete_medical_device_item(
+        self,
+        item_id: UUID,
+        updated_by: str
+    ) -> bool:
+        """Soft delete medical device item"""
+        logger.info(f"Soft deleting medical device item {item_id}")
+
+        result = await self.db.execute(
+            select(DonationMedicalDeviceItem).where(DonationMedicalDeviceItem.id == item_id)
+        )
+        item = result.scalar_one_or_none()
+
+        if not item:
+            return False
+
+        item.is_deleted = True
+        item.updated_by = updated_by
+        item.updated_at = datetime.utcnow()
+
+        await self.db.commit()
+        return True
 
