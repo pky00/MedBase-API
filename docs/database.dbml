@@ -1,0 +1,337 @@
+// MedBase Database Schema
+// Import this file into dbdiagram.io
+
+// ===================
+// USERS & AUTH
+// ===================
+
+Table users {
+  id int [pk, increment]
+  username varchar [unique, not null]
+  email varchar [unique, not null]
+  password_hash varchar [not null]
+  role varchar [not null, note: 'admin, user']
+  is_active boolean [default: true]
+  is_deleted boolean [default: false]
+  created_by int
+  created_at timestamp [default: `now()`]
+  updated_by int
+  updated_at timestamp [default: `now()`]
+}
+
+// ===================
+// INVENTORY
+// ===================
+
+Table medicine_categories {
+  id int [pk, increment]
+  name varchar [not null]
+  description text
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
+
+Table equipment_categories {
+  id int [pk, increment]
+  name varchar [not null]
+  description text
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
+
+Table medical_device_categories {
+  id int [pk, increment]
+  name varchar [not null]
+  description text
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
+
+Table medicines {
+  id int [pk, increment]
+  name varchar [not null]
+  category_id int [ref: > medicine_categories.id]
+  description text
+  unit varchar [note: 'tablets, ml, mg, etc.']
+  is_active boolean [default: true]
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
+
+Table equipment {
+  id int [pk, increment]
+  name varchar [not null]
+  category_id int [ref: > equipment_categories.id]
+  description text
+  condition varchar [note: 'new, good, fair, poor']
+  is_active boolean [default: true]
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
+
+Table medical_devices {
+  id int [pk, increment]
+  name varchar [not null]
+  category_id int [ref: > medical_device_categories.id]
+  description text
+  serial_number varchar
+  is_active boolean [default: true]
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
+
+Table inventory {
+  id int [pk, increment]
+  item_type varchar [not null, note: 'medicine, equipment, medical_device']
+  item_id int [not null]
+  quantity int [not null, default: 0]
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
+
+Table inventory_transactions {
+  id int [pk, increment]
+  transaction_type varchar [not null, note: 'purchase, donation, prescription, loss, breakage, expiration, destruction']
+  item_type varchar [not null, note: 'medicine, equipment, medical_device']
+  item_id int [not null]
+  quantity int [not null]
+  notes text
+  transaction_date timestamp [default: `now()`]
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
+
+// ===================
+// DOCTORS
+// ===================
+
+Table doctors {
+  id int [pk, increment]
+  name varchar [not null]
+  specialization varchar
+  phone varchar
+  email varchar
+  type varchar [note: 'internal, external, partner_provided']
+  partner_id int [ref: > partners.id]
+  is_active boolean [default: true]
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
+
+// ===================
+// PARTNERS
+// ===================
+
+Table partners {
+  id int [pk, increment]
+  name varchar [not null]
+  partner_type varchar [note: 'donor, referral, both']
+  organization_type varchar [note: 'NGO, organization, individual, hospital, medical_center']
+  contact_person varchar
+  phone varchar
+  email varchar
+  address text
+  is_active boolean [default: true]
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
+
+Table donations {
+  id int [pk, increment]
+  partner_id int [ref: > partners.id, not null]
+  donation_date date [not null]
+  notes text
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
+
+Table donation_items {
+  id int [pk, increment]
+  donation_id int [ref: > donations.id, not null]
+  item_type varchar [not null, note: 'medicine, equipment, medical_device']
+  item_id int [not null]
+  quantity int [not null]
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
+
+
+// ===================
+// PATIENTS
+// ===================
+
+Table patients {
+  id int [pk, increment]
+  first_name varchar [not null]
+  last_name varchar [not null]
+  date_of_birth date
+  gender varchar
+  phone varchar
+  email varchar
+  address text
+  emergency_contact varchar
+  emergency_phone varchar
+  is_active boolean [default: true]
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
+
+Table patient_documents {
+  id int [pk, increment]
+  patient_id int [ref: > patients.id, not null]
+  document_name varchar [not null]
+  document_type varchar
+  file_path varchar [not null]
+  upload_date timestamp [default: `now()`]
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
+
+// ===================
+// APPOINTMENTS & MEDICAL RECORDS
+// ===================
+
+Table appointments {
+  id int [pk, increment]
+  patient_id int [ref: > patients.id, not null]
+  doctor_id int [ref: > doctors.id]
+  partner_id int [ref: > partners.id, note: 'for external appointments']
+  appointment_date timestamp [not null]
+  status varchar [note: 'scheduled, in_progress, completed, cancelled']
+  type varchar [note: 'scheduled, walk_in']
+  location varchar [note: 'internal, external']
+  notes text
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
+
+Table vital_signs {
+  id int [pk, increment]
+  appointment_id int [ref: > appointments.id, not null]
+  blood_pressure_systolic int
+  blood_pressure_diastolic int
+  heart_rate int
+  temperature decimal
+  respiratory_rate int
+  weight decimal
+  height decimal
+  notes text
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
+
+Table medical_records {
+  id int [pk, increment]
+  appointment_id int [ref: > appointments.id, not null]
+  chief_complaint text
+  diagnosis text
+  treatment_notes text
+  follow_up_date date
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
+
+// ===================
+// PRESCRIPTIONS
+// ===================
+
+Table prescriptions {
+  id int [pk, increment]
+  medical_record_id int [ref: > medical_records.id, not null]
+  patient_id int [ref: > patients.id, not null]
+  prescription_date timestamp [default: `now()`]
+  notes text
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
+
+Table prescription_items {
+  id int [pk, increment]
+  prescription_id int [ref: > prescriptions.id, not null]
+  item_type varchar [not null, note: 'medicine, medical_device']
+  item_id int [not null]
+  quantity int [not null]
+  dosage varchar [note: 'for medicines']
+  instructions text
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
+
+// ===================
+// TREATMENTS (External)
+// ===================
+
+Table treatments {
+  id int [pk, increment]
+  patient_id int [ref: > patients.id, not null]
+  appointment_id int [ref: > appointments.id]
+  partner_id int [ref: > partners.id, not null]
+  treatment_type varchar [not null]
+  description text
+  treatment_date date
+  status varchar [note: 'pending, in_progress, completed, cancelled']
+  cost decimal
+  notes text
+  is_deleted boolean [default: false]
+  created_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+  updated_by int [ref: > users.id]
+  updated_at timestamp [default: `now()`]
+}
