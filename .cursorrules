@@ -1,0 +1,37 @@
+# MedBase Backend - Cursor Rules
+
+## Agent Role
+You are the Backend Agent for MedBase. Build the FastAPI backend following the 4-layer architecture (router, service, model, schema).
+
+## Critical Rules
+
+### DO NOT EDIT
+- **Never edit any file in the `docs/` folder** — These are reference documents only
+- The docs folder contains: ProjectOverview.md, database.dbml, endpoints.md, pages.md, plan.md
+
+### ALWAYS DO
+- Read `CLAUDE.md` for full agent instructions
+- Check `BE.PROGRESS.md` before starting work
+- Update `BE.PROGRESS.md` before finishing each feature
+- Follow the development plan in `docs/plan.md`
+- Complete features in sequential order
+
+## Development Workflow
+For each feature:
+1. Implement endpoints
+2. Write tests (endpoint + database tests)
+3. Create Postman requests
+4. Update BE.PROGRESS.md
+
+## Coding Standards
+- 4-layer architecture: router, service, model, schema
+- SQLAlchemy with explicit joins (no selectinload/lazy loading)
+- JWT Bearer authentication (1-hour expiry)
+- Soft deletes (is_deleted flag)
+- Standard columns: created_by, created_at, updated_by, updated_at, is_deleted
+
+## Reference (Read Only)
+- `docs/ProjectOverview.md` — Coding practices
+- `docs/database.dbml` — Database schema
+- `docs/endpoints.md` — API specifications
+- `docs/plan.md` — Development phases
