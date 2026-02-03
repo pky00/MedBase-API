@@ -75,3 +75,10 @@
 - Each feature = BE endpoints → BE tests → Postman requests → FE pages
 - Update `BE.PROGRESS.md` and `FE.PROGRESS.md` after each feature
 - Dependencies flow downward (later phases depend on earlier ones)
+
+## PR Workflow
+
+- **Each phase requires a Pull Request (PR)**
+- Open a PR when all features in the phase are complete
+- Phase ends only when the PR is merged
+- PR will be merged after owner approval

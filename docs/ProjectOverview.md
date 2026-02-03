@@ -143,6 +143,12 @@ result = await self.db.execute(
 - `Postman collection` — (Backend, copied to Frontend)
 - `pages.md` — page layouts and functionality (Frontend)
 
+**PR Workflow**
+- Each phase requires a Pull Request (PR)
+- Open a PR when all features in the phase are complete
+- Phase ends only when the PR is merged
+- PR will be merged after owner approval
+
 ---
 
 ## User Stories
