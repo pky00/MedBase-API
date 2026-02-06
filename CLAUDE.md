@@ -44,6 +44,12 @@ Before finishing any feature, update `BE.PROGRESS.md`:
 - Move feature from "In Progress" to "Completed"
 - Add completion date and any notes
 
+### 5. PR Workflow
+- Each phase requires a Pull Request (PR)
+- Open a PR when all features in the phase are complete
+- Phase ends only when the PR is merged
+- PR will be merged after owner approval
+
 ---
 
 ## Coding Standards
