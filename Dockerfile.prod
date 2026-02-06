@@ -1,0 +1,23 @@
+# Production Dockerfile
+FROM continuumio/miniconda3:latest
+
+WORKDIR /app
+
+# Copy environment files
+COPY environment.yml requirements.txt ./
+
+# Create conda environment
+RUN conda env create -f environment.yml && \
+    conda clean -afy
+
+# Make RUN commands use the new environment
+SHELL ["conda", "run", "-n", "medbase", "/bin/bash", "-c"]
+
+# Copy application code
+COPY . .
+
+# Expose port
+EXPOSE 8000
+
+# Run with multiple workers for production
+CMD ["conda", "run", "--no-capture-output", "-n", "medbase", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
