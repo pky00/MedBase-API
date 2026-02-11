@@ -1,4 +1,4 @@
-# Development Dockerfile
+# Dockerfile
 FROM continuumio/miniconda3:latest
 
 WORKDIR /app

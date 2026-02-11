@@ -43,5 +43,7 @@ def decode_access_token(token: str) -> Optional[dict]:
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
         return payload
-    except JWTError:
+    except JWTError as e:
+        import logging
+        logging.getLogger("medbase.utility.security").warning("JWT decode error: %s", e)
         return None

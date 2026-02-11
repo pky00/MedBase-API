@@ -1,8 +1,11 @@
 """Tests for user endpoints."""
 import pytest
 from httpx import AsyncClient
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.model.user import User
+from app.utility.security import verify_password
 
 
 class TestGetUsers:
@@ -104,8 +107,10 @@ class TestCreateUser:
     """Tests for POST /api/v1/users"""
     
     @pytest.mark.asyncio
-    async def test_create_user_success(self, client: AsyncClient, admin_user: User, admin_headers: dict):
-        """Test creating a new user."""
+    async def test_create_user_success(
+        self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
+    ):
+        """Test creating a new user and verify in database."""
         user_data = {
             "username": "newuser",
             "email": "newuser@test.com",
@@ -120,6 +125,7 @@ class TestCreateUser:
             headers=admin_headers
         )
         
+        # Verify API response
         assert response.status_code == 201
         data = response.json()
         assert data["username"] == "newuser"
@@ -127,6 +133,22 @@ class TestCreateUser:
         assert data["role"] == "user"
         assert "password" not in data
         assert "password_hash" not in data
+        
+        # Verify database state
+        result = await db_session.execute(
+            select(User).where(User.id == data["id"])
+        )
+        db_user = result.scalar_one_or_none()
+        
+        assert db_user is not None
+        assert db_user.username == "newuser"
+        assert db_user.email == "newuser@test.com"
+        assert db_user.role == "user"
+        assert db_user.is_active is True
+        assert db_user.is_deleted is False
+        assert db_user.created_by == admin_user.id
+        assert db_user.updated_by == admin_user.id
+        assert verify_password("newpass123", db_user.password_hash) is True
     
     @pytest.mark.asyncio
     async def test_create_user_duplicate_username(self, client: AsyncClient, admin_user: User, admin_headers: dict):
@@ -189,11 +211,15 @@ class TestUpdateUser:
     """Tests for PUT /api/v1/users/{user_id}"""
     
     @pytest.mark.asyncio
-    async def test_update_user_success(self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session):
-        """Test updating a user."""
-        # Create a user to update
+    async def test_update_user_success(
+        self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
+    ):
+        """Test updating a user and verify in database."""
         from app.utility.security import get_password_hash
         
+        admin_id = admin_user.id  # Save before expire_all
+        
+        # Create a user to update
         user = User(
             username="toupdate",
             email="toupdate@test.com",
@@ -204,6 +230,7 @@ class TestUpdateUser:
         db_session.add(user)
         await db_session.commit()
         await db_session.refresh(user)
+        user_id = user.id
         
         update_data = {
             "username": "updated",
@@ -211,15 +238,69 @@ class TestUpdateUser:
         }
         
         response = await client.put(
-            f"/api/v1/users/{user.id}",
+            f"/api/v1/users/{user_id}",
+            json=update_data,
+            headers=admin_headers
+        )
+        
+        # Verify API response
+        assert response.status_code == 200
+        data = response.json()
+        assert data["username"] == "updated"
+        assert data["email"] == "updated@test.com"
+        
+        # Verify database state
+        db_session.expire_all()
+        result = await db_session.execute(
+            select(User).where(User.id == user_id)
+        )
+        db_user = result.scalar_one_or_none()
+        
+        assert db_user is not None
+        assert db_user.username == "updated"
+        assert db_user.email == "updated@test.com"
+        assert db_user.updated_by == admin_id
+    
+    @pytest.mark.asyncio
+    async def test_update_user_password(
+        self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
+    ):
+        """Test updating user password and verify in database."""
+        from app.utility.security import get_password_hash
+        
+        # Create a user to update
+        user = User(
+            username="passupdate",
+            email="passupdate@test.com",
+            password_hash=get_password_hash("oldpass123"),
+            role="user",
+            is_active=True,
+        )
+        db_session.add(user)
+        await db_session.commit()
+        await db_session.refresh(user)
+        user_id = user.id
+        
+        update_data = {"password": "newpass456"}
+        
+        response = await client.put(
+            f"/api/v1/users/{user_id}",
             json=update_data,
             headers=admin_headers
         )
         
         assert response.status_code == 200
-        data = response.json()
-        assert data["username"] == "updated"
-        assert data["email"] == "updated@test.com"
+        
+        # Verify password was updated in database
+        db_session.expire_all()
+        result = await db_session.execute(
+            select(User).where(User.id == user_id)
+        )
+        db_user = result.scalar_one_or_none()
+        
+        assert db_user is not None
+        assert verify_password("newpass456", db_user.password_hash) is True
+        assert verify_password("oldpass123", db_user.password_hash) is False
     
     @pytest.mark.asyncio
     async def test_update_user_not_found(self, client: AsyncClient, admin_headers: dict):
@@ -237,10 +318,15 @@ class TestDeleteUser:
     """Tests for DELETE /api/v1/users/{user_id}"""
     
     @pytest.mark.asyncio
-    async def test_delete_user_success(self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session):
-        """Test deleting a user."""
+    async def test_delete_user_success(
+        self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
+    ):
+        """Test deleting a user (soft delete) and verify in database."""
         from app.utility.security import get_password_hash
         
+        admin_id = admin_user.id  # Save before expire_all
+        
+        # Create a user to delete
         user = User(
             username="todelete",
             email="todelete@test.com",
@@ -251,14 +337,27 @@ class TestDeleteUser:
         db_session.add(user)
         await db_session.commit()
         await db_session.refresh(user)
+        user_id = user.id
         
         response = await client.delete(
-            f"/api/v1/users/{user.id}",
+            f"/api/v1/users/{user_id}",
             headers=admin_headers
         )
         
+        # Verify API response
         assert response.status_code == 200
         assert "deleted successfully" in response.json()["message"]
+        
+        # Verify database state - user should still exist but be soft deleted
+        db_session.expire_all()
+        result = await db_session.execute(
+            select(User).where(User.id == user_id)
+        )
+        db_user = result.scalar_one_or_none()
+        
+        assert db_user is not None
+        assert db_user.is_deleted is True
+        assert db_user.updated_by == admin_id
     
     @pytest.mark.asyncio
     async def test_delete_self_forbidden(self, client: AsyncClient, admin_user: User, admin_headers: dict):

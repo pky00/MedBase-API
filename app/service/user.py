@@ -1,3 +1,4 @@
+import logging
 from typing import Optional, List, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, or_
@@ -5,6 +6,8 @@ from sqlalchemy import select, func, or_
 from app.model.user import User
 from app.schema.user import UserCreate, UserUpdate
 from app.utility.security import get_password_hash, verify_password
+
+logger = logging.getLogger("medbase.service.user")
 
 
 class UserService:
@@ -80,6 +83,8 @@ class UserService:
         result = await self.db.execute(query)
         users = result.scalars().all()
         
+        logger.debug("Queried users: total=%d returned=%d", total, len(users))
+        
         return list(users), total
     
     async def create(self, user_data: UserCreate, created_by: Optional[int] = None) -> User:
@@ -96,6 +101,7 @@ class UserService:
         self.db.add(user)
         await self.db.flush()
         await self.db.refresh(user)
+        logger.info("Created user id=%d username='%s'", user.id, user.username)
         return user
     
     async def update(
@@ -122,6 +128,7 @@ class UserService:
         user.updated_by = updated_by
         await self.db.flush()
         await self.db.refresh(user)
+        logger.info("Updated user id=%d fields=%s", user_id, list(update_data.keys()))
         return user
     
     async def delete(self, user_id: int, deleted_by: Optional[int] = None) -> bool:
@@ -133,15 +140,19 @@ class UserService:
         user.is_deleted = True
         user.updated_by = deleted_by
         await self.db.flush()
+        logger.info("Soft-deleted user id=%d", user_id)
         return True
     
     async def authenticate(self, username: str, password: str) -> Optional[User]:
         """Authenticate a user by username and password."""
         user = await self.get_by_username(username)
         if not user:
+            logger.debug("Auth failed: user not found username='%s'", username)
             return None
         if not user.is_active:
+            logger.debug("Auth failed: user inactive username='%s'", username)
             return None
         if not verify_password(password, user.password_hash):
+            logger.debug("Auth failed: wrong password username='%s'", username)
             return None
         return user

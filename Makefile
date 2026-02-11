@@ -43,11 +43,16 @@ shell:
 
 # Run tests
 test:
-	docker-compose exec api conda run -n medbase pytest -v
+	docker-compose exec -e PYTHONUNBUFFERED=1 api conda run --no-capture-output -n medbase pytest -v -s
+
+# Run a single test and keep data in DB for inspection
+# Usage: make test-one TEST=tests/endpoint/test_users.py::TestCreateUser::test_create_user_success
+test-one:
+	docker-compose exec -e PYTHONUNBUFFERED=1 -e KEEP_DB=1 api conda run --no-capture-output -n medbase pytest -v -s $(TEST)
 
 # Run tests with coverage
 test-cov:
-	docker-compose exec api conda run -n medbase pytest -v --cov=app --cov-report=html
+	docker-compose exec -e PYTHONUNBUFFERED=1 api conda run --no-capture-output -n medbase pytest -v -s --cov=app --cov-report=html
 
 # Run database migrations
 migrate:
@@ -77,16 +82,6 @@ seed:
 # Remove containers and volumes
 clean:
 	docker-compose down -v --remove-orphans
-
-# Production commands
-build-prod:
-	docker-compose -f docker-compose.prod.yml build
-
-up-prod:
-	docker-compose -f docker-compose.prod.yml up -d
-
-down-prod:
-	docker-compose -f docker-compose.prod.yml down
 
 # Local development without Docker
 dev:

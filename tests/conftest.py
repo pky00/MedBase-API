@@ -7,10 +7,7 @@ from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 
 # Set test environment before importing app modules
-os.environ["DATABASE_URL"] = os.getenv(
-    "TEST_DATABASE_URL",
-    "postgresql+asyncpg://medbase_test:medbase_test123@localhost:5433/medbase_test"
-)
+os.environ["DATABASE_URL"] = os.getenv("TEST_DATABASE_URL", "")
 
 from app.utility.database import Base, get_db
 from app.utility.security import get_password_hash
@@ -49,16 +46,18 @@ def event_loop() -> Generator:
 @pytest.fixture(scope="function")
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
     """Create a fresh database session for each test."""
-    # Create all tables
+    # Drop then create to ensure a clean slate (handles leftover KEEP_DB data)
     async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
     
     async with TestAsyncSessionLocal() as session:
         yield session
     
-    # Drop all tables after test
-    async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+    # Drop all tables after test (skip if KEEP_DB=1 so you can inspect the database)
+    if not os.getenv("KEEP_DB"):
+        async with test_engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
 
 
 @pytest.fixture(scope="function")

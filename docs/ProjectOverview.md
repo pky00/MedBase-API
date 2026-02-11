@@ -10,7 +10,7 @@ MedBase is a clinic management application designed for small medical clinics. I
 
 - **Frontend**: Angular
 - **Backend**: FastAPI (Python), SQLAlchemy, Alembic, Pydantic, Conda
-- **Database**: PostgreSQL
+- **Database**: PostgreSQL (Amazon RDS)
 - **Containerization**: Docker (backend)
 - **Deployment**: AWS
 
@@ -81,7 +81,8 @@ MedBase is a clinic management application designed for small medical clinics. I
 
 **Migrations**
 - Alembic for migration management
-- Auto-generate migrations, manually edit if needed
+- After creating/updating a model, run autogenerate command to create migration
+- Manually edit migration if needed
 
 **SQLAlchemy Joins**
 - Do NOT use `selectinload()` or lazy loading
@@ -109,15 +110,24 @@ result = await self.db.execute(
 **Docker & Environment**
 - Base image: Miniconda slim
 - Dependency files: `environment.yml` + `requirements.txt`
-- Two configurations:
-  - **Local**: development setup with hot reload
-  - **Production**: optimized for deployment
+- Single Docker setup with hot reload for development
+- Database hosted on Amazon RDS (no local PostgreSQL containers)
+- All environment variables loaded from `.env` (`DATABASE_URL`, `TEST_DATABASE_URL`, etc.)
 - Makefile for common commands (build, run, test, migrate, etc.)
 
 **Testing**
-- Separate test database (clean/empty before each test run)
-- Endpoint tests: validate API responses
-- Database tests: verify data is correctly inserted, updated, and deleted
+- Separate test database on Amazon RDS (`TEST_DATABASE_URL` from `.env`)
+- Clean/empty before each test run
+- Endpoint tests: validate API responses AND query the database directly to verify data was correctly inserted, updated, or deleted
+
+**Logging**
+- Python standard `logging` module
+- Middleware logs every request (method, URL, body) and response (status, duration)
+- Sensitive fields (`password`, `access_token`) are masked in body logs
+- Router layer: `info` for actions and outcomes, `warning` for failures (not found, duplicates, auth failures)
+- Service layer: `info` for writes (create, update, delete), `debug` for reads and auth details
+- Logger names follow `medbase.<layer>.<module>` convention (e.g. `medbase.router.auth`)
+- Log level controlled by `DEBUG` env var (`DEBUG=true` → DEBUG level, otherwise INFO)
 
 **API Documentation**
 - Postman collection with request examples for each endpoint
@@ -142,6 +152,7 @@ result = await self.db.execute(
 - `endpoints.md` — API endpoints list (Backend, copied to Frontend)
 - `Postman collection` — (Backend, copied to Frontend)
 - `pages.md` — page layouts and functionality (Frontend)
+- `README.md` — project description, setup instructions, and how to run (in each repo root)
 
 **PR Workflow**
 - Each phase requires a Pull Request (PR)
@@ -206,3 +217,5 @@ result = await self.db.execute(
 
 ### Treatments
 - Track treatments provided to patients through external partners
+
+

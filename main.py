@@ -1,18 +1,25 @@
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.utility.config import settings
 from app.utility.database import init_db
+from app.utility.logging import setup_logging, RequestLoggingMiddleware
 from app.router import auth, user
+
+logger = logging.getLogger("medbase.app")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan handler for startup and shutdown events."""
     # Startup
+    setup_logging(debug=settings.DEBUG)
+    logger.info("MedBase API starting up")
     yield
     # Shutdown
+    logger.info("MedBase API shutting down")
 
 
 app = FastAPI(
@@ -24,6 +31,9 @@ app = FastAPI(
     openapi_url="/openapi.json",
     lifespan=lifespan
 )
+
+# Request/response logging middleware
+app.add_middleware(RequestLoggingMiddleware)
 
 # CORS middleware
 app.add_middleware(
