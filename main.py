@@ -6,7 +6,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.utility.config import settings
 from app.utility.database import init_db
 from app.utility.logging import setup_logging, RequestLoggingMiddleware
-from app.router import auth, user
+from app.router import (
+    auth,
+    user,
+    medicine_category,
+    equipment_category,
+    medical_device_category,
+    medicine,
+    equipment,
+    medical_device,
+    inventory,
+)
 
 logger = logging.getLogger("medbase.app")
 
@@ -47,6 +57,13 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
 app.include_router(user.router, prefix=settings.API_V1_PREFIX)
+app.include_router(medicine_category.router, prefix=settings.API_V1_PREFIX)
+app.include_router(equipment_category.router, prefix=settings.API_V1_PREFIX)
+app.include_router(medical_device_category.router, prefix=settings.API_V1_PREFIX)
+app.include_router(medicine.router, prefix=settings.API_V1_PREFIX)
+app.include_router(equipment.router, prefix=settings.API_V1_PREFIX)
+app.include_router(medical_device.router, prefix=settings.API_V1_PREFIX)
+app.include_router(inventory.router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/")
