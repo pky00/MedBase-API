@@ -51,13 +51,8 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/auth/login",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"auth",
-								"login"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
 						},
 						"description": "Login with username and password. Returns JWT token."
 					},
@@ -70,13 +65,8 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/auth/logout",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"auth",
-								"logout"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["auth", "logout"]
 						},
 						"description": "Logout current user. Client should discard token."
 					},
@@ -89,13 +79,8 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/auth/me",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"auth",
-								"me"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["auth", "me"]
 						},
 						"description": "Get current authenticated user info."
 					},
@@ -113,46 +98,16 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/users?page=1&size=10",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users"
-							],
+							"host": ["{{base_url}}"],
+							"path": ["users"],
 							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "size",
-									"value": "10"
-								},
-								{
-									"key": "role",
-									"value": "admin",
-									"disabled": true
-								},
-								{
-									"key": "is_active",
-									"value": "true",
-									"disabled": true
-								},
-								{
-									"key": "search",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "sort",
-									"value": "id",
-									"disabled": true
-								},
-								{
-									"key": "order",
-									"value": "asc",
-									"disabled": true
-								}
+								{ "key": "page", "value": "1" },
+								{ "key": "size", "value": "10" },
+								{ "key": "role", "value": "admin", "disabled": true },
+								{ "key": "is_active", "value": "true", "disabled": true },
+								{ "key": "search", "value": "", "disabled": true },
+								{ "key": "sort", "value": "id", "disabled": true },
+								{ "key": "order", "value": "asc", "disabled": true }
 							]
 						},
 						"description": "Get all users with pagination and filters. Admin only."
@@ -166,13 +121,8 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/users/1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users",
-								"1"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["users", "1"]
 						},
 						"description": "Get user by ID. Admin only."
 					},
@@ -182,24 +132,15 @@
 					"name": "Create User",
 					"request": {
 						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"username\": \"newuser\",\n    \"email\": \"newuser@example.com\",\n    \"password\": \"password123\",\n    \"role\": \"user\",\n    \"is_active\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/users",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["users"]
 						},
 						"description": "Create a new user. Admin only."
 					},
@@ -209,25 +150,15 @@
 					"name": "Update User",
 					"request": {
 						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"username\": \"updateduser\",\n    \"email\": \"updated@example.com\",\n    \"is_active\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/users/2",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users",
-								"2"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["users", "2"]
 						},
 						"description": "Update an existing user. Admin only."
 					},
@@ -240,15 +171,611 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/users/2",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"users",
-								"2"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["users", "2"]
 						},
 						"description": "Delete a user (soft delete). Admin only. Cannot delete self."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Medicine Categories",
+			"item": [
+				{
+					"name": "Get All Medicine Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/medicine-categories?page=1&size=10",
+							"host": ["{{base_url}}"],
+							"path": ["medicine-categories"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "size", "value": "10" },
+								{ "key": "search", "value": "", "disabled": true },
+								{ "key": "sort", "value": "id", "disabled": true },
+								{ "key": "order", "value": "asc", "disabled": true }
+							]
+						},
+						"description": "Get all medicine categories with pagination and search."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Medicine Category by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/medicine-categories/1",
+							"host": ["{{base_url}}"],
+							"path": ["medicine-categories", "1"]
+						},
+						"description": "Get medicine category by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Medicine Category",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Antibiotics\",\n    \"description\": \"Anti-bacterial medicines\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/medicine-categories",
+							"host": ["{{base_url}}"],
+							"path": ["medicine-categories"]
+						},
+						"description": "Create a new medicine category."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Medicine Category",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Category\",\n    \"description\": \"Updated description\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/medicine-categories/1",
+							"host": ["{{base_url}}"],
+							"path": ["medicine-categories", "1"]
+						},
+						"description": "Update a medicine category."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Medicine Category",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/medicine-categories/1",
+							"host": ["{{base_url}}"],
+							"path": ["medicine-categories", "1"]
+						},
+						"description": "Delete a medicine category (soft delete). Cannot delete if medicines are linked."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Equipment Categories",
+			"item": [
+				{
+					"name": "Get All Equipment Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/equipment-categories?page=1&size=10",
+							"host": ["{{base_url}}"],
+							"path": ["equipment-categories"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "size", "value": "10" },
+								{ "key": "search", "value": "", "disabled": true },
+								{ "key": "sort", "value": "id", "disabled": true },
+								{ "key": "order", "value": "asc", "disabled": true }
+							]
+						},
+						"description": "Get all equipment categories with pagination and search."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Equipment Category by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/equipment-categories/1",
+							"host": ["{{base_url}}"],
+							"path": ["equipment-categories", "1"]
+						},
+						"description": "Get equipment category by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Equipment Category",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Surgical Tools\",\n    \"description\": \"Tools used in surgery\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/equipment-categories",
+							"host": ["{{base_url}}"],
+							"path": ["equipment-categories"]
+						},
+						"description": "Create a new equipment category."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Equipment Category",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Category\",\n    \"description\": \"Updated description\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/equipment-categories/1",
+							"host": ["{{base_url}}"],
+							"path": ["equipment-categories", "1"]
+						},
+						"description": "Update an equipment category."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Equipment Category",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/equipment-categories/1",
+							"host": ["{{base_url}}"],
+							"path": ["equipment-categories", "1"]
+						},
+						"description": "Delete an equipment category (soft delete). Cannot delete if equipment items are linked."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Medical Device Categories",
+			"item": [
+				{
+					"name": "Get All Medical Device Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/medical-device-categories?page=1&size=10",
+							"host": ["{{base_url}}"],
+							"path": ["medical-device-categories"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "size", "value": "10" },
+								{ "key": "search", "value": "", "disabled": true },
+								{ "key": "sort", "value": "id", "disabled": true },
+								{ "key": "order", "value": "asc", "disabled": true }
+							]
+						},
+						"description": "Get all medical device categories with pagination and search."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Medical Device Category by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/medical-device-categories/1",
+							"host": ["{{base_url}}"],
+							"path": ["medical-device-categories", "1"]
+						},
+						"description": "Get medical device category by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Medical Device Category",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Monitors\",\n    \"description\": \"Patient monitoring devices\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/medical-device-categories",
+							"host": ["{{base_url}}"],
+							"path": ["medical-device-categories"]
+						},
+						"description": "Create a new medical device category."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Medical Device Category",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Category\",\n    \"description\": \"Updated description\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/medical-device-categories/1",
+							"host": ["{{base_url}}"],
+							"path": ["medical-device-categories", "1"]
+						},
+						"description": "Update a medical device category."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Medical Device Category",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/medical-device-categories/1",
+							"host": ["{{base_url}}"],
+							"path": ["medical-device-categories", "1"]
+						},
+						"description": "Delete a medical device category (soft delete). Cannot delete if medical devices are linked."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Medicines",
+			"item": [
+				{
+					"name": "Get All Medicines",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/medicines?page=1&size=10",
+							"host": ["{{base_url}}"],
+							"path": ["medicines"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "size", "value": "10" },
+								{ "key": "category_id", "value": "1", "disabled": true },
+								{ "key": "is_active", "value": "true", "disabled": true },
+								{ "key": "search", "value": "", "disabled": true },
+								{ "key": "sort", "value": "id", "disabled": true },
+								{ "key": "order", "value": "asc", "disabled": true }
+							]
+						},
+						"description": "Get all medicines with pagination, filters, and search."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Medicine by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/medicines/1",
+							"host": ["{{base_url}}"],
+							"path": ["medicines", "1"]
+						},
+						"description": "Get medicine by ID. Includes inventory quantity and category name."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Medicine",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Amoxicillin\",\n    \"category_id\": 1,\n    \"description\": \"Broad-spectrum antibiotic\",\n    \"unit\": \"tablets\",\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/medicines",
+							"host": ["{{base_url}}"],
+							"path": ["medicines"]
+						},
+						"description": "Create a new medicine. Auto-creates inventory record with quantity 0."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Medicine",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Medicine\",\n    \"unit\": \"ml\",\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/medicines/1",
+							"host": ["{{base_url}}"],
+							"path": ["medicines", "1"]
+						},
+						"description": "Update a medicine."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Medicine",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/medicines/1",
+							"host": ["{{base_url}}"],
+							"path": ["medicines", "1"]
+						},
+						"description": "Delete a medicine (soft delete). Only allowed if inventory quantity is 0."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Equipment",
+			"item": [
+				{
+					"name": "Get All Equipment",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/equipment?page=1&size=10",
+							"host": ["{{base_url}}"],
+							"path": ["equipment"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "size", "value": "10" },
+								{ "key": "category_id", "value": "1", "disabled": true },
+								{ "key": "is_active", "value": "true", "disabled": true },
+								{ "key": "condition", "value": "new", "disabled": true },
+								{ "key": "search", "value": "", "disabled": true },
+								{ "key": "sort", "value": "id", "disabled": true },
+								{ "key": "order", "value": "asc", "disabled": true }
+							]
+						},
+						"description": "Get all equipment with pagination, filters, and search."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Equipment by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/equipment/1",
+							"host": ["{{base_url}}"],
+							"path": ["equipment", "1"]
+						},
+						"description": "Get equipment by ID. Includes inventory quantity and category name."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Equipment",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Surgical Scalpel\",\n    \"category_id\": 1,\n    \"description\": \"Precision surgical scalpel\",\n    \"condition\": \"new\",\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/equipment",
+							"host": ["{{base_url}}"],
+							"path": ["equipment"]
+						},
+						"description": "Create new equipment. Auto-creates inventory record with quantity 0."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Equipment",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Equipment\",\n    \"condition\": \"good\",\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/equipment/1",
+							"host": ["{{base_url}}"],
+							"path": ["equipment", "1"]
+						},
+						"description": "Update equipment."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Equipment",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/equipment/1",
+							"host": ["{{base_url}}"],
+							"path": ["equipment", "1"]
+						},
+						"description": "Delete equipment (soft delete). Only allowed if inventory quantity is 0."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Medical Devices",
+			"item": [
+				{
+					"name": "Get All Medical Devices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/medical-devices?page=1&size=10",
+							"host": ["{{base_url}}"],
+							"path": ["medical-devices"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "size", "value": "10" },
+								{ "key": "category_id", "value": "1", "disabled": true },
+								{ "key": "is_active", "value": "true", "disabled": true },
+								{ "key": "search", "value": "", "disabled": true },
+								{ "key": "sort", "value": "id", "disabled": true },
+								{ "key": "order", "value": "asc", "disabled": true }
+							]
+						},
+						"description": "Get all medical devices with pagination, filters, and search."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Medical Device by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/medical-devices/1",
+							"host": ["{{base_url}}"],
+							"path": ["medical-devices", "1"]
+						},
+						"description": "Get medical device by ID. Includes inventory quantity and category name."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Medical Device",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"ECG Machine\",\n    \"category_id\": 1,\n    \"description\": \"12-lead ECG machine\",\n    \"serial_number\": \"ECG-001\",\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/medical-devices",
+							"host": ["{{base_url}}"],
+							"path": ["medical-devices"]
+						},
+						"description": "Create a new medical device. Auto-creates inventory record with quantity 0."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Medical Device",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Device\",\n    \"serial_number\": \"DEV-002\",\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/medical-devices/1",
+							"host": ["{{base_url}}"],
+							"path": ["medical-devices", "1"]
+						},
+						"description": "Update a medical device."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Medical Device",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/medical-devices/1",
+							"host": ["{{base_url}}"],
+							"path": ["medical-devices", "1"]
+						},
+						"description": "Delete a medical device (soft delete). Only allowed if inventory quantity is 0."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Inventory",
+			"item": [
+				{
+					"name": "Get All Inventory",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/inventory?page=1&size=10",
+							"host": ["{{base_url}}"],
+							"path": ["inventory"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "size", "value": "10" },
+								{ "key": "item_type", "value": "medicine", "disabled": true },
+								{ "key": "sort", "value": "id", "disabled": true },
+								{ "key": "order", "value": "asc", "disabled": true }
+							]
+						},
+						"description": "Get all inventory records with pagination and filtering."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Inventory by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/inventory/1",
+							"host": ["{{base_url}}"],
+							"path": ["inventory", "1"]
+						},
+						"description": "Get inventory record by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Inventory by Item",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/inventory/item/medicine/1",
+							"host": ["{{base_url}}"],
+							"path": ["inventory", "item", "medicine", "1"]
+						},
+						"description": "Get inventory record by item type and item ID. item_type: medicine, equipment, medical_device."
 					},
 					"response": []
 				}
@@ -272,9 +799,7 @@
 				"type": "text/javascript",
 				"packages": {},
 				"requests": {},
-				"exec": [
-					""
-				]
+				"exec": [""]
 			}
 		},
 		{
@@ -283,9 +808,7 @@
 				"type": "text/javascript",
 				"packages": {},
 				"requests": {},
-				"exec": [
-					""
-				]
+				"exec": [""]
 			}
 		}
 	],
