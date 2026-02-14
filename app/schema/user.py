@@ -1,6 +1,14 @@
 from datetime import datetime
+from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
+
+
+class UserRole(str, Enum):
+    """User role values."""
+
+    ADMIN = "admin"
+    USER = "user"
 
 
 class UserBase(BaseModel):
@@ -14,7 +22,7 @@ class UserCreate(UserBase):
     """Schema for creating a new user."""
     
     password: str = Field(..., min_length=6, max_length=100)
-    role: str = Field(default="user", pattern="^(admin|user)$")
+    role: UserRole = UserRole.USER
     is_active: bool = True
 
 
@@ -24,7 +32,7 @@ class UserUpdate(BaseModel):
     username: Optional[str] = Field(None, min_length=3, max_length=50)
     email: Optional[EmailStr] = None
     password: Optional[str] = Field(None, min_length=6, max_length=100)
-    role: Optional[str] = Field(None, pattern="^(admin|user)$")
+    role: Optional[UserRole] = None
     is_active: Optional[bool] = None
 
 

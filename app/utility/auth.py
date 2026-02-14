@@ -8,6 +8,7 @@ from app.utility.database import get_db
 from app.utility.security import decode_access_token
 from app.model.user import User
 from app.service.user import UserService
+from app.schema.user import UserRole
 
 logger = logging.getLogger("medbase.utility.auth")
 
@@ -76,7 +77,7 @@ async def get_current_admin_user(
     current_user: User = Depends(get_current_user)
 ) -> User:
     """Get current user and verify they are an admin."""
-    if current_user.role != "admin":
+    if current_user.role != UserRole.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin access required"

@@ -12,6 +12,13 @@ os.environ["DATABASE_URL"] = os.getenv("TEST_DATABASE_URL", "")
 from app.utility.database import Base, get_db
 from app.utility.security import get_password_hash
 from app.model.user import User
+from app.model.medicine_category import MedicineCategory  # noqa: F401
+from app.model.equipment_category import EquipmentCategory  # noqa: F401
+from app.model.medical_device_category import MedicalDeviceCategory  # noqa: F401
+from app.model.medicine import Medicine  # noqa: F401
+from app.model.equipment import Equipment  # noqa: F401
+from app.model.medical_device import MedicalDevice  # noqa: F401
+from app.model.inventory import Inventory  # noqa: F401
 from main import app
 
 

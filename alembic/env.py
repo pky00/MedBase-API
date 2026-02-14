@@ -15,6 +15,13 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Import your models
 from app.utility.database import Base
 from app.model.user import User  # noqa: F401 - Import to register model
+from app.model.medicine_category import MedicineCategory  # noqa: F401
+from app.model.equipment_category import EquipmentCategory  # noqa: F401
+from app.model.medical_device_category import MedicalDeviceCategory  # noqa: F401
+from app.model.medicine import Medicine  # noqa: F401
+from app.model.equipment import Equipment  # noqa: F401
+from app.model.medical_device import MedicalDevice  # noqa: F401
+from app.model.inventory import Inventory  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
