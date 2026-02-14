@@ -6,7 +6,8 @@ from sqlalchemy import select, func, or_
 from app.model.equipment import Equipment
 from app.model.equipment_category import EquipmentCategory
 from app.model.inventory import Inventory
-from app.schema.equipment import EquipmentCreate, EquipmentUpdate
+from app.schema.equipment import EquipmentCreate, EquipmentUpdate, EquipmentDetailResponse
+from app.schema.enums import ItemType
 from app.service.inventory import InventoryService
 
 logger = logging.getLogger("medbase.service.equipment")
@@ -28,7 +29,7 @@ class EquipmentService:
         )
         return result.scalar_one_or_none()
 
-    async def get_by_id_with_details(self, equipment_id: int) -> Optional[dict]:
+    async def get_by_id_with_details(self, equipment_id: int) -> Optional[EquipmentDetailResponse]:
         """Get equipment by ID with inventory and category info."""
         result = await self.db.execute(
             select(
@@ -38,7 +39,7 @@ class EquipmentService:
             )
             .outerjoin(
                 Inventory,
-                (Inventory.item_type == "equipment")
+                (Inventory.item_type == ItemType.EQUIPMENT)
                 & (Inventory.item_id == Equipment.id)
                 & (Inventory.is_deleted == False),
             )
@@ -56,22 +57,7 @@ class EquipmentService:
         if not row:
             return None
 
-        equipment = row[0]
-        return {
-            "id": equipment.id,
-            "name": equipment.name,
-            "category_id": equipment.category_id,
-            "description": equipment.description,
-            "condition": equipment.condition,
-            "is_active": equipment.is_active,
-            "is_deleted": equipment.is_deleted,
-            "created_by": equipment.created_by,
-            "created_at": equipment.created_at,
-            "updated_by": equipment.updated_by,
-            "updated_at": equipment.updated_at,
-            "inventory_quantity": row[1] or 0,
-            "category_name": row[2],
-        }
+        return EquipmentDetailResponse.from_row(row)
 
     async def get_all(
         self,
@@ -146,7 +132,7 @@ class EquipmentService:
         # Auto-create inventory record
         inventory_service = InventoryService(self.db)
         await inventory_service.create(
-            item_type="equipment",
+            item_type=ItemType.EQUIPMENT,
             item_id=equipment.id,
             quantity=0,
             created_by=created_by,
@@ -187,7 +173,7 @@ class EquipmentService:
 
         # Also soft-delete the inventory record
         inventory_service = InventoryService(self.db)
-        await inventory_service.delete("equipment", equipment_id, deleted_by=deleted_by)
+        await inventory_service.delete(ItemType.EQUIPMENT, equipment_id, deleted_by=deleted_by)
 
         await self.db.flush()
         logger.info("Soft-deleted equipment id=%d", equipment_id)
@@ -196,7 +182,7 @@ class EquipmentService:
     async def get_inventory_quantity(self, equipment_id: int) -> int:
         """Get inventory quantity for equipment."""
         inventory_service = InventoryService(self.db)
-        inventory = await inventory_service.get_by_item("equipment", equipment_id)
+        inventory = await inventory_service.get_by_item(ItemType.EQUIPMENT, equipment_id)
         if inventory:
             return inventory.quantity
         return 0

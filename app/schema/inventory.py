@@ -2,6 +2,8 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
+from app.schema.enums import ItemType
+
 
 class InventoryResponse(BaseModel):
     """Schema for inventory response."""
@@ -9,7 +11,7 @@ class InventoryResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    item_type: str
+    item_type: ItemType
     item_id: int
     quantity: int
     is_deleted: bool

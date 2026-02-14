@@ -7,6 +7,7 @@ from app.utility.database import get_db
 from app.utility.auth import get_current_user
 from app.service.inventory import InventoryService
 from app.schema.inventory import InventoryResponse
+from app.schema.enums import ItemType
 from app.schema.base import PaginatedResponse
 from app.model.user import User
 
@@ -19,7 +20,7 @@ router = APIRouter(prefix="/inventory", tags=["Inventory"])
 async def get_inventory_list(
     page: int = Query(1, ge=1, description="Page number"),
     size: int = Query(10, ge=1, le=100, description="Page size"),
-    item_type: Optional[str] = Query(None, description="Filter by item type (medicine/equipment/medical_device)"),
+    item_type: Optional[ItemType] = Query(None, description="Filter by item type (medicine/equipment/medical_device)"),
     sort: str = Query("id", description="Sort field"),
     order: str = Query("asc", description="Sort order (asc/desc)"),
     db: AsyncSession = Depends(get_db),
@@ -64,7 +65,7 @@ async def get_inventory(
 
 @router.get("/item/{item_type}/{item_id}", response_model=InventoryResponse)
 async def get_inventory_by_item(
-    item_type: str,
+    item_type: ItemType,
     item_id: int,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -74,12 +75,6 @@ async def get_inventory_by_item(
         "Fetching inventory for item_type='%s' item_id=%d by user_id=%d",
         item_type, item_id, current_user.id,
     )
-
-    if item_type not in ("medicine", "equipment", "medical_device"):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid item_type. Must be: medicine, equipment, or medical_device",
-        )
 
     service = InventoryService(db)
     inventory = await service.get_by_item(item_type, item_id)

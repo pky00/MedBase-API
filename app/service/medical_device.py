@@ -6,7 +6,8 @@ from sqlalchemy import select, func, or_
 from app.model.medical_device import MedicalDevice
 from app.model.medical_device_category import MedicalDeviceCategory
 from app.model.inventory import Inventory
-from app.schema.medical_device import MedicalDeviceCreate, MedicalDeviceUpdate
+from app.schema.medical_device import MedicalDeviceCreate, MedicalDeviceUpdate, MedicalDeviceDetailResponse
+from app.schema.enums import ItemType
 from app.service.inventory import InventoryService
 
 logger = logging.getLogger("medbase.service.medical_device")
@@ -28,7 +29,7 @@ class MedicalDeviceService:
         )
         return result.scalar_one_or_none()
 
-    async def get_by_id_with_details(self, device_id: int) -> Optional[dict]:
+    async def get_by_id_with_details(self, device_id: int) -> Optional[MedicalDeviceDetailResponse]:
         """Get medical device by ID with inventory and category info."""
         result = await self.db.execute(
             select(
@@ -38,7 +39,7 @@ class MedicalDeviceService:
             )
             .outerjoin(
                 Inventory,
-                (Inventory.item_type == "medical_device")
+                (Inventory.item_type == ItemType.MEDICAL_DEVICE)
                 & (Inventory.item_id == MedicalDevice.id)
                 & (Inventory.is_deleted == False),
             )
@@ -56,22 +57,7 @@ class MedicalDeviceService:
         if not row:
             return None
 
-        device = row[0]
-        return {
-            "id": device.id,
-            "name": device.name,
-            "category_id": device.category_id,
-            "description": device.description,
-            "serial_number": device.serial_number,
-            "is_active": device.is_active,
-            "is_deleted": device.is_deleted,
-            "created_by": device.created_by,
-            "created_at": device.created_at,
-            "updated_by": device.updated_by,
-            "updated_at": device.updated_at,
-            "inventory_quantity": row[1] or 0,
-            "category_name": row[2],
-        }
+        return MedicalDeviceDetailResponse.from_row(row)
 
     async def get_all(
         self,
@@ -143,7 +129,7 @@ class MedicalDeviceService:
         # Auto-create inventory record
         inventory_service = InventoryService(self.db)
         await inventory_service.create(
-            item_type="medical_device",
+            item_type=ItemType.MEDICAL_DEVICE,
             item_id=device.id,
             quantity=0,
             created_by=created_by,
@@ -184,7 +170,7 @@ class MedicalDeviceService:
 
         # Also soft-delete the inventory record
         inventory_service = InventoryService(self.db)
-        await inventory_service.delete("medical_device", device_id, deleted_by=deleted_by)
+        await inventory_service.delete(ItemType.MEDICAL_DEVICE, device_id, deleted_by=deleted_by)
 
         await self.db.flush()
         logger.info("Soft-deleted medical device id=%d", device_id)
@@ -193,7 +179,7 @@ class MedicalDeviceService:
     async def get_inventory_quantity(self, device_id: int) -> int:
         """Get inventory quantity for a medical device."""
         inventory_service = InventoryService(self.db)
-        inventory = await inventory_service.get_by_item("medical_device", device_id)
+        inventory = await inventory_service.get_by_item(ItemType.MEDICAL_DEVICE, device_id)
         if inventory:
             return inventory.quantity
         return 0

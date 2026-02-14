@@ -2,6 +2,8 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, Field, ConfigDict
 
+from app.schema.enums import EquipmentCondition
+
 
 class EquipmentBase(BaseModel):
     """Base schema for equipment."""
@@ -9,7 +11,7 @@ class EquipmentBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     category_id: Optional[int] = None
     description: Optional[str] = None
-    condition: Optional[str] = Field(None, pattern="^(new|good|fair|poor)$")
+    condition: Optional[EquipmentCondition] = None
     is_active: bool = True
 
 
@@ -24,7 +26,7 @@ class EquipmentUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     category_id: Optional[int] = None
     description: Optional[str] = None
-    condition: Optional[str] = Field(None, pattern="^(new|good|fair|poor)$")
+    condition: Optional[EquipmentCondition] = None
     is_active: Optional[bool] = None
 
 
@@ -46,3 +48,25 @@ class EquipmentDetailResponse(EquipmentResponse):
 
     inventory_quantity: Optional[int] = 0
     category_name: Optional[str] = None
+
+    @classmethod
+    def from_row(cls, row) -> "EquipmentDetailResponse":
+        """Build from a SQLAlchemy row of (Equipment, quantity, category_name)."""
+        equipment = row[0]
+        return cls.model_validate(
+            {
+                "id": equipment.id,
+                "name": equipment.name,
+                "category_id": equipment.category_id,
+                "description": equipment.description,
+                "condition": equipment.condition,
+                "is_active": equipment.is_active,
+                "is_deleted": equipment.is_deleted,
+                "created_by": equipment.created_by,
+                "created_at": equipment.created_at,
+                "updated_by": equipment.updated_by,
+                "updated_at": equipment.updated_at,
+                "inventory_quantity": row[1] or 0,
+                "category_name": row[2],
+            }
+        )

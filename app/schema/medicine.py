@@ -46,3 +46,25 @@ class MedicineDetailResponse(MedicineResponse):
 
     inventory_quantity: Optional[int] = 0
     category_name: Optional[str] = None
+
+    @classmethod
+    def from_row(cls, row) -> "MedicineDetailResponse":
+        """Build from a SQLAlchemy row of (Medicine, quantity, category_name)."""
+        medicine = row[0]
+        return cls.model_validate(
+            {
+                "id": medicine.id,
+                "name": medicine.name,
+                "category_id": medicine.category_id,
+                "description": medicine.description,
+                "unit": medicine.unit,
+                "is_active": medicine.is_active,
+                "is_deleted": medicine.is_deleted,
+                "created_by": medicine.created_by,
+                "created_at": medicine.created_at,
+                "updated_by": medicine.updated_by,
+                "updated_at": medicine.updated_at,
+                "inventory_quantity": row[1] or 0,
+                "category_name": row[2],
+            }
+        )

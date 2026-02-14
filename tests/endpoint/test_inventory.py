@@ -157,7 +157,7 @@ class TestGetInventoryByItem:
         response = await client.get(
             "/api/v1/inventory/item/invalid_type/1", headers=admin_headers
         )
-        assert response.status_code == 400
+        assert response.status_code == 422
 
     @pytest.mark.asyncio
     async def test_inventory_auto_created_with_medicine(

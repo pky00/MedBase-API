@@ -13,6 +13,7 @@ from app.schema.equipment import (
     EquipmentResponse,
     EquipmentDetailResponse,
 )
+from app.schema.enums import EquipmentCondition
 from app.schema.base import PaginatedResponse, MessageResponse
 from app.model.user import User
 
@@ -27,7 +28,7 @@ async def get_equipment_list(
     size: int = Query(10, ge=1, le=100, description="Page size"),
     category_id: Optional[int] = Query(None, description="Filter by category ID"),
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
-    condition: Optional[str] = Query(None, description="Filter by condition (new/good/fair/poor)"),
+    condition: Optional[EquipmentCondition] = Query(None, description="Filter by condition (new/good/fair/poor)"),
     search: Optional[str] = Query(None, description="Search in name and description"),
     sort: str = Query("id", description="Sort field"),
     order: str = Query("asc", description="Sort order (asc/desc)"),
