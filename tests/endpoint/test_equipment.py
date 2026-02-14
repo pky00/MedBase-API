@@ -199,6 +199,23 @@ class TestCreateEquipment:
         )
         assert response.status_code == 400
 
+    @pytest.mark.asyncio
+    async def test_create_equipment_duplicate_name(
+        self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
+    ):
+        """Test creating equipment with duplicate name fails."""
+        equip = Equipment(name="Duplicate Equip", created_by=admin_user.id, updated_by=admin_user.id)
+        db_session.add(equip)
+        await db_session.commit()
+
+        response = await client.post(
+            "/api/v1/equipment",
+            json={"name": "Duplicate Equip"},
+            headers=admin_headers,
+        )
+        assert response.status_code == 400
+        assert "already exists" in response.json()["detail"]
+
 
 class TestUpdateEquipment:
     """Tests for PUT /api/v1/equipment/{id}"""

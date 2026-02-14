@@ -16,6 +16,16 @@ class EquipmentCategoryService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
+    async def get_by_name(self, name: str) -> Optional[EquipmentCategory]:
+        """Get equipment category by name."""
+        result = await self.db.execute(
+            select(EquipmentCategory).where(
+                EquipmentCategory.name == name,
+                EquipmentCategory.is_deleted == False,
+            )
+        )
+        return result.scalar_one_or_none()
+
     async def get_by_id(self, category_id: int) -> Optional[EquipmentCategory]:
         """Get equipment category by ID."""
         result = await self.db.execute(

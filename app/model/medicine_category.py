@@ -8,5 +8,5 @@ class MedicineCategory(BaseModel):
 
     __tablename__ = "medicine_categories"
 
-    name = Column(String, nullable=False)
+    name = Column(String, unique=True, nullable=False)
     description = Column(Text, nullable=True)

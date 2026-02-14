@@ -170,6 +170,25 @@ class TestCreateMedicineCategory:
         assert data["description"] is None
 
     @pytest.mark.asyncio
+    async def test_create_category_duplicate_name(
+        self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
+    ):
+        """Test creating a category with duplicate name fails."""
+        from app.model.medicine_category import MedicineCategory
+
+        cat = MedicineCategory(name="Duplicate", created_by=admin_user.id, updated_by=admin_user.id)
+        db_session.add(cat)
+        await db_session.commit()
+
+        response = await client.post(
+            "/api/v1/medicine-categories",
+            json={"name": "Duplicate"},
+            headers=admin_headers,
+        )
+        assert response.status_code == 400
+        assert "already exists" in response.json()["detail"]
+
+    @pytest.mark.asyncio
     async def test_create_category_empty_name(
         self, client: AsyncClient, admin_headers: dict
     ):

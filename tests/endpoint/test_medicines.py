@@ -236,6 +236,23 @@ class TestCreateMedicine:
         assert "category not found" in response.json()["detail"]
 
     @pytest.mark.asyncio
+    async def test_create_medicine_duplicate_name(
+        self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
+    ):
+        """Test creating medicine with duplicate name fails."""
+        med = Medicine(name="Duplicate Med", created_by=admin_user.id, updated_by=admin_user.id)
+        db_session.add(med)
+        await db_session.commit()
+
+        response = await client.post(
+            "/api/v1/medicines",
+            json={"name": "Duplicate Med"},
+            headers=admin_headers,
+        )
+        assert response.status_code == 400
+        assert "already exists" in response.json()["detail"]
+
+    @pytest.mark.asyncio
     async def test_create_medicine_empty_name(
         self, client: AsyncClient, admin_headers: dict
     ):
