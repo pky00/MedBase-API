@@ -13,7 +13,7 @@ from app.schema.equipment import (
     EquipmentResponse,
     EquipmentDetailResponse,
 )
-from app.schema.enums import EquipmentCondition
+from app.schema.equipment import EquipmentCondition
 from app.schema.base import PaginatedResponse, MessageResponse
 from app.model.user import User
 
@@ -95,6 +95,17 @@ async def create_equipment(
         data.name, current_user.id,
     )
 
+    service = EquipmentService(db)
+
+    # Check for duplicate name
+    existing = await service.get_by_name(data.name)
+    if existing:
+        logger.warning("Equipment name already exists name='%s'", data.name)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Equipment name already exists",
+        )
+
     # Validate category if provided
     if data.category_id is not None:
         cat_service = EquipmentCategoryService(db)
@@ -106,7 +117,6 @@ async def create_equipment(
                 detail="Equipment category not found",
             )
 
-    service = EquipmentService(db)
     equipment = await service.create(data, created_by=current_user.id)
 
     logger.info("Equipment created equipment_id=%d", equipment.id)
@@ -132,6 +142,16 @@ async def update_equipment(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Equipment not found",
         )
+
+    # Check for duplicate name if being updated
+    if data.name and data.name != equipment.name:
+        existing = await service.get_by_name(data.name)
+        if existing:
+            logger.warning("Equipment name already exists name='%s'", data.name)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Equipment name already exists",
+            )
 
     # Validate category if provided
     if data.category_id is not None:

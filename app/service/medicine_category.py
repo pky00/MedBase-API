@@ -16,6 +16,16 @@ class MedicineCategoryService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
+    async def get_by_name(self, name: str) -> Optional[MedicineCategory]:
+        """Get medicine category by name."""
+        result = await self.db.execute(
+            select(MedicineCategory).where(
+                MedicineCategory.name == name,
+                MedicineCategory.is_deleted == False,
+            )
+        )
+        return result.scalar_one_or_none()
+
     async def get_by_id(self, category_id: int) -> Optional[MedicineCategory]:
         """Get medicine category by ID."""
         result = await self.db.execute(

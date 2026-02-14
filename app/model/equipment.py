@@ -8,7 +8,7 @@ class Equipment(BaseModel):
 
     __tablename__ = "equipment"
 
-    name = Column(String, nullable=False)
+    name = Column(String, unique=True, nullable=False)
     category_id = Column(Integer, ForeignKey("equipment_categories.id"), nullable=True)
     description = Column(Text, nullable=True)
     condition = Column(String, nullable=True)  # new, good, fair, poor

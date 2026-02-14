@@ -208,6 +208,23 @@ class TestCreateMedicalDevice:
         )
         assert response.status_code == 400
 
+    @pytest.mark.asyncio
+    async def test_create_device_duplicate_name(
+        self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
+    ):
+        """Test creating device with duplicate name fails."""
+        dev = MedicalDevice(name="Duplicate Device", created_by=admin_user.id, updated_by=admin_user.id)
+        db_session.add(dev)
+        await db_session.commit()
+
+        response = await client.post(
+            "/api/v1/medical-devices",
+            json={"name": "Duplicate Device"},
+            headers=admin_headers,
+        )
+        assert response.status_code == 400
+        assert "already exists" in response.json()["detail"]
+
 
 class TestUpdateMedicalDevice:
     """Tests for PUT /api/v1/medical-devices/{id}"""

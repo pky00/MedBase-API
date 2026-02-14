@@ -111,6 +111,23 @@ class TestCreateEquipmentCategory:
         assert db_cat.name == "Surgical Tools"
         assert db_cat.created_by == admin_user.id
 
+    @pytest.mark.asyncio
+    async def test_create_category_duplicate_name(
+        self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
+    ):
+        """Test creating a category with duplicate name fails."""
+        cat = EquipmentCategory(name="Duplicate", created_by=admin_user.id, updated_by=admin_user.id)
+        db_session.add(cat)
+        await db_session.commit()
+
+        response = await client.post(
+            "/api/v1/equipment-categories",
+            json={"name": "Duplicate"},
+            headers=admin_headers,
+        )
+        assert response.status_code == 400
+        assert "already exists" in response.json()["detail"]
+
 
 class TestUpdateEquipmentCategory:
     """Tests for PUT /api/v1/equipment-categories/{id}"""

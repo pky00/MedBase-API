@@ -92,6 +92,17 @@ async def create_medical_device(
         data.name, current_user.id,
     )
 
+    service = MedicalDeviceService(db)
+
+    # Check for duplicate name
+    existing = await service.get_by_name(data.name)
+    if existing:
+        logger.warning("Medical device name already exists name='%s'", data.name)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Medical device name already exists",
+        )
+
     # Validate category if provided
     if data.category_id is not None:
         cat_service = MedicalDeviceCategoryService(db)
@@ -103,7 +114,6 @@ async def create_medical_device(
                 detail="Medical device category not found",
             )
 
-    service = MedicalDeviceService(db)
     device = await service.create(data, created_by=current_user.id)
 
     logger.info("Medical device created device_id=%d", device.id)
@@ -129,6 +139,16 @@ async def update_medical_device(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Medical device not found",
         )
+
+    # Check for duplicate name if being updated
+    if data.name and data.name != device.name:
+        existing = await service.get_by_name(data.name)
+        if existing:
+            logger.warning("Medical device name already exists name='%s'", data.name)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Medical device name already exists",
+            )
 
     # Validate category if provided
     if data.category_id is not None:

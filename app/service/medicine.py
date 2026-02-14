@@ -7,7 +7,7 @@ from app.model.medicine import Medicine
 from app.model.medicine_category import MedicineCategory
 from app.model.inventory import Inventory
 from app.schema.medicine import MedicineCreate, MedicineUpdate, MedicineDetailResponse
-from app.schema.enums import ItemType
+from app.schema.inventory import ItemType
 from app.service.inventory import InventoryService
 
 logger = logging.getLogger("medbase.service.medicine")
@@ -18,6 +18,16 @@ class MedicineService:
 
     def __init__(self, db: AsyncSession):
         self.db = db
+
+    async def get_by_name(self, name: str) -> Optional[Medicine]:
+        """Get medicine by name."""
+        result = await self.db.execute(
+            select(Medicine).where(
+                Medicine.name == name,
+                Medicine.is_deleted == False,
+            )
+        )
+        return result.scalar_one_or_none()
 
     async def get_by_id(self, medicine_id: int) -> Optional[Medicine]:
         """Get medicine by ID."""

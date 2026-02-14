@@ -92,6 +92,17 @@ async def create_medicine(
         data.name, current_user.id,
     )
 
+    service = MedicineService(db)
+
+    # Check for duplicate name
+    existing = await service.get_by_name(data.name)
+    if existing:
+        logger.warning("Medicine name already exists name='%s'", data.name)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Medicine name already exists",
+        )
+
     # Validate category if provided
     if data.category_id is not None:
         cat_service = MedicineCategoryService(db)
@@ -103,7 +114,6 @@ async def create_medicine(
                 detail="Medicine category not found",
             )
 
-    service = MedicineService(db)
     medicine = await service.create(data, created_by=current_user.id)
 
     logger.info("Medicine created medicine_id=%d", medicine.id)
@@ -129,6 +139,16 @@ async def update_medicine(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Medicine not found",
         )
+
+    # Check for duplicate name if being updated
+    if data.name and data.name != medicine.name:
+        existing = await service.get_by_name(data.name)
+        if existing:
+            logger.warning("Medicine name already exists name='%s'", data.name)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Medicine name already exists",
+            )
 
     # Validate category if provided
     if data.category_id is not None:

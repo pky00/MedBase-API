@@ -7,7 +7,7 @@ from app.model.equipment import Equipment
 from app.model.equipment_category import EquipmentCategory
 from app.model.inventory import Inventory
 from app.schema.equipment import EquipmentCreate, EquipmentUpdate, EquipmentDetailResponse
-from app.schema.enums import ItemType
+from app.schema.inventory import ItemType
 from app.service.inventory import InventoryService
 
 logger = logging.getLogger("medbase.service.equipment")
@@ -18,6 +18,16 @@ class EquipmentService:
 
     def __init__(self, db: AsyncSession):
         self.db = db
+
+    async def get_by_name(self, name: str) -> Optional[Equipment]:
+        """Get equipment by name."""
+        result = await self.db.execute(
+            select(Equipment).where(
+                Equipment.name == name,
+                Equipment.is_deleted == False,
+            )
+        )
+        return result.scalar_one_or_none()
 
     async def get_by_id(self, equipment_id: int) -> Optional[Equipment]:
         """Get equipment by ID."""

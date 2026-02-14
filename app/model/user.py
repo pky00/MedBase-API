@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, Boolean, Integer, DateTime, ForeignKey
 from sqlalchemy.sql import func
 
 from app.utility.database import Base
-from app.schema.enums import UserRole
+from app.schema.user import UserRole
 
 
 class User(Base):
