@@ -7,7 +7,7 @@ from app.utility.database import get_db
 from app.utility.auth import get_current_admin_user
 from app.service.user import UserService
 from app.schema.user import UserCreate, UserUpdate, UserResponse
-from app.schema.enums import UserRole
+from app.schema.user import UserRole
 from app.schema.base import PaginatedResponse, MessageResponse
 from app.model.user import User
 

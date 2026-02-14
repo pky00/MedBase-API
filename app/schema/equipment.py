@@ -1,8 +1,16 @@
 from datetime import datetime
+from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, Field, ConfigDict
 
-from app.schema.enums import EquipmentCondition
+
+class EquipmentCondition(str, Enum):
+    """Equipment condition values."""
+
+    NEW = "new"
+    GOOD = "good"
+    FAIR = "fair"
+    POOR = "poor"
 
 
 class EquipmentBase(BaseModel):

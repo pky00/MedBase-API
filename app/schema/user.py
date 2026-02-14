@@ -1,8 +1,14 @@
 from datetime import datetime
+from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
-from app.schema.enums import UserRole
+
+class UserRole(str, Enum):
+    """User role values."""
+
+    ADMIN = "admin"
+    USER = "user"
 
 
 class UserBase(BaseModel):

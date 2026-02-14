@@ -7,7 +7,7 @@ from app.model.equipment import Equipment
 from app.model.equipment_category import EquipmentCategory
 from app.model.inventory import Inventory
 from app.schema.equipment import EquipmentCreate, EquipmentUpdate, EquipmentDetailResponse
-from app.schema.enums import ItemType
+from app.schema.inventory import ItemType
 from app.service.inventory import InventoryService
 
 logger = logging.getLogger("medbase.service.equipment")

@@ -13,7 +13,7 @@ from app.schema.equipment import (
     EquipmentResponse,
     EquipmentDetailResponse,
 )
-from app.schema.enums import EquipmentCondition
+from app.schema.equipment import EquipmentCondition
 from app.schema.base import PaginatedResponse, MessageResponse
 from app.model.user import User
 

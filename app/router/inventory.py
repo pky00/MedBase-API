@@ -7,7 +7,7 @@ from app.utility.database import get_db
 from app.utility.auth import get_current_user
 from app.service.inventory import InventoryService
 from app.schema.inventory import InventoryResponse
-from app.schema.enums import ItemType
+from app.schema.inventory import ItemType
 from app.schema.base import PaginatedResponse
 from app.model.user import User
 

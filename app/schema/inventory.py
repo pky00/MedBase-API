@@ -1,8 +1,15 @@
 from datetime import datetime
+from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
-from app.schema.enums import ItemType
+
+class ItemType(str, Enum):
+    """Inventory item types."""
+
+    MEDICINE = "medicine"
+    EQUIPMENT = "equipment"
+    MEDICAL_DEVICE = "medical_device"
 
 
 class InventoryResponse(BaseModel):

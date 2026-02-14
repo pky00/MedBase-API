@@ -8,7 +8,7 @@ from app.utility.database import get_db
 from app.utility.security import decode_access_token
 from app.model.user import User
 from app.service.user import UserService
-from app.schema.enums import UserRole
+from app.schema.user import UserRole
 
 logger = logging.getLogger("medbase.utility.auth")
 
