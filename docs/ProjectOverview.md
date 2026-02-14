@@ -71,6 +71,11 @@ MedBase is a clinic management application designed for small medical clinics. I
 | `is_deleted` | Yes | Soft delete flag |
 | `is_active` | Optional | For resources that can be deactivated (e.g., doctors) |
 
+**Unique Names**
+- In general, entity names should be unique across the system
+- Add unique constraints on name fields in models to prevent duplicates
+- Validate uniqueness in the service layer when creating or updating entities
+
 **Authentication**
 - JWT Bearer tokens
 - Token expiry: 1 hour
@@ -99,6 +104,24 @@ result = await self.db.execute(
     .options(contains_eager(Donation.medicine_items))
     .where(Donation.id == donation_id, Donation.is_deleted == False)
 )
+```
+
+**Limited Option Fields (Enums)**
+- Fields with limited options should be stored as `String` type in the database model
+- Create a corresponding `StrEnum` class to define the allowed values in code
+- Each enum should be defined in its relative resource's file (e.g., `AppointmentType` in `appointment.py`)
+- This provides type safety and validation while maintaining database flexibility
+
+```python
+from enum import StrEnum
+
+class AppointmentType(StrEnum):
+    SCHEDULED = "scheduled"
+    WALK_IN = "walk_in"
+
+class Appointment(Base):
+    __tablename__ = "appointments"
+    type = Column(String, nullable=False)  # Stores enum values as strings
 ```
 
 **API Endpoints (Get All)**
