@@ -2,6 +2,7 @@ from sqlalchemy import Column, String, Boolean, Integer, DateTime, ForeignKey
 from sqlalchemy.sql import func
 
 from app.utility.database import Base
+from app.schema.enums import UserRole
 
 
 class User(Base):
@@ -13,7 +14,7 @@ class User(Base):
     username = Column(String, unique=True, nullable=False, index=True)
     email = Column(String, unique=True, nullable=False, index=True)
     password_hash = Column(String, nullable=False)
-    role = Column(String, nullable=False, default="user")  # admin, user
+    role = Column(String, nullable=False, default=UserRole.USER)
     is_active = Column(Boolean, default=True, nullable=False)
     is_deleted = Column(Boolean, default=False, nullable=False)
     created_by = Column(Integer, ForeignKey("users.id"), nullable=True)

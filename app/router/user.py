@@ -7,6 +7,7 @@ from app.utility.database import get_db
 from app.utility.auth import get_current_admin_user
 from app.service.user import UserService
 from app.schema.user import UserCreate, UserUpdate, UserResponse
+from app.schema.enums import UserRole
 from app.schema.base import PaginatedResponse, MessageResponse
 from app.model.user import User
 
@@ -19,7 +20,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
 async def get_users(
     page: int = Query(1, ge=1, description="Page number"),
     size: int = Query(10, ge=1, le=100, description="Page size"),
-    role: Optional[str] = Query(None, description="Filter by role (admin/user)"),
+    role: Optional[UserRole] = Query(None, description="Filter by role (admin/user)"),
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
     search: Optional[str] = Query(None, description="Search in username and email"),
     sort: str = Query("id", description="Sort field"),
