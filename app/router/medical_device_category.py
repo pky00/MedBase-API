@@ -37,12 +37,10 @@ async def get_medical_device_categories(
         page=page, size=size, search=search, sort=sort, order=order
     )
 
-    pages = (total + size - 1) // size
-
     logger.info("Returning %d medical device categories (total=%d)", len(categories), total)
 
     return PaginatedResponse(
-        items=categories, total=total, page=page, size=size, pages=pages
+        items=categories, total=total, page=page, size=size,
     )
 
 

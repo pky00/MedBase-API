@@ -49,12 +49,10 @@ async def get_equipment_list(
         order=order,
     )
 
-    pages = (total + size - 1) // size
-
     logger.info("Returning %d equipment items (total=%d)", len(items), total)
 
     return PaginatedResponse(
-        items=items, total=total, page=page, size=size, pages=pages
+        items=items, total=total, page=page, size=size,
     )
 
 

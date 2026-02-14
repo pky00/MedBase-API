@@ -53,8 +53,6 @@ async def get_users(
         order=order
     )
     
-    pages = (total + size - 1) // size  # Ceiling division
-    
     logger.info("Returning %d users (total=%d)", len(users), total)
     
     return PaginatedResponse(
@@ -62,7 +60,6 @@ async def get_users(
         total=total,
         page=page,
         size=size,
-        pages=pages
     )
 
 

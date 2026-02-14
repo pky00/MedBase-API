@@ -78,7 +78,6 @@ class TestGetMedicineCategories:
         assert data["total"] == 5
         assert data["page"] == 1
         assert data["size"] == 2
-        assert data["pages"] == 3
 
 
 class TestGetMedicineCategory:

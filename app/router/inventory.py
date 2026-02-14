@@ -33,12 +33,10 @@ async def get_inventory_list(
         page=page, size=size, item_type=item_type, sort=sort, order=order
     )
 
-    pages = (total + size - 1) // size
-
     logger.info("Returning %d inventory records (total=%d)", len(records), total)
 
     return PaginatedResponse(
-        items=records, total=total, page=page, size=size, pages=pages
+        items=records, total=total, page=page, size=size,
     )
 
 

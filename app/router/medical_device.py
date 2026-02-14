@@ -47,12 +47,10 @@ async def get_medical_devices(
         order=order,
     )
 
-    pages = (total + size - 1) // size
-
     logger.info("Returning %d medical devices (total=%d)", len(devices), total)
 
     return PaginatedResponse(
-        items=devices, total=total, page=page, size=size, pages=pages
+        items=devices, total=total, page=page, size=size,
     )
 
 

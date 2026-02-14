@@ -47,12 +47,10 @@ async def get_medicines(
         order=order,
     )
 
-    pages = (total + size - 1) // size
-
     logger.info("Returning %d medicines (total=%d)", len(medicines), total)
 
     return PaginatedResponse(
-        items=medicines, total=total, page=page, size=size, pages=pages
+        items=medicines, total=total, page=page, size=size,
     )
 
 
