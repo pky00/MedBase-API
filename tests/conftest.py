@@ -19,6 +19,9 @@ from app.model.medicine import Medicine  # noqa: F401
 from app.model.equipment import Equipment  # noqa: F401
 from app.model.medical_device import MedicalDevice  # noqa: F401
 from app.model.inventory import Inventory  # noqa: F401
+from app.model.partner import Partner  # noqa: F401
+from app.model.donation import Donation, DonationItem  # noqa: F401
+from app.model.doctor import Doctor  # noqa: F401
 from main import app
 
 
