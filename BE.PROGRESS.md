@@ -6,7 +6,7 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 
 ---
 
-## Current Phase: Phase 2 - Core Entities
+## Current Phase: Phase 3 - Partners & Doctors
 
 ---
 
@@ -20,6 +20,9 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 | 5 | Medicines | 2026-02-11 | Medicine CRUD with category, auto inventory creation, delete restriction (qty > 0) |
 | 6 | Equipment | 2026-02-11 | Equipment CRUD with category/condition, auto inventory creation, delete restriction |
 | 7 | Medical Devices | 2026-02-11 | Medical device CRUD with category/serial number, auto inventory creation, delete restriction |
+| 8 | Partners | 2026-02-14 | Partner CRUD with donor/referral/both types, organization types, search, filters, donation summary in detail view |
+| 9 | Donations | 2026-02-14 | Donation CRUD with items, auto inventory update on add/update/delete items, partner validation (donor/both), donation items CRUD |
+| 10 | Doctors | 2026-02-14 | Doctor CRUD with internal/external/partner_provided types, partner validation for partner_provided, partner name in detail view |
 
 ---
 
@@ -189,8 +192,77 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 
 ---
 
+## Phase 3 Details
+
+### Feature 8: Partners
+**Status:** Complete
+
+**Endpoints:**
+- GET `/api/v1/partners` - List all partners (paginated, filterable by partner_type, organization_type, is_active, searchable)
+- GET `/api/v1/partners/{id}` - Get partner by ID (includes donations summary if donor)
+- POST `/api/v1/partners` - Create partner
+- PUT `/api/v1/partners/{id}` - Update partner
+- DELETE `/api/v1/partners/{id}` - Delete partner (soft delete)
+
+**Model:**
+- id, name (unique), partner_type (donor/referral/both), organization_type (NGO/organization/individual/hospital/medical_center)
+- contact_person, phone, email, address, is_active, is_deleted, audit columns
+
+**Tests:**
+- test_partners.py (20 tests: CRUD, filters, search, pagination, duplicate name, validation)
+
+**Postman:**
+- Partners folder (Get All, Get by ID, Create, Update, Delete)
+
+### Feature 9: Donations
+**Status:** Complete
+
+**Endpoints:**
+- GET `/api/v1/donations` - List all donations (paginated, filterable by partner_id, donation_date, searchable)
+- GET `/api/v1/donations/{id}` - Get donation by ID (includes items with item names)
+- POST `/api/v1/donations` - Create donation with optional items (auto-updates inventory)
+- PUT `/api/v1/donations/{id}` - Update donation
+- DELETE `/api/v1/donations/{id}` - Delete donation (soft delete, reverses inventory)
+- GET `/api/v1/donations/{donation_id}/items` - List items for a donation
+- POST `/api/v1/donations/{donation_id}/items` - Add item to donation (auto-updates inventory)
+- PUT `/api/v1/donation-items/{id}` - Update donation item (auto-adjusts inventory)
+- DELETE `/api/v1/donation-items/{id}` - Delete donation item (reverses inventory)
+
+**Models:**
+- Donation: id, partner_id (FK), donation_date, notes, is_deleted, audit columns
+- DonationItem: id, donation_id (FK), item_type (medicine/equipment/medical_device), item_id, quantity, is_deleted, audit columns
+
+**Tests:**
+- test_donations.py (20 tests: CRUD, filters, items CRUD, inventory auto-update, inventory reversal, partner validation)
+
+**Postman:**
+- Donations folder (Get All, Get by ID, Create, Update, Delete)
+- Donation Items folder (Get Items, Add Item, Update Item, Delete Item)
+
+### Feature 10: Doctors
+**Status:** Complete
+
+**Endpoints:**
+- GET `/api/v1/doctors` - List all doctors (paginated, filterable by type, is_active, partner_id, searchable)
+- GET `/api/v1/doctors/{id}` - Get doctor by ID (includes partner name if partner_provided)
+- POST `/api/v1/doctors` - Create doctor (partner_id required for partner_provided type)
+- PUT `/api/v1/doctors/{id}` - Update doctor
+- DELETE `/api/v1/doctors/{id}` - Delete doctor (soft delete)
+
+**Model:**
+- id, name (unique), specialization, phone, email, type (internal/external/partner_provided)
+- partner_id (FK to partners, required for partner_provided), is_active, is_deleted, audit columns
+
+**Tests:**
+- test_doctors.py (20 tests: CRUD, filters, search, pagination, partner validation, type validation, duplicate name)
+
+**Postman:**
+- Doctors folder (Get All, Get by ID, Create Internal, Create Partner Provided, Update, Delete)
+
+---
+
 ## Notes
 
 - Update this file before finishing each feature
 - Format: Endpoints → Tests → Postman requests
-- All 117 tests pass (Phase 1: 30 tests + Phase 2: 87 tests)
+- All tests pass (Phase 1: 30 tests + Phase 2: 87 tests + Phase 3: ~60 tests)
