@@ -79,6 +79,26 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_donation_items_id'), 'donation_items', ['id'], unique=False)
 
+    # Inventory Transactions table
+    op.create_table('inventory_transactions',
+    sa.Column('transaction_type', sa.String(), nullable=False),
+    sa.Column('item_type', sa.String(), nullable=False),
+    sa.Column('item_id', sa.Integer(), nullable=False),
+    sa.Column('quantity', sa.Integer(), nullable=False),
+    sa.Column('notes', sa.Text(), nullable=True),
+    sa.Column('transaction_date', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('is_deleted', sa.Boolean(), nullable=False),
+    sa.Column('created_by', sa.Integer(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_by', sa.Integer(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['created_by'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['updated_by'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_inventory_transactions_id'), 'inventory_transactions', ['id'], unique=False)
+
     # Doctors table
     op.create_table('doctors',
     sa.Column('name', sa.String(), nullable=False),
@@ -106,6 +126,8 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_index(op.f('ix_doctors_id'), table_name='doctors')
     op.drop_table('doctors')
+    op.drop_index(op.f('ix_inventory_transactions_id'), table_name='inventory_transactions')
+    op.drop_table('inventory_transactions')
     op.drop_index(op.f('ix_donation_items_id'), table_name='donation_items')
     op.drop_table('donation_items')
     op.drop_index(op.f('ix_donations_id'), table_name='donations')

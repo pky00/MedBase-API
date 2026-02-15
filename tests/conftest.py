@@ -22,6 +22,7 @@ from app.model.inventory import Inventory  # noqa: F401
 from app.model.partner import Partner  # noqa: F401
 from app.model.donation import Donation, DonationItem  # noqa: F401
 from app.model.doctor import Doctor  # noqa: F401
+from app.model.inventory_transaction import InventoryTransaction  # noqa: F401
 from main import app
 
 

@@ -1,14 +1,13 @@
 import logging
 from typing import Optional, List, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, case, or_
+from sqlalchemy import select, func, or_
 
 from app.model.donation import Donation, DonationItem
 from app.model.partner import Partner
 from app.model.medicine import Medicine
 from app.model.equipment import Equipment
 from app.model.medical_device import MedicalDevice
-from app.model.inventory import Inventory
 from app.schema.donation import (
     DonationCreate,
     DonationUpdate,
@@ -19,6 +18,8 @@ from app.schema.donation import (
     DonationItemResponse,
 )
 from app.schema.inventory import ItemType
+from app.schema.inventory_transaction import InventoryTransactionCreate, TransactionType
+from app.service.inventory_transaction import InventoryTransactionService
 
 logger = logging.getLogger("medbase.service.donation")
 
@@ -259,12 +260,14 @@ class DonationService:
         return donation
 
     async def delete(self, donation_id: int, deleted_by: Optional[int] = None) -> bool:
-        """Soft delete a donation and its items, and reverse inventory changes."""
+        """Soft delete a donation and its items, and reverse inventory via transactions."""
         donation = await self.get_by_id(donation_id)
         if not donation:
             return False
 
-        # Soft delete all donation items and reverse inventory
+        tx_service = InventoryTransactionService(self.db)
+
+        # Soft delete all donation items and reverse inventory via transactions
         result = await self.db.execute(
             select(DonationItem).where(
                 DonationItem.donation_id == donation_id,
@@ -273,9 +276,16 @@ class DonationService:
         )
         items = result.scalars().all()
         for item in items:
-            # Reverse inventory increase
-            await self._update_inventory(
-                item.item_type, item.item_id, -item.quantity, deleted_by
+            # Create a reversal transaction (destruction type reverses the donation increase)
+            await tx_service.create(
+                InventoryTransactionCreate(
+                    transaction_type=TransactionType.DESTRUCTION,
+                    item_type=item.item_type,
+                    item_id=item.item_id,
+                    quantity=item.quantity,
+                    notes=f"Reversal: donation {donation_id} deleted",
+                ),
+                created_by=deleted_by,
             )
             item.is_deleted = True
             item.updated_by = deleted_by
@@ -308,7 +318,7 @@ class DonationService:
         data: DonationItemCreate,
         created_by: Optional[int] = None,
     ) -> DonationItem:
-        """Add an item to a donation and update inventory."""
+        """Add an item to a donation and create inventory transaction."""
         item = await self._create_donation_item(
             donation_id=donation_id,
             data=data,
@@ -326,7 +336,7 @@ class DonationService:
         data: DonationItemUpdate,
         updated_by: Optional[int] = None,
     ) -> Optional[DonationItem]:
-        """Update a donation item and adjust inventory."""
+        """Update a donation item and adjust inventory via transactions."""
         item = await self.get_item_by_id(item_id)
         if not item:
             return None
@@ -339,19 +349,59 @@ class DonationService:
         for field, value in update_data.items():
             setattr(item, field, value)
 
-        # Adjust inventory if quantity or item changed
         new_quantity = item.quantity
         new_item_type = item.item_type
         new_item_id = item.item_id
 
+        tx_service = InventoryTransactionService(self.db)
+
         if old_item_type != new_item_type or old_item_id != new_item_id:
-            # Item changed: reverse old, apply new
-            await self._update_inventory(old_item_type, old_item_id, -old_quantity, updated_by)
-            await self._update_inventory(new_item_type, new_item_id, new_quantity, updated_by)
+            # Item changed: reverse old donation, apply new donation
+            await tx_service.create(
+                InventoryTransactionCreate(
+                    transaction_type=TransactionType.DESTRUCTION,
+                    item_type=old_item_type,
+                    item_id=old_item_id,
+                    quantity=old_quantity,
+                    notes=f"Reversal: donation item {item_id} changed",
+                ),
+                created_by=updated_by,
+            )
+            await tx_service.create(
+                InventoryTransactionCreate(
+                    transaction_type=TransactionType.DONATION,
+                    item_type=new_item_type,
+                    item_id=new_item_id,
+                    quantity=new_quantity,
+                    notes=f"Updated donation item {item_id}",
+                ),
+                created_by=updated_by,
+            )
         elif old_quantity != new_quantity:
             # Only quantity changed
             diff = new_quantity - old_quantity
-            await self._update_inventory(new_item_type, new_item_id, diff, updated_by)
+            if diff > 0:
+                await tx_service.create(
+                    InventoryTransactionCreate(
+                        transaction_type=TransactionType.DONATION,
+                        item_type=new_item_type,
+                        item_id=new_item_id,
+                        quantity=diff,
+                        notes=f"Donation item {item_id} quantity increased",
+                    ),
+                    created_by=updated_by,
+                )
+            elif diff < 0:
+                await tx_service.create(
+                    InventoryTransactionCreate(
+                        transaction_type=TransactionType.DESTRUCTION,
+                        item_type=new_item_type,
+                        item_id=new_item_id,
+                        quantity=abs(diff),
+                        notes=f"Donation item {item_id} quantity decreased",
+                    ),
+                    created_by=updated_by,
+                )
 
         item.updated_by = updated_by
         await self.db.flush()
@@ -360,13 +410,23 @@ class DonationService:
         return item
 
     async def delete_item(self, item_id: int, deleted_by: Optional[int] = None) -> bool:
-        """Soft delete a donation item and reverse inventory."""
+        """Soft delete a donation item and reverse inventory via transaction."""
         item = await self.get_item_by_id(item_id)
         if not item:
             return False
 
-        # Reverse inventory increase
-        await self._update_inventory(item.item_type, item.item_id, -item.quantity, deleted_by)
+        # Create reversal transaction
+        tx_service = InventoryTransactionService(self.db)
+        await tx_service.create(
+            InventoryTransactionCreate(
+                transaction_type=TransactionType.DESTRUCTION,
+                item_type=item.item_type,
+                item_id=item.item_id,
+                quantity=item.quantity,
+                notes=f"Reversal: donation item {item_id} deleted",
+            ),
+            created_by=deleted_by,
+        )
 
         item.is_deleted = True
         item.updated_by = deleted_by
@@ -380,7 +440,7 @@ class DonationService:
         data: DonationItemCreate,
         created_by: Optional[int] = None,
     ) -> DonationItem:
-        """Create a donation item and update inventory."""
+        """Create a donation item and create an inventory transaction."""
         item = DonationItem(
             donation_id=donation_id,
             item_type=data.item_type,
@@ -393,35 +453,20 @@ class DonationService:
         await self.db.flush()
         await self.db.refresh(item)
 
-        # Update inventory (increase for donations)
-        await self._update_inventory(data.item_type, data.item_id, data.quantity, created_by)
+        # Create inventory transaction (donation type increases inventory)
+        tx_service = InventoryTransactionService(self.db)
+        await tx_service.create(
+            InventoryTransactionCreate(
+                transaction_type=TransactionType.DONATION,
+                item_type=data.item_type,
+                item_id=data.item_id,
+                quantity=data.quantity,
+                notes=f"Donation item for donation {donation_id}",
+            ),
+            created_by=created_by,
+        )
 
         return item
-
-    async def _update_inventory(
-        self,
-        item_type: str,
-        item_id: int,
-        quantity_change: int,
-        updated_by: Optional[int] = None,
-    ):
-        """Update inventory quantity for an item."""
-        result = await self.db.execute(
-            select(Inventory).where(
-                Inventory.item_type == item_type,
-                Inventory.item_id == item_id,
-                Inventory.is_deleted == False,
-            )
-        )
-        inventory = result.scalar_one_or_none()
-        if inventory:
-            inventory.quantity = max(0, inventory.quantity + quantity_change)
-            inventory.updated_by = updated_by
-            await self.db.flush()
-            logger.debug(
-                "Updated inventory item_type='%s' item_id=%d change=%d new_qty=%d",
-                item_type, item_id, quantity_change, inventory.quantity,
-            )
 
     async def validate_item_exists(self, item_type: str, item_id: int) -> bool:
         """Validate that the referenced inventory item exists."""

@@ -19,6 +19,7 @@ from app.router import (
     partner,
     donation,
     doctor,
+    inventory_transaction,
 )
 
 logger = logging.getLogger("medbase.app")
@@ -70,6 +71,7 @@ app.include_router(inventory.router, prefix=settings.API_V1_PREFIX)
 app.include_router(partner.router, prefix=settings.API_V1_PREFIX)
 app.include_router(donation.router, prefix=settings.API_V1_PREFIX)
 app.include_router(doctor.router, prefix=settings.API_V1_PREFIX)
+app.include_router(inventory_transaction.router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/")

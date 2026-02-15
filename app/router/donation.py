@@ -94,7 +94,7 @@ async def create_donation(
         data.partner_id, current_user.id,
     )
 
-    # Validate partner exists and is a donor type
+    # Validate partner exists
     partner_service = PartnerService(db)
     partner = await partner_service.get_by_id(data.partner_id)
     if not partner:
@@ -102,12 +102,6 @@ async def create_donation(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Partner not found",
-        )
-    if partner.partner_type not in ("donor", "both"):
-        logger.warning("Partner is not a donor partner_id=%d type=%s", data.partner_id, partner.partner_type)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Partner must be of type 'donor' or 'both' to receive donations",
         )
 
     # Validate items if provided
@@ -170,11 +164,6 @@ async def update_donation(
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Partner not found",
-            )
-        if partner.partner_type not in ("donor", "both"):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Partner must be of type 'donor' or 'both' to receive donations",
             )
 
     updated = await service.update(donation_id, data, updated_by=current_user.id)
