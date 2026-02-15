@@ -11,6 +11,7 @@ from app.model.medicine import Medicine
 from app.model.equipment import Equipment
 from app.model.medical_device import MedicalDevice
 from app.model.inventory import Inventory
+from app.model.inventory_transaction import InventoryTransaction
 from app.model.user import User
 
 
@@ -257,12 +258,12 @@ class TestCreateDonation:
         assert db_donation.created_by == admin_user.id
 
     @pytest.mark.asyncio
-    async def test_create_donation_with_items(
+    async def test_create_donation_with_items_creates_inventory_transactions(
         self, client: AsyncClient, admin_user: User, admin_headers: dict,
         db_session: AsyncSession, donor_partner: Partner,
         medicine_with_inventory,
     ):
-        """Test creating a donation with items and verify inventory update."""
+        """Test creating a donation with items creates inventory transactions and updates inventory."""
         med, inv = medicine_with_inventory
         initial_qty = inv.quantity
 
@@ -301,8 +302,21 @@ class TestCreateDonation:
         assert items[0].item_type == "medicine"
         assert items[0].quantity == 50
 
-        # Verify inventory was updated
+        # Verify inventory transaction was created
         db_session.expire_all()
+        result = await db_session.execute(
+            select(InventoryTransaction).where(
+                InventoryTransaction.transaction_type == "donation",
+                InventoryTransaction.item_type == "medicine",
+                InventoryTransaction.item_id == med.id,
+                InventoryTransaction.is_deleted == False,
+            )
+        )
+        txs = result.scalars().all()
+        assert len(txs) >= 1
+        assert txs[0].quantity == 50
+
+        # Verify inventory was updated via the transaction
         result = await db_session.execute(
             select(Inventory).where(
                 Inventory.item_type == "medicine",
@@ -313,11 +327,11 @@ class TestCreateDonation:
         assert updated_inv.quantity == initial_qty + 50
 
     @pytest.mark.asyncio
-    async def test_create_donation_non_donor_partner(
+    async def test_create_donation_referral_partner_allowed(
         self, client: AsyncClient, admin_headers: dict,
         referral_partner: Partner,
     ):
-        """Test creating donation with referral-only partner fails."""
+        """Test creating donation with referral partner is allowed (any partner type valid)."""
         response = await client.post(
             "/api/v1/donations",
             json={
@@ -327,8 +341,7 @@ class TestCreateDonation:
             headers=admin_headers,
         )
 
-        assert response.status_code == 400
-        assert "donor" in response.json()["detail"].lower()
+        assert response.status_code == 201
 
     @pytest.mark.asyncio
     async def test_create_donation_invalid_partner(
@@ -413,12 +426,12 @@ class TestDeleteDonation:
     """Tests for DELETE /api/v1/donations/{id}"""
 
     @pytest.mark.asyncio
-    async def test_delete_donation_reverses_inventory(
+    async def test_delete_donation_creates_reversal_transactions(
         self, client: AsyncClient, admin_user: User, admin_headers: dict,
         db_session: AsyncSession, donor_partner: Partner,
         medicine_with_inventory,
     ):
-        """Test deleting donation soft-deletes items and reverses inventory."""
+        """Test deleting donation soft-deletes items and creates reversal inventory transactions."""
         med, inv = medicine_with_inventory
 
         # Create donation with items via API
@@ -469,7 +482,7 @@ class TestDeleteDonation:
         for item in items:
             assert item.is_deleted is True
 
-        # Verify inventory reversed
+        # Verify inventory reversed back to 0
         result = await db_session.execute(
             select(Inventory).where(
                 Inventory.item_type == "medicine",
@@ -478,6 +491,18 @@ class TestDeleteDonation:
         )
         inv_after = result.scalar_one_or_none()
         assert inv_after.quantity == 0
+
+        # Verify reversal inventory transaction was created
+        result = await db_session.execute(
+            select(InventoryTransaction).where(
+                InventoryTransaction.transaction_type == "destruction",
+                InventoryTransaction.item_type == "medicine",
+                InventoryTransaction.item_id == med.id,
+                InventoryTransaction.is_deleted == False,
+            )
+        )
+        reversal_txs = result.scalars().all()
+        assert len(reversal_txs) >= 1
 
     @pytest.mark.asyncio
     async def test_delete_donation_not_found(self, client: AsyncClient, admin_headers: dict):
@@ -524,12 +549,12 @@ class TestDonationItems:
         assert data[0]["item_name"] == "Test Medicine"
 
     @pytest.mark.asyncio
-    async def test_add_item_to_donation(
+    async def test_add_item_to_donation_creates_transaction(
         self, client: AsyncClient, admin_headers: dict,
         db_session: AsyncSession, donation: Donation,
         medicine_with_inventory,
     ):
-        """Test adding an item to a donation updates inventory."""
+        """Test adding an item to a donation creates inventory transaction and updates inventory."""
         med, inv = medicine_with_inventory
         initial_qty = inv.quantity
 
@@ -559,6 +584,18 @@ class TestDonationItems:
         )
         updated_inv = result.scalar_one_or_none()
         assert updated_inv.quantity == initial_qty + 25
+
+        # Verify inventory transaction created
+        result = await db_session.execute(
+            select(InventoryTransaction).where(
+                InventoryTransaction.transaction_type == "donation",
+                InventoryTransaction.item_type == "medicine",
+                InventoryTransaction.item_id == med.id,
+                InventoryTransaction.is_deleted == False,
+            )
+        )
+        txs = result.scalars().all()
+        assert len(txs) >= 1
 
     @pytest.mark.asyncio
     async def test_add_item_invalid_item(
@@ -601,7 +638,7 @@ class TestDonationItems:
         db_session: AsyncSession, donation: Donation,
         medicine_with_inventory,
     ):
-        """Test updating a donation item adjusts inventory."""
+        """Test updating a donation item adjusts inventory via transactions."""
         med, inv = medicine_with_inventory
 
         # Add item via API
@@ -640,12 +677,12 @@ class TestDonationItems:
         assert updated_inv.quantity == 30
 
     @pytest.mark.asyncio
-    async def test_delete_donation_item(
+    async def test_delete_donation_item_creates_reversal(
         self, client: AsyncClient, admin_headers: dict,
         db_session: AsyncSession, donation: Donation,
         medicine_with_inventory,
     ):
-        """Test deleting a donation item reverses inventory."""
+        """Test deleting a donation item creates reversal transaction and reverses inventory."""
         med, inv = medicine_with_inventory
 
         # Add item via API
