@@ -21,8 +21,9 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 | 6 | Equipment | 2026-02-11 | Equipment CRUD with category/condition, auto inventory creation, delete restriction |
 | 7 | Medical Devices | 2026-02-11 | Medical device CRUD with category/serial number, auto inventory creation, delete restriction |
 | 8 | Partners | 2026-02-14 | Partner CRUD with donor/referral/both types, organization types, search, filters, donation summary in detail view |
-| 9 | Donations | 2026-02-14 | Donation CRUD with items, auto inventory update on add/update/delete items, partner validation (donor/both), donation items CRUD |
+| 9 | Donations | 2026-02-14 | Donation CRUD with items, inventory transactions created automatically, any partner type allowed, donation items CRUD |
 | 10 | Doctors | 2026-02-14 | Doctor CRUD with internal/external/partner_provided types, partner validation for partner_provided, partner name in detail view |
+| - | Inventory Transactions | 2026-02-14 | Transaction CRUD (purchase/donation/prescription/loss/breakage/expiration/destruction), auto inventory update, reversal on delete |
 
 ---
 
@@ -220,24 +221,51 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 **Endpoints:**
 - GET `/api/v1/donations` - List all donations (paginated, filterable by partner_id, donation_date, searchable)
 - GET `/api/v1/donations/{id}` - Get donation by ID (includes items with item names)
-- POST `/api/v1/donations` - Create donation with optional items (auto-updates inventory)
+- POST `/api/v1/donations` - Create donation with optional items (creates inventory transactions automatically)
 - PUT `/api/v1/donations/{id}` - Update donation
-- DELETE `/api/v1/donations/{id}` - Delete donation (soft delete, reverses inventory)
+- DELETE `/api/v1/donations/{id}` - Delete donation (soft delete, creates reversal transactions)
 - GET `/api/v1/donations/{donation_id}/items` - List items for a donation
-- POST `/api/v1/donations/{donation_id}/items` - Add item to donation (auto-updates inventory)
-- PUT `/api/v1/donation-items/{id}` - Update donation item (auto-adjusts inventory)
-- DELETE `/api/v1/donation-items/{id}` - Delete donation item (reverses inventory)
+- POST `/api/v1/donations/{donation_id}/items` - Add item to donation (creates inventory transaction)
+- PUT `/api/v1/donation-items/{id}` - Update donation item (adjusts via transactions)
+- DELETE `/api/v1/donation-items/{id}` - Delete donation item (creates reversal transaction)
 
 **Models:**
 - Donation: id, partner_id (FK), donation_date, notes, is_deleted, audit columns
 - DonationItem: id, donation_id (FK), item_type (medicine/equipment/medical_device), item_id, quantity, is_deleted, audit columns
 
+**Notes:**
+- Partner validation: any partner_type (donor/referral/both) is allowed for donations
+- Inventory is updated exclusively through inventory_transactions (not direct modification)
+
 **Tests:**
-- test_donations.py (20 tests: CRUD, filters, items CRUD, inventory auto-update, inventory reversal, partner validation)
+- test_donations.py (20 tests: CRUD, filters, items CRUD, inventory transactions, inventory reversal, partner validation)
 
 **Postman:**
 - Donations folder (Get All, Get by ID, Create, Update, Delete)
 - Donation Items folder (Get Items, Add Item, Update Item, Delete Item)
+
+### Inventory Transactions (supporting feature)
+**Status:** Complete
+
+**Endpoints:**
+- GET `/api/v1/inventory-transactions` - List all transactions (paginated, filterable by transaction_type, item_type, item_id)
+- GET `/api/v1/inventory-transactions/{id}` - Get transaction by ID
+- POST `/api/v1/inventory-transactions` - Create transaction (auto-updates inventory: + for purchase/donation, - for others)
+- DELETE `/api/v1/inventory-transactions/{id}` - Delete transaction (soft delete, reverses inventory change)
+
+**Model:**
+- id, transaction_type (purchase/donation/prescription/loss/breakage/expiration/destruction), item_type, item_id, quantity, notes, transaction_date, is_deleted, audit columns
+
+**Notes:**
+- This is the only way to modify inventory quantities
+- Created automatically by donation item operations
+- Can also be created manually via the API for purchases, losses, etc.
+
+**Tests:**
+- test_inventory_transactions.py (17 tests: CRUD, filters, purchase/donation increase, loss/breakage decrease, inventory floor at 0, deletion reversal)
+
+**Postman:**
+- Inventory Transactions folder (Get All, Get by ID, Create Purchase, Create Loss, Delete)
 
 ### Feature 10: Doctors
 **Status:** Complete
@@ -265,4 +293,4 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 
 - Update this file before finishing each feature
 - Format: Endpoints → Tests → Postman requests
-- All tests pass (Phase 1: 30 tests + Phase 2: 87 tests + Phase 3: ~60 tests)
+- All tests pass (Phase 1: 30 tests + Phase 2: 87 tests + Phase 3: ~77 tests)

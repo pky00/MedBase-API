@@ -782,6 +782,98 @@
 		]
 	},
 	{
+		"name": "Inventory Transactions",
+		"item": [
+			{
+				"name": "Get All Inventory Transactions",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/inventory-transactions?page=1&size=10",
+						"host": ["{{base_url}}"],
+						"path": ["inventory-transactions"],
+						"query": [
+							{ "key": "page", "value": "1" },
+							{ "key": "size", "value": "10" },
+							{ "key": "transaction_type", "value": "purchase", "disabled": true },
+							{ "key": "item_type", "value": "medicine", "disabled": true },
+							{ "key": "item_id", "value": "1", "disabled": true },
+							{ "key": "sort", "value": "id", "disabled": true },
+							{ "key": "order", "value": "asc", "disabled": true }
+						]
+					},
+					"description": "Get all inventory transactions with pagination and filters. Filters: transaction_type (purchase/donation/prescription/loss/breakage/expiration/destruction), item_type (medicine/equipment/medical_device), item_id."
+				},
+				"response": []
+			},
+			{
+				"name": "Get Inventory Transaction by ID",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/inventory-transactions/1",
+						"host": ["{{base_url}}"],
+						"path": ["inventory-transactions", "1"]
+					},
+					"description": "Get inventory transaction by ID."
+				},
+				"response": []
+			},
+			{
+				"name": "Create Inventory Transaction (Purchase)",
+				"request": {
+					"method": "POST",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"transaction_type\": \"purchase\",\n    \"item_type\": \"medicine\",\n    \"item_id\": 1,\n    \"quantity\": 100,\n    \"notes\": \"Monthly supply purchase\"\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/inventory-transactions",
+						"host": ["{{base_url}}"],
+						"path": ["inventory-transactions"]
+					},
+					"description": "Create an inventory transaction. Automatically updates inventory quantity. + for purchase/donation, - for prescription/loss/breakage/expiration/destruction."
+				},
+				"response": []
+			},
+			{
+				"name": "Create Inventory Transaction (Loss)",
+				"request": {
+					"method": "POST",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"transaction_type\": \"loss\",\n    \"item_type\": \"medicine\",\n    \"item_id\": 1,\n    \"quantity\": 5,\n    \"notes\": \"Damaged in storage\"\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/inventory-transactions",
+						"host": ["{{base_url}}"],
+						"path": ["inventory-transactions"]
+					},
+					"description": "Create a loss transaction. Decreases inventory quantity."
+				},
+				"response": []
+			},
+			{
+				"name": "Delete Inventory Transaction",
+				"request": {
+					"method": "DELETE",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/inventory-transactions/1",
+						"host": ["{{base_url}}"],
+						"path": ["inventory-transactions", "1"]
+					},
+					"description": "Delete an inventory transaction (soft delete). Reverses the inventory change."
+				},
+				"response": []
+			}
+		]
+	},
+	{
 		"name": "Partners",
 		"item": [
 			{
