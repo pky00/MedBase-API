@@ -24,7 +24,7 @@ class DoctorBase(BaseModel):
 
 class DoctorCreate(DoctorBase):
     """Schema for creating a doctor."""
-    pass
+    third_party_id: Optional[int] = None
 
 
 class DoctorUpdate(BaseModel):
@@ -45,6 +45,7 @@ class DoctorResponse(DoctorBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    third_party_id: int
     is_deleted: bool
     created_by: Optional[int] = None
     created_at: datetime
@@ -64,6 +65,7 @@ class DoctorDetailResponse(DoctorResponse):
         return cls.model_validate(
             {
                 "id": doctor.id,
+                "third_party_id": doctor.third_party_id,
                 "name": doctor.name,
                 "specialization": doctor.specialization,
                 "phone": doctor.phone,

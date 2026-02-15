@@ -6,6 +6,8 @@ from sqlalchemy import select, func, or_
 from app.model.doctor import Doctor
 from app.model.partner import Partner
 from app.schema.doctor import DoctorCreate, DoctorUpdate, DoctorDetailResponse
+from app.service.third_party import ThirdPartyService
+from app.schema.third_party import ThirdPartyType
 
 logger = logging.getLogger("medbase.service.doctor")
 
@@ -19,44 +21,27 @@ class DoctorService:
     async def get_by_name(self, name: str) -> Optional[Doctor]:
         """Get doctor by name."""
         result = await self.db.execute(
-            select(Doctor).where(
-                Doctor.name == name,
-                Doctor.is_deleted == False,
-            )
+            select(Doctor).where(Doctor.name == name, Doctor.is_deleted == False)
         )
         return result.scalar_one_or_none()
 
     async def get_by_id(self, doctor_id: int) -> Optional[Doctor]:
         """Get doctor by ID."""
         result = await self.db.execute(
-            select(Doctor).where(
-                Doctor.id == doctor_id,
-                Doctor.is_deleted == False,
-            )
+            select(Doctor).where(Doctor.id == doctor_id, Doctor.is_deleted == False)
         )
         return result.scalar_one_or_none()
 
     async def get_by_id_with_details(self, doctor_id: int) -> Optional[DoctorDetailResponse]:
         """Get doctor by ID with partner name."""
         result = await self.db.execute(
-            select(
-                Doctor,
-                Partner.name.label("partner_name"),
-            )
-            .outerjoin(
-                Partner,
-                (Partner.id == Doctor.partner_id)
-                & (Partner.is_deleted == False),
-            )
-            .where(
-                Doctor.id == doctor_id,
-                Doctor.is_deleted == False,
-            )
+            select(Doctor, Partner.name.label("partner_name"))
+            .outerjoin(Partner, (Partner.id == Doctor.partner_id) & (Partner.is_deleted == False))
+            .where(Doctor.id == doctor_id, Doctor.is_deleted == False)
         )
         row = result.first()
         if not row:
             return None
-
         return DoctorDetailResponse.from_row(row)
 
     async def get_all(
@@ -73,7 +58,6 @@ class DoctorService:
         """Get all doctors with pagination, filtering, and sorting."""
         query = select(Doctor).where(Doctor.is_deleted == False)
 
-        # Apply filters
         if type is not None:
             query = query.where(Doctor.type == type)
         if is_active is not None:
@@ -91,19 +75,16 @@ class DoctorService:
                 )
             )
 
-        # Get total count
         count_query = select(func.count()).select_from(query.subquery())
         total_result = await self.db.execute(count_query)
         total = total_result.scalar()
 
-        # Apply sorting
         sort_column = getattr(Doctor, sort, Doctor.id)
         if order.lower() == "desc":
             query = query.order_by(sort_column.desc())
         else:
             query = query.order_by(sort_column.asc())
 
-        # Apply pagination
         offset = (page - 1) * size
         query = query.offset(offset).limit(size)
 
@@ -111,14 +92,30 @@ class DoctorService:
         doctors = result.scalars().all()
 
         logger.debug("Queried doctors: total=%d returned=%d", total, len(doctors))
-
         return list(doctors), total
 
-    async def create(
-        self, data: DoctorCreate, created_by: Optional[int] = None
-    ) -> Doctor:
-        """Create a new doctor."""
+    async def create(self, data: DoctorCreate, created_by: Optional[int] = None) -> Doctor:
+        """Create a new doctor. Auto-creates a third_party record if third_party_id not provided."""
+        tp_service = ThirdPartyService(self.db)
+
+        if data.third_party_id:
+            tp = await tp_service.get_by_id(data.third_party_id)
+            if not tp:
+                raise ValueError("Third party not found")
+            third_party_id = data.third_party_id
+        else:
+            tp = await tp_service.create(
+                name=data.name,
+                type=ThirdPartyType.DOCTOR,
+                phone=data.phone,
+                email=data.email,
+                is_active=data.is_active,
+                created_by=created_by,
+            )
+            third_party_id = tp.id
+
         doctor = Doctor(
+            third_party_id=third_party_id,
             name=data.name,
             specialization=data.specialization,
             phone=data.phone,
@@ -133,15 +130,10 @@ class DoctorService:
         await self.db.flush()
         await self.db.refresh(doctor)
 
-        logger.info("Created doctor id=%d name='%s'", doctor.id, doctor.name)
+        logger.info("Created doctor id=%d name='%s' third_party_id=%d", doctor.id, doctor.name, third_party_id)
         return doctor
 
-    async def update(
-        self,
-        doctor_id: int,
-        data: DoctorUpdate,
-        updated_by: Optional[int] = None,
-    ) -> Optional[Doctor]:
+    async def update(self, doctor_id: int, data: DoctorUpdate, updated_by: Optional[int] = None) -> Optional[Doctor]:
         """Update a doctor."""
         doctor = await self.get_by_id(doctor_id)
         if not doctor:
@@ -154,6 +146,18 @@ class DoctorService:
         doctor.updated_by = updated_by
         await self.db.flush()
         await self.db.refresh(doctor)
+
+        # Sync third_party record
+        tp_service = ThirdPartyService(self.db)
+        await tp_service.update(
+            doctor.third_party_id,
+            name=update_data.get("name"),
+            phone=update_data.get("phone"),
+            email=update_data.get("email"),
+            is_active=update_data.get("is_active"),
+            updated_by=updated_by,
+        )
+
         logger.info("Updated doctor id=%d fields=%s", doctor_id, list(update_data.keys()))
         return doctor
 
@@ -162,7 +166,6 @@ class DoctorService:
         doctor = await self.get_by_id(doctor_id)
         if not doctor:
             return False
-
         doctor.is_deleted = True
         doctor.updated_by = deleted_by
         await self.db.flush()

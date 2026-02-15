@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import StrEnum
-from typing import Optional, List
+from typing import Optional
 from pydantic import BaseModel, Field, ConfigDict
 
 
@@ -33,7 +33,7 @@ class PartnerBase(BaseModel):
 
 class PartnerCreate(PartnerBase):
     """Schema for creating a partner."""
-    pass
+    third_party_id: Optional[int] = None
 
 
 class PartnerUpdate(BaseModel):
@@ -55,25 +55,9 @@ class PartnerResponse(PartnerBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    third_party_id: int
     is_deleted: bool
     created_by: Optional[int] = None
     created_at: datetime
     updated_by: Optional[int] = None
     updated_at: datetime
-
-
-class DonationSummary(BaseModel):
-    """Summary of a donation for partner detail view."""
-
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    donation_date: str
-    notes: Optional[str] = None
-    item_count: int = 0
-
-
-class PartnerDetailResponse(PartnerResponse):
-    """Schema for partner response with donations and treatments info."""
-
-    donations: List[DonationSummary] = []

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Text, Boolean
+from sqlalchemy import Column, String, Integer, Text, Boolean, ForeignKey
 
 from app.model.base import BaseModel
 
@@ -8,6 +8,7 @@ class Partner(BaseModel):
 
     __tablename__ = "partners"
 
+    third_party_id = Column(Integer, ForeignKey("third_parties.id"), nullable=False)
     name = Column(String, unique=True, nullable=False)
     partner_type = Column(String, nullable=False)  # donor, referral, both
     organization_type = Column(String, nullable=True)  # NGO, organization, individual, hospital, medical_center

@@ -6,6 +6,8 @@ from sqlalchemy import select, func, or_
 from app.model.user import User
 from app.schema.user import UserCreate, UserUpdate
 from app.utility.security import get_password_hash, verify_password
+from app.service.third_party import ThirdPartyService
+from app.schema.third_party import ThirdPartyType
 
 logger = logging.getLogger("medbase.service.user")
 
@@ -88,8 +90,19 @@ class UserService:
         return list(users), total
     
     async def create(self, user_data: UserCreate, created_by: Optional[int] = None) -> User:
-        """Create a new user."""
+        """Create a new user. Automatically creates a third_party record (type: user)."""
+        # Auto-create third_party record
+        tp_service = ThirdPartyService(self.db)
+        third_party = await tp_service.create(
+            name=user_data.username,
+            type=ThirdPartyType.USER,
+            email=user_data.email,
+            is_active=user_data.is_active,
+            created_by=created_by,
+        )
+
         user = User(
+            third_party_id=third_party.id,
             username=user_data.username,
             email=user_data.email,
             password_hash=get_password_hash(user_data.password),
@@ -101,7 +114,7 @@ class UserService:
         self.db.add(user)
         await self.db.flush()
         await self.db.refresh(user)
-        logger.info("Created user id=%d username='%s'", user.id, user.username)
+        logger.info("Created user id=%d username='%s' third_party_id=%d", user.id, user.username, third_party.id)
         return user
     
     async def update(

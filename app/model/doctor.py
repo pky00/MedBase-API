@@ -8,6 +8,7 @@ class Doctor(BaseModel):
 
     __tablename__ = "doctors"
 
+    third_party_id = Column(Integer, ForeignKey("third_parties.id"), nullable=False)
     name = Column(String, unique=True, nullable=False)
     specialization = Column(String, nullable=True)
     phone = Column(String, nullable=True)
