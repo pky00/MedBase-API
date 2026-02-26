@@ -27,8 +27,8 @@ async def donor_partner(db_session: AsyncSession, admin_user: User) -> Partner:
         email="donor@test.com",
         address="123 Donor St",
         is_active=True,
-        created_by=admin_user.id,
-        updated_by=admin_user.id,
+        created_by=admin_user.username,
+        updated_by=admin_user.username,
     )
     db_session.add(partner)
     await db_session.commit()
@@ -54,8 +54,8 @@ async def referral_partner(db_session: AsyncSession, admin_user: User) -> Partne
         email="referral@test.com",
         address="456 Hospital Ave",
         is_active=True,
-        created_by=admin_user.id,
-        updated_by=admin_user.id,
+        created_by=admin_user.username,
+        updated_by=admin_user.username,
     )
     db_session.add(partner)
     await db_session.commit()
@@ -137,7 +137,7 @@ class TestGetPartners:
             await db_session.flush()
             p = Partner(
                 third_party_id=tp.id, name=f"Partner {i}", partner_type="donor",
-                created_by=admin_user.id, updated_by=admin_user.id,
+                created_by=admin_user.username, updated_by=admin_user.username,
             )
             db_session.add(p)
         await db_session.commit()

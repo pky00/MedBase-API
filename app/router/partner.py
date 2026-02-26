@@ -91,7 +91,7 @@ async def create_partner(
         if not tp:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Third party not found")
 
-    partner = await service.create(data, created_by=current_user.id)
+    partner = await service.create(data, created_by=current_user.username)
     logger.info("Partner created partner_id=%d", partner.id)
     return partner
 
@@ -119,7 +119,7 @@ async def update_partner(
             logger.warning("Partner name already exists name='%s'", data.name)
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Partner name already exists")
 
-    updated = await service.update(partner_id, data, updated_by=current_user.id)
+    updated = await service.update(partner_id, data, updated_by=current_user.username)
     logger.info("Partner updated partner_id=%d", partner_id)
     return updated
 
@@ -140,6 +140,6 @@ async def delete_partner(
         logger.warning("Partner not found for deletion partner_id=%d", partner_id)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Partner not found")
 
-    await service.delete(partner_id, deleted_by=current_user.id)
+    await service.delete(partner_id, deleted_by=current_user.username)
     logger.info("Partner deleted partner_id=%d", partner_id)
     return MessageResponse(message="Partner deleted successfully")

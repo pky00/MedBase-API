@@ -88,7 +88,7 @@ class PartnerService:
         return list(partners), total
 
     async def create(
-        self, data: PartnerCreate, created_by: Optional[int] = None
+        self, data: PartnerCreate, created_by: Optional[str] = None
     ) -> Partner:
         """Create a new partner. Auto-creates a third_party record if third_party_id not provided."""
         tp_service = ThirdPartyService(self.db)
@@ -135,7 +135,7 @@ class PartnerService:
         self,
         partner_id: int,
         data: PartnerUpdate,
-        updated_by: Optional[int] = None,
+        updated_by: Optional[str] = None,
     ) -> Optional[Partner]:
         """Update a partner."""
         partner = await self.get_by_id(partner_id)
@@ -164,7 +164,7 @@ class PartnerService:
         logger.info("Updated partner id=%d fields=%s", partner_id, list(update_data.keys()))
         return partner
 
-    async def delete(self, partner_id: int, deleted_by: Optional[int] = None) -> bool:
+    async def delete(self, partner_id: int, deleted_by: Optional[str] = None) -> bool:
         """Soft delete a partner."""
         partner = await self.get_by_id(partner_id)
         if not partner:

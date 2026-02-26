@@ -146,8 +146,8 @@ class TestCreateUser:
         assert db_user.role == "user"
         assert db_user.is_active is True
         assert db_user.is_deleted is False
-        assert db_user.created_by == admin_user.id
-        assert db_user.updated_by == admin_user.id
+        assert db_user.created_by == admin_user.username
+        assert db_user.updated_by == admin_user.username
         assert verify_password("newpass123", db_user.password_hash) is True
     
     @pytest.mark.asyncio
@@ -217,7 +217,7 @@ class TestUpdateUser:
         """Test updating a user and verify in database."""
         from app.utility.security import get_password_hash
         
-        admin_id = admin_user.id  # Save before expire_all
+        admin_username = admin_user.username  # Save before expire_all
         
         # Create a user to update
         user = User(
@@ -259,7 +259,7 @@ class TestUpdateUser:
         assert db_user is not None
         assert db_user.username == "updated"
         assert db_user.email == "updated@test.com"
-        assert db_user.updated_by == admin_id
+        assert db_user.updated_by == admin_username
     
     @pytest.mark.asyncio
     async def test_update_user_password(
@@ -324,7 +324,7 @@ class TestDeleteUser:
         """Test deleting a user (soft delete) and verify in database."""
         from app.utility.security import get_password_hash
         
-        admin_id = admin_user.id  # Save before expire_all
+        admin_username = admin_user.username  # Save before expire_all
         
         # Create a user to delete
         user = User(
@@ -357,7 +357,7 @@ class TestDeleteUser:
         
         assert db_user is not None
         assert db_user.is_deleted is True
-        assert db_user.updated_by == admin_id
+        assert db_user.updated_by == admin_username
     
     @pytest.mark.asyncio
     async def test_delete_self_forbidden(self, client: AsyncClient, admin_user: User, admin_headers: dict):

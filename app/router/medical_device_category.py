@@ -89,7 +89,7 @@ async def create_medical_device_category(
             detail="Medical device category name already exists",
         )
 
-    category = await service.create(data, created_by=current_user.id)
+    category = await service.create(data, created_by=current_user.username)
 
     logger.info("Medical device category created category_id=%d", category.id)
     return category
@@ -125,7 +125,7 @@ async def update_medical_device_category(
                 detail="Medical device category name already exists",
             )
 
-    updated = await service.update(category_id, data, updated_by=current_user.id)
+    updated = await service.update(category_id, data, updated_by=current_user.username)
     logger.info("Medical device category updated category_id=%d", category_id)
     return updated
 
@@ -157,6 +157,6 @@ async def delete_medical_device_category(
             detail="Cannot delete category with linked medical devices",
         )
 
-    await service.delete(category_id, deleted_by=current_user.id)
+    await service.delete(category_id, deleted_by=current_user.username)
     logger.info("Medical device category deleted category_id=%d", category_id)
     return MessageResponse(message="Medical device category deleted successfully")

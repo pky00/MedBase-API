@@ -37,8 +37,8 @@ class TestGetEquipmentCategories:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test searching equipment categories."""
-        cat1 = EquipmentCategory(name="Surgical", description="Surgical equipment", created_by=admin_user.id, updated_by=admin_user.id)
-        cat2 = EquipmentCategory(name="Diagnostic", description="Diagnostic tools", created_by=admin_user.id, updated_by=admin_user.id)
+        cat1 = EquipmentCategory(name="Surgical", description="Surgical equipment", created_by=admin_user.username, updated_by=admin_user.username)
+        cat2 = EquipmentCategory(name="Diagnostic", description="Diagnostic tools", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add_all([cat1, cat2])
         await db_session.commit()
 
@@ -62,7 +62,7 @@ class TestGetEquipmentCategory:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test getting category by ID."""
-        cat = EquipmentCategory(name="Lab Equipment", description="Laboratory tools", created_by=admin_user.id, updated_by=admin_user.id)
+        cat = EquipmentCategory(name="Lab Equipment", description="Laboratory tools", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(cat)
         await db_session.commit()
         await db_session.refresh(cat)
@@ -109,14 +109,14 @@ class TestCreateEquipmentCategory:
         db_cat = result.scalar_one_or_none()
         assert db_cat is not None
         assert db_cat.name == "Surgical Tools"
-        assert db_cat.created_by == admin_user.id
+        assert db_cat.created_by == admin_user.username
 
     @pytest.mark.asyncio
     async def test_create_category_duplicate_name(
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test creating a category with duplicate name fails."""
-        cat = EquipmentCategory(name="Duplicate", created_by=admin_user.id, updated_by=admin_user.id)
+        cat = EquipmentCategory(name="Duplicate", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(cat)
         await db_session.commit()
 
@@ -137,7 +137,7 @@ class TestUpdateEquipmentCategory:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test updating an equipment category."""
-        cat = EquipmentCategory(name="Old Name", created_by=admin_user.id, updated_by=admin_user.id)
+        cat = EquipmentCategory(name="Old Name", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(cat)
         await db_session.commit()
         await db_session.refresh(cat)
@@ -170,7 +170,7 @@ class TestDeleteEquipmentCategory:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test deleting an equipment category (soft delete)."""
-        cat = EquipmentCategory(name="To Delete", created_by=admin_user.id, updated_by=admin_user.id)
+        cat = EquipmentCategory(name="To Delete", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(cat)
         await db_session.commit()
         await db_session.refresh(cat)
@@ -195,12 +195,12 @@ class TestDeleteEquipmentCategory:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test cannot delete category with linked equipment."""
-        cat = EquipmentCategory(name="Has Equipment", created_by=admin_user.id, updated_by=admin_user.id)
+        cat = EquipmentCategory(name="Has Equipment", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(cat)
         await db_session.commit()
         await db_session.refresh(cat)
 
-        equip = Equipment(name="Test Equip", category_id=cat.id, created_by=admin_user.id, updated_by=admin_user.id)
+        equip = Equipment(name="Test Equip", category_id=cat.id, created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(equip)
         await db_session.commit()
 

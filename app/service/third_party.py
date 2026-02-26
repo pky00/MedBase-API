@@ -83,7 +83,7 @@ class ThirdPartyService:
         phone: Optional[str] = None,
         email: Optional[str] = None,
         is_active: bool = True,
-        created_by: Optional[int] = None,
+        created_by: Optional[str] = None,
     ) -> ThirdParty:
         """Create a third party record. Used internally by other services."""
         tp = ThirdParty(
@@ -108,7 +108,7 @@ class ThirdPartyService:
         phone: Optional[str] = None,
         email: Optional[str] = None,
         is_active: Optional[bool] = None,
-        updated_by: Optional[int] = None,
+        updated_by: Optional[str] = None,
     ) -> Optional[ThirdParty]:
         """Update a third party record. Used internally by other services."""
         tp = await self.get_by_id(third_party_id)

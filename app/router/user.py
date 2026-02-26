@@ -132,7 +132,7 @@ async def create_user(
             detail="Email already registered"
         )
     
-    user = await user_service.create(user_data, created_by=current_user.id)
+    user = await user_service.create(user_data, created_by=current_user.username)
     logger.info("User created user_id=%d username='%s'", user.id, user.username)
     return user
 
@@ -185,7 +185,7 @@ async def update_user(
             )
     
     updated_user = await user_service.update(
-        user_id, user_data, updated_by=current_user.id
+        user_id, user_data, updated_by=current_user.username
     )
     logger.info("User updated user_id=%d", user_id)
     return updated_user
@@ -225,6 +225,6 @@ async def delete_user(
             detail="User not found"
         )
     
-    await user_service.delete(user_id, deleted_by=current_user.id)
+    await user_service.delete(user_id, deleted_by=current_user.username)
     logger.info("User deleted user_id=%d", user_id)
     return MessageResponse(message="User deleted successfully")

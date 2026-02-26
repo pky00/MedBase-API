@@ -35,11 +35,11 @@ class TestGetInventory:
         """Test filtering inventory by item type."""
         inv1 = Inventory(
             item_type="medicine", item_id=1, quantity=10,
-            created_by=admin_user.id, updated_by=admin_user.id,
+            created_by=admin_user.username, updated_by=admin_user.username,
         )
         inv2 = Inventory(
             item_type="equipment", item_id=1, quantity=5,
-            created_by=admin_user.id, updated_by=admin_user.id,
+            created_by=admin_user.username, updated_by=admin_user.username,
         )
         db_session.add_all([inv1, inv2])
         await db_session.commit()
@@ -63,7 +63,7 @@ class TestGetInventory:
         for i in range(5):
             inv = Inventory(
                 item_type="medicine", item_id=i + 1, quantity=i,
-                created_by=admin_user.id, updated_by=admin_user.id,
+                created_by=admin_user.username, updated_by=admin_user.username,
             )
             db_session.add(inv)
         await db_session.commit()
@@ -90,7 +90,7 @@ class TestGetInventoryById:
         """Test getting inventory by ID."""
         inv = Inventory(
             item_type="medicine", item_id=1, quantity=10,
-            created_by=admin_user.id, updated_by=admin_user.id,
+            created_by=admin_user.username, updated_by=admin_user.username,
         )
         db_session.add(inv)
         await db_session.commit()
@@ -124,7 +124,7 @@ class TestGetInventoryByItem:
         """Test getting inventory by item type and ID."""
         inv = Inventory(
             item_type="equipment", item_id=42, quantity=7,
-            created_by=admin_user.id, updated_by=admin_user.id,
+            created_by=admin_user.username, updated_by=admin_user.username,
         )
         db_session.add(inv)
         await db_session.commit()

@@ -114,7 +114,7 @@ async def create_medical_device(
                 detail="Medical device category not found",
             )
 
-    device = await service.create(data, created_by=current_user.id)
+    device = await service.create(data, created_by=current_user.username)
 
     logger.info("Medical device created device_id=%d", device.id)
     return device
@@ -161,7 +161,7 @@ async def update_medical_device(
                 detail="Medical device category not found",
             )
 
-    updated = await service.update(device_id, data, updated_by=current_user.id)
+    updated = await service.update(device_id, data, updated_by=current_user.username)
     logger.info("Medical device updated device_id=%d", device_id)
     return updated
 
@@ -194,6 +194,6 @@ async def delete_medical_device(
             detail=f"Cannot delete medical device with inventory quantity {quantity}. Quantity must be 0.",
         )
 
-    await service.delete(device_id, deleted_by=current_user.id)
+    await service.delete(device_id, deleted_by=current_user.username)
     logger.info("Medical device deleted device_id=%d", device_id)
     return MessageResponse(message="Medical device deleted successfully")

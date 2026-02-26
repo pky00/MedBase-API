@@ -123,7 +123,7 @@ class EquipmentService:
         return list(items), total
 
     async def create(
-        self, data: EquipmentCreate, created_by: Optional[int] = None
+        self, data: EquipmentCreate, created_by: Optional[str] = None
     ) -> Equipment:
         """Create new equipment and its inventory record."""
         equipment = Equipment(
@@ -155,7 +155,7 @@ class EquipmentService:
         self,
         equipment_id: int,
         data: EquipmentUpdate,
-        updated_by: Optional[int] = None,
+        updated_by: Optional[str] = None,
     ) -> Optional[Equipment]:
         """Update equipment."""
         equipment = await self.get_by_id(equipment_id)
@@ -172,7 +172,7 @@ class EquipmentService:
         logger.info("Updated equipment id=%d fields=%s", equipment_id, list(update_data.keys()))
         return equipment
 
-    async def delete(self, equipment_id: int, deleted_by: Optional[int] = None) -> bool:
+    async def delete(self, equipment_id: int, deleted_by: Optional[str] = None) -> bool:
         """Soft delete equipment and its inventory record."""
         equipment = await self.get_by_id(equipment_id)
         if not equipment:

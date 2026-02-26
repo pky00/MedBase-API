@@ -16,8 +16,8 @@ async def device_category(db_session: AsyncSession, admin_user: User) -> Medical
     cat = MedicalDeviceCategory(
         name="Monitors",
         description="Patient monitoring devices",
-        created_by=admin_user.id,
-        updated_by=admin_user.id,
+        created_by=admin_user.username,
+        updated_by=admin_user.username,
     )
     db_session.add(cat)
     await db_session.commit()
@@ -54,7 +54,7 @@ class TestGetMedicalDevices:
         """Test filtering devices by category."""
         dev = MedicalDevice(
             name="BP Monitor", category_id=device_category.id,
-            created_by=admin_user.id, updated_by=admin_user.id,
+            created_by=admin_user.username, updated_by=admin_user.username,
         )
         db_session.add(dev)
         await db_session.commit()
@@ -76,8 +76,8 @@ class TestGetMedicalDevices:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test searching medical devices."""
-        d1 = MedicalDevice(name="Blood Pressure Monitor", created_by=admin_user.id, updated_by=admin_user.id)
-        d2 = MedicalDevice(name="Pulse Oximeter", created_by=admin_user.id, updated_by=admin_user.id)
+        d1 = MedicalDevice(name="Blood Pressure Monitor", created_by=admin_user.username, updated_by=admin_user.username)
+        d2 = MedicalDevice(name="Pulse Oximeter", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add_all([d1, d2])
         await db_session.commit()
 
@@ -169,7 +169,7 @@ class TestCreateMedicalDevice:
         db_dev = result.scalar_one_or_none()
         assert db_dev is not None
         assert db_dev.name == "ECG Machine"
-        assert db_dev.created_by == admin_user.id
+        assert db_dev.created_by == admin_user.username
 
         # Verify inventory auto-created
         result = await db_session.execute(
@@ -213,7 +213,7 @@ class TestCreateMedicalDevice:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test creating device with duplicate name fails."""
-        dev = MedicalDevice(name="Duplicate Device", created_by=admin_user.id, updated_by=admin_user.id)
+        dev = MedicalDevice(name="Duplicate Device", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(dev)
         await db_session.commit()
 
@@ -234,10 +234,10 @@ class TestUpdateMedicalDevice:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test updating a medical device and verify in database."""
-        admin_id = admin_user.id
+        admin_username = admin_user.username
         dev = MedicalDevice(
             name="Old Name", serial_number="OLD-001",
-            created_by=admin_id, updated_by=admin_id,
+            created_by=admin_username, updated_by=admin_username,
         )
         db_session.add(dev)
         await db_session.commit()
@@ -262,7 +262,7 @@ class TestUpdateMedicalDevice:
         )
         db_dev = result.scalar_one_or_none()
         assert db_dev.name == "New Name"
-        assert db_dev.updated_by == admin_id
+        assert db_dev.updated_by == admin_username
 
     @pytest.mark.asyncio
     async def test_update_device_not_found(self, client: AsyncClient, admin_headers: dict):
@@ -321,14 +321,14 @@ class TestDeleteMedicalDevice:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test cannot delete device when inventory quantity > 0."""
-        dev = MedicalDevice(name="Has Stock", created_by=admin_user.id, updated_by=admin_user.id)
+        dev = MedicalDevice(name="Has Stock", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(dev)
         await db_session.flush()
         await db_session.refresh(dev)
 
         inv = Inventory(
             item_type="medical_device", item_id=dev.id, quantity=3,
-            created_by=admin_user.id, updated_by=admin_user.id,
+            created_by=admin_user.username, updated_by=admin_user.username,
         )
         db_session.add(inv)
         await db_session.commit()

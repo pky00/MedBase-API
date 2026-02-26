@@ -46,9 +46,9 @@ class UserResponse(UserBase):
     role: str
     is_active: bool
     is_deleted: bool
-    created_by: Optional[int] = None
+    created_by: Optional[str] = None
     created_at: datetime
-    updated_by: Optional[int] = None
+    updated_by: Optional[str] = None
     updated_at: datetime
 
 

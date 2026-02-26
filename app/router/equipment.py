@@ -117,7 +117,7 @@ async def create_equipment(
                 detail="Equipment category not found",
             )
 
-    equipment = await service.create(data, created_by=current_user.id)
+    equipment = await service.create(data, created_by=current_user.username)
 
     logger.info("Equipment created equipment_id=%d", equipment.id)
     return equipment
@@ -164,7 +164,7 @@ async def update_equipment(
                 detail="Equipment category not found",
             )
 
-    updated = await service.update(equipment_id, data, updated_by=current_user.id)
+    updated = await service.update(equipment_id, data, updated_by=current_user.username)
     logger.info("Equipment updated equipment_id=%d", equipment_id)
     return updated
 
@@ -197,6 +197,6 @@ async def delete_equipment(
             detail=f"Cannot delete equipment with inventory quantity {quantity}. Quantity must be 0.",
         )
 
-    await service.delete(equipment_id, deleted_by=current_user.id)
+    await service.delete(equipment_id, deleted_by=current_user.username)
     logger.info("Equipment deleted equipment_id=%d", equipment_id)
     return MessageResponse(message="Equipment deleted successfully")

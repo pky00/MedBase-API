@@ -24,8 +24,8 @@ async def partner(db_session: AsyncSession, admin_user: User) -> Partner:
         partner_type="both",
         organization_type="hospital",
         is_active=True,
-        created_by=admin_user.id,
-        updated_by=admin_user.id,
+        created_by=admin_user.username,
+        updated_by=admin_user.username,
     )
     db_session.add(partner)
     await db_session.commit()
@@ -49,8 +49,8 @@ async def internal_doctor(db_session: AsyncSession, admin_user: User) -> Doctor:
         email="internal@clinic.com",
         type="internal",
         is_active=True,
-        created_by=admin_user.id,
-        updated_by=admin_user.id,
+        created_by=admin_user.username,
+        updated_by=admin_user.username,
     )
     db_session.add(doctor)
     await db_session.commit()
@@ -73,8 +73,8 @@ async def partner_doctor(db_session: AsyncSession, admin_user: User, partner: Pa
         type="partner_provided",
         partner_id=partner.id,
         is_active=True,
-        created_by=admin_user.id,
-        updated_by=admin_user.id,
+        created_by=admin_user.username,
+        updated_by=admin_user.username,
     )
     db_session.add(doctor)
     await db_session.commit()

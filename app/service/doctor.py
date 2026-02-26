@@ -94,7 +94,7 @@ class DoctorService:
         logger.debug("Queried doctors: total=%d returned=%d", total, len(doctors))
         return list(doctors), total
 
-    async def create(self, data: DoctorCreate, created_by: Optional[int] = None) -> Doctor:
+    async def create(self, data: DoctorCreate, created_by: Optional[str] = None) -> Doctor:
         """Create a new doctor. Auto-creates a third_party record if third_party_id not provided."""
         tp_service = ThirdPartyService(self.db)
 
@@ -133,7 +133,7 @@ class DoctorService:
         logger.info("Created doctor id=%d name='%s' third_party_id=%d", doctor.id, doctor.name, third_party_id)
         return doctor
 
-    async def update(self, doctor_id: int, data: DoctorUpdate, updated_by: Optional[int] = None) -> Optional[Doctor]:
+    async def update(self, doctor_id: int, data: DoctorUpdate, updated_by: Optional[str] = None) -> Optional[Doctor]:
         """Update a doctor."""
         doctor = await self.get_by_id(doctor_id)
         if not doctor:
@@ -161,7 +161,7 @@ class DoctorService:
         logger.info("Updated doctor id=%d fields=%s", doctor_id, list(update_data.keys()))
         return doctor
 
-    async def delete(self, doctor_id: int, deleted_by: Optional[int] = None) -> bool:
+    async def delete(self, doctor_id: int, deleted_by: Optional[str] = None) -> bool:
         """Soft delete a doctor."""
         doctor = await self.get_by_id(doctor_id)
         if not doctor:

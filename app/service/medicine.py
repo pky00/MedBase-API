@@ -120,7 +120,7 @@ class MedicineService:
         return list(medicines), total
 
     async def create(
-        self, data: MedicineCreate, created_by: Optional[int] = None
+        self, data: MedicineCreate, created_by: Optional[str] = None
     ) -> Medicine:
         """Create a new medicine and its inventory record."""
         medicine = Medicine(
@@ -152,7 +152,7 @@ class MedicineService:
         self,
         medicine_id: int,
         data: MedicineUpdate,
-        updated_by: Optional[int] = None,
+        updated_by: Optional[str] = None,
     ) -> Optional[Medicine]:
         """Update a medicine."""
         medicine = await self.get_by_id(medicine_id)
@@ -169,7 +169,7 @@ class MedicineService:
         logger.info("Updated medicine id=%d fields=%s", medicine_id, list(update_data.keys()))
         return medicine
 
-    async def delete(self, medicine_id: int, deleted_by: Optional[int] = None) -> bool:
+    async def delete(self, medicine_id: int, deleted_by: Optional[str] = None) -> bool:
         """Soft delete a medicine and its inventory record."""
         medicine = await self.get_by_id(medicine_id)
         if not medicine:

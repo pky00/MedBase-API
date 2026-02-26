@@ -81,7 +81,7 @@ class MedicalDeviceCategoryService:
         return list(categories), total
 
     async def create(
-        self, data: MedicalDeviceCategoryCreate, created_by: Optional[int] = None
+        self, data: MedicalDeviceCategoryCreate, created_by: Optional[str] = None
     ) -> MedicalDeviceCategory:
         """Create a new medical device category."""
         category = MedicalDeviceCategory(
@@ -100,7 +100,7 @@ class MedicalDeviceCategoryService:
         self,
         category_id: int,
         data: MedicalDeviceCategoryUpdate,
-        updated_by: Optional[int] = None,
+        updated_by: Optional[str] = None,
     ) -> Optional[MedicalDeviceCategory]:
         """Update a medical device category."""
         category = await self.get_by_id(category_id)
@@ -117,7 +117,7 @@ class MedicalDeviceCategoryService:
         logger.info("Updated medical device category id=%d fields=%s", category_id, list(update_data.keys()))
         return category
 
-    async def delete(self, category_id: int, deleted_by: Optional[int] = None) -> bool:
+    async def delete(self, category_id: int, deleted_by: Optional[str] = None) -> bool:
         """Soft delete a medical device category."""
         category = await self.get_by_id(category_id)
         if not category:

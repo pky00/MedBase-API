@@ -121,7 +121,7 @@ async def create_doctor(
                 detail="Partner not found",
             )
 
-    doctor = await service.create(data, created_by=current_user.id)
+    doctor = await service.create(data, created_by=current_user.username)
 
     logger.info("Doctor created doctor_id=%d", doctor.id)
     return doctor
@@ -179,7 +179,7 @@ async def update_doctor(
                 detail="Partner not found",
             )
 
-    updated = await service.update(doctor_id, data, updated_by=current_user.id)
+    updated = await service.update(doctor_id, data, updated_by=current_user.username)
     logger.info("Doctor updated doctor_id=%d", doctor_id)
     return updated
 
@@ -203,6 +203,6 @@ async def delete_doctor(
             detail="Doctor not found",
         )
 
-    await service.delete(doctor_id, deleted_by=current_user.id)
+    await service.delete(doctor_id, deleted_by=current_user.username)
     logger.info("Doctor deleted doctor_id=%d", doctor_id)
     return MessageResponse(message="Doctor deleted successfully")
