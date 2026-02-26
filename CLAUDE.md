@@ -97,6 +97,25 @@ Before finishing any feature, update `BE.PROGRESS.md`:
 
 ---
 
+## CLI Tools
+
+- **Always use CLI tools to autogenerate files when possible** (e.g. `alembic` for migrations, `make` commands, etc.). Only write files manually when no CLI tool can do it for you.
+
+---
+
+## Database Migrations
+
+- **Always create a new migration** when database changes are needed — never modify existing migrations
+- **Autogenerate first, then manually edit** — use `make migrate-create` to autogenerate as much as possible, then manually adjust the migration if custom logic is needed (e.g. reordering operations, adding data transforms)
+
+---
+
+## Environment Variables
+
+- If you are missing any environment variables during development, **ask the user for them** — do not guess or hardcode values
+
+---
+
 ## Important Rules
 
 1. **Never skip features** — Complete in order
@@ -104,3 +123,4 @@ Before finishing any feature, update `BE.PROGRESS.md`:
 3. **Follow the docs** — They are your source of truth
 4. **Test everything** — No feature is complete without tests
 5. **Document in Postman** — Create requests for every endpoint
+6. **Develop → Test → Postman** — Follow this order strictly for every feature
