@@ -47,8 +47,20 @@ class TestAuthLogin:
     async def test_login_inactive_user(self, client: AsyncClient, db_session):
         """Test login with inactive user."""
         from app.utility.security import get_password_hash
-        
+        from app.model.third_party import ThirdParty
+
+        tp = ThirdParty(
+            name="inactiveuser",
+            type="user",
+            email="inactive@test.com",
+            is_active=False,
+        )
+        db_session.add(tp)
+        await db_session.flush()
+        await db_session.refresh(tp)
+
         user = User(
+            third_party_id=tp.id,
             username="inactiveuser",
             email="inactive@test.com",
             password_hash=get_password_hash("testpass123"),

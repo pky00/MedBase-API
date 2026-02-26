@@ -359,15 +359,16 @@ class TestDeleteDoctor:
         db_session: AsyncSession, internal_doctor: Doctor,
     ):
         """Test deleting doctor (soft delete)."""
+        doctor_id = internal_doctor.id
         response = await client.delete(
-            f"/api/v1/doctors/{internal_doctor.id}", headers=admin_headers
+            f"/api/v1/doctors/{doctor_id}", headers=admin_headers
         )
         assert response.status_code == 200
         assert "deleted successfully" in response.json()["message"]
 
         db_session.expire_all()
         result = await db_session.execute(
-            select(Doctor).where(Doctor.id == internal_doctor.id)
+            select(Doctor).where(Doctor.id == doctor_id)
         )
         db_doctor = result.scalar_one_or_none()
         assert db_doctor.is_deleted is True

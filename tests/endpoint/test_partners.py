@@ -335,15 +335,16 @@ class TestDeletePartner:
         db_session: AsyncSession, donor_partner: Partner,
     ):
         """Test deleting partner (soft delete)."""
+        partner_id = donor_partner.id
         response = await client.delete(
-            f"/api/v1/partners/{donor_partner.id}", headers=admin_headers
+            f"/api/v1/partners/{partner_id}", headers=admin_headers
         )
         assert response.status_code == 200
         assert "deleted successfully" in response.json()["message"]
 
         db_session.expire_all()
         result = await db_session.execute(
-            select(Partner).where(Partner.id == donor_partner.id)
+            select(Partner).where(Partner.id == partner_id)
         )
         db_partner = result.scalar_one_or_none()
         assert db_partner.is_deleted is True

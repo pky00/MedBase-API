@@ -4,8 +4,34 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.model.third_party import ThirdParty
 from app.model.user import User
 from app.utility.security import verify_password
+
+
+async def _create_test_user(
+    db_session: AsyncSession, username: str, email: str, password: str, role: str, is_active: bool = True
+) -> User:
+    """Helper to create a user with its required third_party record."""
+    from app.utility.security import get_password_hash
+
+    tp = ThirdParty(name=username, type="user", email=email, is_active=is_active)
+    db_session.add(tp)
+    await db_session.flush()
+    await db_session.refresh(tp)
+
+    user = User(
+        third_party_id=tp.id,
+        username=username,
+        email=email,
+        password_hash=get_password_hash(password),
+        role=role,
+        is_active=is_active,
+    )
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+    return user
 
 
 class TestGetUsers:
@@ -215,21 +241,10 @@ class TestUpdateUser:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test updating a user and verify in database."""
-        from app.utility.security import get_password_hash
-        
         admin_username = admin_user.username  # Save before expire_all
-        
+
         # Create a user to update
-        user = User(
-            username="toupdate",
-            email="toupdate@test.com",
-            password_hash=get_password_hash("testpass123"),
-            role="user",
-            is_active=True,
-        )
-        db_session.add(user)
-        await db_session.commit()
-        await db_session.refresh(user)
+        user = await _create_test_user(db_session, "toupdate", "toupdate@test.com", "testpass123", "user")
         user_id = user.id
         
         update_data = {
@@ -266,19 +281,8 @@ class TestUpdateUser:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test updating user password and verify in database."""
-        from app.utility.security import get_password_hash
-        
         # Create a user to update
-        user = User(
-            username="passupdate",
-            email="passupdate@test.com",
-            password_hash=get_password_hash("oldpass123"),
-            role="user",
-            is_active=True,
-        )
-        db_session.add(user)
-        await db_session.commit()
-        await db_session.refresh(user)
+        user = await _create_test_user(db_session, "passupdate", "passupdate@test.com", "oldpass123", "user")
         user_id = user.id
         
         update_data = {"password": "newpass456"}
@@ -322,21 +326,10 @@ class TestDeleteUser:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test deleting a user (soft delete) and verify in database."""
-        from app.utility.security import get_password_hash
-        
         admin_username = admin_user.username  # Save before expire_all
-        
+
         # Create a user to delete
-        user = User(
-            username="todelete",
-            email="todelete@test.com",
-            password_hash=get_password_hash("testpass123"),
-            role="user",
-            is_active=True,
-        )
-        db_session.add(user)
-        await db_session.commit()
-        await db_session.refresh(user)
+        user = await _create_test_user(db_session, "todelete", "todelete@test.com", "testpass123", "user")
         user_id = user.id
         
         response = await client.delete(
