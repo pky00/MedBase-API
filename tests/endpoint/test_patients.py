@@ -1,4 +1,6 @@
 """Tests for patient endpoints."""
+from datetime import date
+
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
@@ -21,7 +23,7 @@ async def patient(db_session: AsyncSession, admin_user: User) -> Patient:
         third_party_id=tp.id,
         first_name="John",
         last_name="Doe",
-        date_of_birth="1990-05-15",
+        date_of_birth=date(1990, 5, 15),
         gender="male",
         phone="1234567890",
         email="john.doe@test.com",
@@ -50,7 +52,7 @@ async def second_patient(db_session: AsyncSession, admin_user: User) -> Patient:
         third_party_id=tp.id,
         first_name="Jane",
         last_name="Smith",
-        date_of_birth="1985-03-20",
+        date_of_birth=date(1985, 3, 20),
         gender="female",
         phone="5555555555",
         email="jane.smith@test.com",
@@ -403,8 +405,11 @@ class TestUpdatePatient:
         db_session: AsyncSession, patient: Patient,
     ):
         """Test updating patient name syncs the third_party record."""
+        patient_id = patient.id
+        third_party_id = patient.third_party_id
+
         response = await client.put(
-            f"/api/v1/patients/{patient.id}",
+            f"/api/v1/patients/{patient_id}",
             json={"first_name": "Updated", "last_name": "Name"},
             headers=admin_headers,
         )
@@ -413,7 +418,7 @@ class TestUpdatePatient:
         # Verify third_party name was synced
         db_session.expire_all()
         result = await db_session.execute(
-            select(ThirdParty).where(ThirdParty.id == patient.third_party_id)
+            select(ThirdParty).where(ThirdParty.id == third_party_id)
         )
         tp = result.scalar_one_or_none()
         assert tp.name == "Updated Name"

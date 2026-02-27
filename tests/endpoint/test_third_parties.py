@@ -82,6 +82,7 @@ class TestGetThirdParties:
             "/api/v1/users",
             json={
                 "username": "tp_test_user",
+                "name": "TP Test User",
                 "email": "tp_test@test.com",
                 "password": "testpass123",
                 "role": "user",
@@ -99,7 +100,7 @@ class TestGetThirdParties:
         tp = result.scalar_one_or_none()
         assert tp is not None
         assert tp.type == "user"
-        assert tp.name == "tp_test_user"
+        assert tp.name == "TP Test User"
 
 
 class TestGetThirdParty:
