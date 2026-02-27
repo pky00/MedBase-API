@@ -3,6 +3,8 @@ from enum import StrEnum
 from typing import Optional, List
 from pydantic import BaseModel, Field, ConfigDict
 
+from app.schema.patient_document import PatientDocumentResponse
+
 
 class Gender(StrEnum):
     MALE = "male"
@@ -56,4 +58,4 @@ class PatientResponse(PatientBase):
     created_at: datetime
     updated_by: Optional[str] = None
     updated_at: datetime
-    documents: Optional[List[dict]] = None
+    documents: Optional[List[PatientDocumentResponse]] = None
