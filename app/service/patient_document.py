@@ -82,22 +82,6 @@ class PatientDocumentService:
         logger.debug("Queried patient documents: patient_id=%d total=%d returned=%d", patient_id, total, len(documents))
         return list(documents), total
 
-    async def get_all_for_patient_ids(self, patient_ids: List[int]) -> dict[int, List[dict]]:
-        """Get all documents for multiple patients, grouped by patient_id. Returns response dicts with file_url."""
-        if not patient_ids:
-            return {}
-        result = await self.db.execute(
-            select(PatientDocument).where(
-                PatientDocument.patient_id.in_(patient_ids),
-                PatientDocument.is_deleted == False,
-            ).order_by(PatientDocument.id.asc())
-        )
-        docs = result.scalars().all()
-        grouped: dict[int, List[dict]] = {pid: [] for pid in patient_ids}
-        for doc in docs:
-            grouped[doc.patient_id].append(document_to_response(doc))
-        return grouped
-
     async def upload(
         self,
         patient_id: int,

@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.utility.database import get_db
 from app.utility.auth import get_current_user
 from app.service.patient import PatientService
-from app.service.patient_document import PatientDocumentService, document_to_response
 from app.schema.patient import (
     PatientCreate,
     PatientUpdate,
@@ -38,21 +37,20 @@ async def get_patients(
     logger.info("Listing patients page=%d size=%d by user_id=%d", page, size, current_user.id)
 
     service = PatientService(db)
-    patients, total = await service.get_all(
+    patients, total, docs_map = await service.get_all(
         page=page, size=size, is_active=is_active,
         gender=gender, search=search, sort=sort, order=order,
+        with_documents=with_documents,
     )
 
-    items = patients
-    if with_documents and patients:
-        doc_service = PatientDocumentService(db)
-        patient_ids = [p.id for p in patients]
-        docs_by_patient = await doc_service.get_all_for_patient_ids(patient_ids)
+    if docs_map is not None:
         items = []
         for p in patients:
             data = PatientResponse.model_validate(p).model_dump()
-            data["documents"] = docs_by_patient.get(p.id, [])
+            data["documents"] = docs_map.get(p.id, [])
             items.append(data)
+    else:
+        items = patients
 
     logger.info("Returning %d patients (total=%d)", len(patients), total)
     return PaginatedResponse(items=items, total=total, page=page, size=size)
@@ -69,18 +67,21 @@ async def get_patient(
     logger.info("Fetching patient_id=%d by user_id=%d", patient_id, current_user.id)
 
     service = PatientService(db)
-    patient = await service.get_by_id(patient_id)
 
+    if with_documents:
+        result = await service.get_by_id_with_documents(patient_id)
+        if not result:
+            logger.warning("Patient not found patient_id=%d", patient_id)
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
+        patient, documents = result
+        data = PatientResponse.model_validate(patient).model_dump()
+        data["documents"] = documents
+        return data
+
+    patient = await service.get_by_id(patient_id)
     if not patient:
         logger.warning("Patient not found patient_id=%d", patient_id)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
-
-    if with_documents:
-        doc_service = PatientDocumentService(db)
-        docs, _ = await doc_service.get_all_for_patient(patient_id, page=1, size=1000)
-        data = PatientResponse.model_validate(patient).model_dump()
-        data["documents"] = [document_to_response(d) for d in docs]
-        return data
 
     return patient
 

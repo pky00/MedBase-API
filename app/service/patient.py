@@ -4,11 +4,31 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, or_
 
 from app.model.patient import Patient
+from app.model.patient_document import PatientDocument
 from app.schema.patient import PatientCreate, PatientUpdate
 from app.service.third_party import ThirdPartyService
 from app.schema.third_party import ThirdPartyType
+from app.utility import storage
 
 logger = logging.getLogger("medbase.service.patient")
+
+
+def _document_to_dict(doc: PatientDocument) -> dict:
+    """Convert a PatientDocument to a dict with file_url from Lightsail bucket."""
+    return {
+        "id": doc.id,
+        "patient_id": doc.patient_id,
+        "document_name": doc.document_name,
+        "document_type": doc.document_type,
+        "file_path": doc.file_path,
+        "file_url": storage.get_file_url(doc.file_path),
+        "upload_date": doc.upload_date,
+        "is_deleted": doc.is_deleted,
+        "created_by": doc.created_by,
+        "created_at": doc.created_at,
+        "updated_by": doc.updated_by,
+        "updated_at": doc.updated_at,
+    }
 
 
 class PatientService:
@@ -38,6 +58,33 @@ class PatientService:
         )
         return result.scalar_one_or_none()
 
+    async def get_by_id_with_documents(self, patient_id: int) -> Optional[Tuple[Patient, List[dict]]]:
+        """Get patient by ID with documents via outerjoin.
+
+        Returns (patient, documents_list) or None if not found.
+        Each document dict includes file_url resolved from the Lightsail bucket.
+        """
+        result = await self.db.execute(
+            select(Patient, PatientDocument)
+            .outerjoin(
+                PatientDocument,
+                (PatientDocument.patient_id == Patient.id) & (PatientDocument.is_deleted == False),
+            )
+            .where(Patient.id == patient_id, Patient.is_deleted == False)
+            .order_by(PatientDocument.id.asc())
+        )
+        rows = result.all()
+        if not rows:
+            return None
+
+        patient = rows[0][0]
+        documents = []
+        for _, doc in rows:
+            if doc is not None:
+                documents.append(_document_to_dict(doc))
+
+        return patient, documents
+
     async def get_all(
         self,
         page: int = 1,
@@ -47,8 +94,15 @@ class PatientService:
         search: Optional[str] = None,
         sort: str = "id",
         order: str = "asc",
-    ) -> Tuple[List[Patient], int]:
-        """Get all patients with pagination, filtering, and sorting."""
+        with_documents: bool = False,
+    ) -> Tuple[List[Patient], int, Optional[dict]]:
+        """Get all patients with pagination, filtering, and sorting.
+
+        When with_documents=True, performs an outerjoin with patient_documents
+        and returns a docs_map (dict[int, List[dict]]) as the third element.
+        Each document dict includes file_url resolved from the Lightsail bucket.
+        When with_documents=False, the third element is None.
+        """
         query = select(Patient).where(Patient.is_deleted == False)
 
         if is_active is not None:
@@ -80,10 +134,33 @@ class PatientService:
         query = query.offset(offset).limit(size)
 
         result = await self.db.execute(query)
-        patients = result.scalars().all()
+        patients = list(result.scalars().all())
 
         logger.debug("Queried patients: total=%d returned=%d", total, len(patients))
-        return list(patients), total
+
+        if not with_documents or not patients:
+            return patients, total, None
+
+        # Outerjoin with patient_documents for the fetched patients
+        patient_ids = [p.id for p in patients]
+        doc_result = await self.db.execute(
+            select(Patient.id, PatientDocument)
+            .outerjoin(
+                PatientDocument,
+                (PatientDocument.patient_id == Patient.id) & (PatientDocument.is_deleted == False),
+            )
+            .where(Patient.id.in_(patient_ids))
+            .order_by(PatientDocument.id.asc())
+        )
+        doc_rows = doc_result.all()
+
+        # Group documents by patient_id, resolve file_url one by one
+        docs_map: dict[int, List[dict]] = {pid: [] for pid in patient_ids}
+        for patient_id, doc in doc_rows:
+            if doc is not None:
+                docs_map[patient_id].append(_document_to_dict(doc))
+
+        return patients, total, docs_map
 
     async def create(self, data: PatientCreate, created_by: Optional[str] = None) -> Patient:
         """Create a new patient. Auto-creates a third_party record if third_party_id not provided."""
