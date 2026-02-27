@@ -18,6 +18,13 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     API_V1_PREFIX: str = "/api/v1"
     PROJECT_NAME: str = "MedBase API"
+
+    # Lightsail Object Storage
+    LIGHTSAIL_BUCKET_NAME: str = ""
+    LIGHTSAIL_ACCESS_KEY: str = ""
+    LIGHTSAIL_SECRET_KEY: str = ""
+    LIGHTSAIL_ENDPOINT: str = ""
+    LIGHTSAIL_REGION: str = ""
     
     class Config:
         env_file = ".env"
