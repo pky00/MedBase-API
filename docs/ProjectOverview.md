@@ -11,6 +11,7 @@ MedBase is a clinic management application designed for small medical clinics. I
 - **Frontend**: Angular
 - **Backend**: FastAPI (Python), SQLAlchemy, Alembic, Pydantic, Conda
 - **Database**: PostgreSQL (Amazon RDS)
+- **File Storage**: Amazon Lightsail Bucket (S3-compatible)
 - **Containerization**: Docker (backend)
 - **Deployment**: AWS
 
@@ -76,6 +77,20 @@ MedBase is a clinic management application designed for small medical clinics. I
 - Add unique constraints on name fields in models to prevent duplicates
 - Validate uniqueness in the service layer when creating or updating entities
 
+**Third Parties**
+- A `third_parties` table serves as the base identity record for all persons/entities in the system
+- Every user, doctor, patient, and partner has a corresponding `third_party` record
+- When creating a doctor, patient, or partner: if no `third_party_id` is provided, the system automatically creates a third_party record; if a `third_party_id` is provided, it links to the existing one
+- `inventory_transactions` links to `third_party_id` to identify who is involved in the transaction:
+  - **Donations**: `third_party_id` must point to a donor (partner with `partner_type` of `donor` or `both`)
+  - **Prescriptions**: `third_party_id` must point to a doctor
+  - **Other types** (purchase, loss, breakage, expiration, destruction): `third_party_id` is set to the logged-in user's `third_party_id`
+
+**Business Rules**
+- Only doctors can make prescriptions
+- Only donors (partners with `partner_type` of `donor` or `both`) can make donations
+- For non-donation/non-prescription transactions, the system automatically uses the current user's `third_party_id`
+
 **Authentication**
 - JWT Bearer tokens
 - Token expiry: 1 hour
@@ -135,7 +150,8 @@ class Appointment(Base):
 - Dependency files: `environment.yml` + `requirements.txt`
 - Single Docker setup with hot reload for development
 - Database hosted on Amazon RDS (no local PostgreSQL containers)
-- All environment variables loaded from `.env` (`DATABASE_URL`, `TEST_DATABASE_URL`, etc.)
+- File storage via Amazon Lightsail Bucket (S3-compatible, using `aioboto3`)
+- All environment variables loaded from `.env` (`DATABASE_URL`, `TEST_DATABASE_URL`, `LIGHTSAIL_*`, etc.)
 - Makefile for common commands (build, run, test, migrate, etc.)
 
 **Testing**
@@ -208,12 +224,14 @@ class Appointment(Base):
   - Sometimes: treatment only (no vitals/record)
 
 ### Prescriptions
-- Prescribe medicine and medical devices (automatically decreases inventory)
+- Prescriptions are handled as inventory transactions with `transaction_type = prescription`
+- Only doctors can make prescriptions (third_party_id must point to a doctor)
+- Prescribing automatically decreases inventory
 
 ### Partners
 - Track partners (NGO, organization, individual, hospital, medical center)
 - Partner types: donor, referral, or both
-- **Donations**: Record what items were donated per donation
+- **Donations**: Handled as inventory transactions with type `donation` — only donors can make donations
 - **Treatments**: Track treatments/operations sent to referral partners
 
 ### Doctors
@@ -222,9 +240,10 @@ class Appointment(Base):
 ### Users & Authentication
 - User system for data entry staff
 - Admin role to manage users (CRUD)
+- Each user has a `third_party` record used to track their involvement in transactions
 
 ### Dashboard
-- Summary statistics: inventory, appointments, donations, donors
+- Summary statistics: inventory, appointments, transactions, partners
 
 ### UI & Navigation
 - Sidebar for quick access to all sections
@@ -234,8 +253,7 @@ class Appointment(Base):
 
 ### View Page Layout
 - Two-section layout: left side shows general data, right side shows related items/sub-items (where applicable)
-- **Donor view**: Donor details + donation cards with summarized data
-- **Donation view**: Donation details + table of donated items (can include any mix of medicines, equipment, medical devices)
+- **Donor view**: Donor details + donation transaction cards with summarized data
 - **Referral Partner view**: Partner details + list of treatments
 
 ### Treatments

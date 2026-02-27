@@ -120,7 +120,7 @@ class MedicalDeviceService:
         return list(devices), total
 
     async def create(
-        self, data: MedicalDeviceCreate, created_by: Optional[int] = None
+        self, data: MedicalDeviceCreate, created_by: Optional[str] = None
     ) -> MedicalDevice:
         """Create a new medical device and its inventory record."""
         device = MedicalDevice(
@@ -152,7 +152,7 @@ class MedicalDeviceService:
         self,
         device_id: int,
         data: MedicalDeviceUpdate,
-        updated_by: Optional[int] = None,
+        updated_by: Optional[str] = None,
     ) -> Optional[MedicalDevice]:
         """Update a medical device."""
         device = await self.get_by_id(device_id)
@@ -169,7 +169,7 @@ class MedicalDeviceService:
         logger.info("Updated medical device id=%d fields=%s", device_id, list(update_data.keys()))
         return device
 
-    async def delete(self, device_id: int, deleted_by: Optional[int] = None) -> bool:
+    async def delete(self, device_id: int, deleted_by: Optional[str] = None) -> bool:
         """Soft delete a medical device and its inventory record."""
         device = await self.get_by_id(device_id)
         if not device:

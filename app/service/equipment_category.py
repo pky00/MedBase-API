@@ -81,7 +81,7 @@ class EquipmentCategoryService:
         return list(categories), total
 
     async def create(
-        self, data: EquipmentCategoryCreate, created_by: Optional[int] = None
+        self, data: EquipmentCategoryCreate, created_by: Optional[str] = None
     ) -> EquipmentCategory:
         """Create a new equipment category."""
         category = EquipmentCategory(
@@ -100,7 +100,7 @@ class EquipmentCategoryService:
         self,
         category_id: int,
         data: EquipmentCategoryUpdate,
-        updated_by: Optional[int] = None,
+        updated_by: Optional[str] = None,
     ) -> Optional[EquipmentCategory]:
         """Update an equipment category."""
         category = await self.get_by_id(category_id)
@@ -117,7 +117,7 @@ class EquipmentCategoryService:
         logger.info("Updated equipment category id=%d fields=%s", category_id, list(update_data.keys()))
         return category
 
-    async def delete(self, category_id: int, deleted_by: Optional[int] = None) -> bool:
+    async def delete(self, category_id: int, deleted_by: Optional[str] = None) -> bool:
         """Soft delete an equipment category."""
         category = await self.get_by_id(category_id)
         if not category:

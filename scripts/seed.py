@@ -32,7 +32,7 @@ async def seed_admin():
             is_active=True
         )
         
-        admin = await user_service.create(admin_data)
+        admin = await user_service.create(admin_data, created_by="admin")
         await db.commit()
         
         print(f"Admin user created successfully!")

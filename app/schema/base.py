@@ -14,9 +14,9 @@ class BaseSchema(BaseModel):
 class AuditMixin(BaseModel):
     """Mixin for audit fields."""
     
-    created_by: Optional[int] = None
+    created_by: Optional[str] = None
     created_at: datetime
-    updated_by: Optional[int] = None
+    updated_by: Optional[str] = None
     updated_at: datetime
 
 

@@ -6,7 +6,7 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 
 ---
 
-## Current Phase: Phase 2 - Core Entities
+## Current Phase: Phase 3 - Partners & Doctors
 
 ---
 
@@ -15,11 +15,14 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 | # | Feature | Date Completed | Notes |
 |---|---------|----------------|-------|
 | 1 | Project Setup (BE) | 2026-02-03 | FastAPI structure, Docker (Miniconda), PostgreSQL, Alembic, Makefile |
-| 3 | Users & Authentication | 2026-02-03 | User CRUD, JWT auth (1hr expiry), admin role, login/logout/me endpoints |
-| 4 | Inventory Categories | 2026-02-11 | Medicine, Equipment, Medical Device categories with CRUD, search, soft delete, linked item checks |
-| 5 | Medicines | 2026-02-11 | Medicine CRUD with category, auto inventory creation, delete restriction (qty > 0) |
-| 6 | Equipment | 2026-02-11 | Equipment CRUD with category/condition, auto inventory creation, delete restriction |
-| 7 | Medical Devices | 2026-02-11 | Medical device CRUD with category/serial number, auto inventory creation, delete restriction |
+| 3 | Third Parties | 2026-02-14 | Base identity table for users/doctors/patients/partners. Read-only API (GET list, GET by ID). Auto-created by linked entities |
+| 4 | Users & Authentication | 2026-02-03 | User CRUD, JWT auth (1hr expiry), admin role, login/logout/me endpoints. Users now have third_party_id |
+| 5 | Inventory Categories | 2026-02-11 | Medicine, Equipment, Medical Device categories with CRUD, search, soft delete, linked item checks |
+| 6 | Medicines | 2026-02-11 | Medicine CRUD with category, auto inventory creation, delete restriction (qty > 0) |
+| 7 | Equipment | 2026-02-11 | Equipment CRUD with category/condition, auto inventory creation, delete restriction |
+| 8 | Medical Devices | 2026-02-11 | Medical device CRUD with category/serial number, auto inventory creation, delete restriction |
+| 9 | Partners | 2026-02-14 | Partner CRUD with donor/referral/both types, organization types, third_party_id (auto-created or linked), search, filters |
+| 10 | Doctors | 2026-02-14 | Doctor CRUD with internal/external/partner_provided types, third_party_id (auto-created or linked), partner validation |
 
 ---
 
@@ -47,7 +50,28 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 - Configuration management with pydantic-settings
 - .env and .env.example files
 
-### Feature 3: Users & Authentication
+### Feature 3: Third Parties
+**Status:** Complete
+
+**Endpoints:**
+- GET `/api/v1/third-parties` - List all third parties (paginated, filterable by type, is_active, searchable)
+- GET `/api/v1/third-parties/{id}` - Get third party by ID
+
+**Model:**
+- id, name, type (user/doctor/patient/partner), phone, email, is_active, is_deleted, audit columns
+
+**Notes:**
+- Read-only API — no direct create/update/delete
+- Records created automatically when creating users, doctors, patients, or partners
+- Linked by FK from users.third_party_id, partners.third_party_id, doctors.third_party_id
+
+**Tests:**
+- test_third_parties.py (6 tests: list, filter by type, filter by is_active, auto-creation via user, get by ID, not found)
+
+**Postman:**
+- Third Parties folder (Get All, Get by ID)
+
+### Feature 4: Users & Authentication
 **Status:** Complete
 
 **Endpoints:**
@@ -56,19 +80,18 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 - GET `/api/v1/auth/me` - Get current user info
 - GET `/api/v1/users` - List users (admin only, paginated, filterable)
 - GET `/api/v1/users/{id}` - Get user by ID (admin only)
-- POST `/api/v1/users` - Create user (admin only)
+- POST `/api/v1/users` - Create user (admin only, auto-creates third_party record)
 - PUT `/api/v1/users/{id}` - Update user (admin only)
 - DELETE `/api/v1/users/{id}` - Delete user (admin only, soft delete)
 
 **User Model:**
-- id, username (unique), email (unique), password_hash
+- id, third_party_id (FK), username (unique), email (unique), password_hash
 - role (admin/user), is_active, is_deleted
 - Audit columns: created_by, created_at, updated_by, updated_at
 
 **Tests:**
 - Endpoint tests: test_auth.py (login, logout, me)
 - Endpoint tests: test_users.py (CRUD operations, pagination, filters)
-- Database tests: test_user_model.py (model, service layer)
 
 **Postman:**
 - Authentication folder (Login, Logout, Get Current User)
@@ -78,114 +101,88 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 
 ## Phase 2 Details
 
-### Feature 4: Inventory Categories
+### Feature 5: Inventory Categories
 **Status:** Complete
-
-**Endpoints:**
-- GET `/api/v1/medicine-categories` - List all medicine categories (paginated, searchable)
-- GET `/api/v1/medicine-categories/{id}` - Get medicine category by ID
-- POST `/api/v1/medicine-categories` - Create medicine category
-- PUT `/api/v1/medicine-categories/{id}` - Update medicine category
-- DELETE `/api/v1/medicine-categories/{id}` - Delete medicine category (blocked if medicines linked)
-- GET `/api/v1/equipment-categories` - List all equipment categories
-- GET `/api/v1/equipment-categories/{id}` - Get equipment category by ID
-- POST `/api/v1/equipment-categories` - Create equipment category
-- PUT `/api/v1/equipment-categories/{id}` - Update equipment category
-- DELETE `/api/v1/equipment-categories/{id}` - Delete equipment category (blocked if equipment linked)
-- GET `/api/v1/medical-device-categories` - List all medical device categories
-- GET `/api/v1/medical-device-categories/{id}` - Get medical device category by ID
-- POST `/api/v1/medical-device-categories` - Create medical device category
-- PUT `/api/v1/medical-device-categories/{id}` - Update medical device category
-- DELETE `/api/v1/medical-device-categories/{id}` - Delete medical device category (blocked if devices linked)
-
-**Models:**
-- MedicineCategory: id, name, description, audit columns
-- EquipmentCategory: id, name, description, audit columns
-- MedicalDeviceCategory: id, name, description, audit columns
 
 **Tests:**
 - test_medicine_categories.py (12 tests)
 - test_equipment_categories.py (11 tests)
 - test_medical_device_categories.py (11 tests)
 
-**Postman:**
-- Medicine Categories folder (Get All, Get by ID, Create, Update, Delete)
-- Equipment Categories folder (Get All, Get by ID, Create, Update, Delete)
-- Medical Device Categories folder (Get All, Get by ID, Create, Update, Delete)
-
-### Feature 5: Medicines
+### Feature 6: Medicines
 **Status:** Complete
 
-**Endpoints:**
-- GET `/api/v1/medicines` - List all medicines (paginated, filterable by category_id, is_active, searchable)
-- GET `/api/v1/medicines/{id}` - Get medicine by ID (includes inventory quantity, category name)
-- POST `/api/v1/medicines` - Create medicine (auto-creates inventory record with quantity 0)
-- PUT `/api/v1/medicines/{id}` - Update medicine
-- DELETE `/api/v1/medicines/{id}` - Delete medicine (only if inventory quantity is 0)
-
-**Model:**
-- id, name, category_id (FK), description, unit, is_active, is_deleted, audit columns
-
 **Tests:**
-- test_medicines.py (14 tests: CRUD, filters, search, inventory auto-creation, delete restrictions)
+- test_medicines.py (14 tests)
 
-**Postman:**
-- Medicines folder (Get All, Get by ID, Create, Update, Delete)
-
-### Feature 6: Equipment
+### Feature 7: Equipment
 **Status:** Complete
 
-**Endpoints:**
-- GET `/api/v1/equipment` - List all equipment (paginated, filterable by category_id, is_active, condition, searchable)
-- GET `/api/v1/equipment/{id}` - Get equipment by ID (includes inventory quantity, category name)
-- POST `/api/v1/equipment` - Create equipment (auto-creates inventory record)
-- PUT `/api/v1/equipment/{id}` - Update equipment
-- DELETE `/api/v1/equipment/{id}` - Delete equipment (only if inventory quantity is 0)
-
-**Model:**
-- id, name, category_id (FK), description, condition (new/good/fair/poor), is_active, is_deleted, audit columns
-
 **Tests:**
-- test_equipment.py (13 tests: CRUD, condition filter, search, inventory, delete restrictions)
+- test_equipment.py (13 tests)
 
-**Postman:**
-- Equipment folder (Get All, Get by ID, Create, Update, Delete)
-
-### Feature 7: Medical Devices
+### Feature 8: Medical Devices
 **Status:** Complete
 
-**Endpoints:**
-- GET `/api/v1/medical-devices` - List all medical devices (paginated, filterable, searchable)
-- GET `/api/v1/medical-devices/{id}` - Get device by ID (includes inventory quantity, category name)
-- POST `/api/v1/medical-devices` - Create medical device (auto-creates inventory record)
-- PUT `/api/v1/medical-devices/{id}` - Update medical device
-- DELETE `/api/v1/medical-devices/{id}` - Delete medical device (only if inventory quantity is 0)
-
-**Model:**
-- id, name, category_id (FK), description, serial_number, is_active, is_deleted, audit columns
-
 **Tests:**
-- test_medical_devices.py (13 tests: CRUD, filters, serial_number, inventory, delete restrictions)
-
-**Postman:**
-- Medical Devices folder (Get All, Get by ID, Create, Update, Delete)
+- test_medical_devices.py (13 tests)
 
 ### Inventory (supporting feature)
 **Status:** Complete
 
+**Tests:**
+- test_inventory.py (10 tests)
+
+---
+
+## Phase 3 Details
+
+### Feature 9: Partners
+**Status:** Complete
+
 **Endpoints:**
-- GET `/api/v1/inventory` - List all inventory records (paginated, filterable by item_type)
-- GET `/api/v1/inventory/{id}` - Get inventory record by ID
-- GET `/api/v1/inventory/item/{item_type}/{item_id}` - Get inventory by item type and ID
+- GET `/api/v1/partners` - List all partners (paginated, filterable by partner_type, organization_type, is_active, searchable)
+- GET `/api/v1/partners/{id}` - Get partner by ID
+- POST `/api/v1/partners` - Create partner (auto-creates third_party if third_party_id not provided)
+- PUT `/api/v1/partners/{id}` - Update partner
+- DELETE `/api/v1/partners/{id}` - Delete partner (soft delete)
 
 **Model:**
-- id, item_type (medicine/equipment/medical_device), item_id, quantity, is_deleted, audit columns
+- id, third_party_id (FK), name (unique), partner_type (donor/referral/both), organization_type (NGO/organization/individual/hospital/medical_center)
+- contact_person, phone, email, address, is_active, is_deleted, audit columns
 
 **Tests:**
-- test_inventory.py (10 tests: list, filter, pagination, get by item, auto-creation)
+- test_partners.py (17 tests: CRUD, filters, search, pagination, third_party auto-creation, link to existing third_party, duplicate name, validation)
 
 **Postman:**
-- Inventory folder (Get All, Get by ID, Get by Item)
+- Partners folder (Get All, Get by ID, Create, Update, Delete)
+
+### Feature 10: Doctors
+**Status:** Complete
+
+**Endpoints:**
+- GET `/api/v1/doctors` - List all doctors (paginated, filterable by type, is_active, partner_id, searchable)
+- GET `/api/v1/doctors/{id}` - Get doctor by ID (includes partner name if partner_provided)
+- POST `/api/v1/doctors` - Create doctor (auto-creates third_party if third_party_id not provided; partner_id required for partner_provided)
+- PUT `/api/v1/doctors/{id}` - Update doctor
+- DELETE `/api/v1/doctors/{id}` - Delete doctor (soft delete)
+
+**Model:**
+- id, third_party_id (FK), name (unique), specialization, phone, email, type (internal/external/partner_provided)
+- partner_id (FK to partners, required for partner_provided), is_active, is_deleted, audit columns
+
+**Tests:**
+- test_doctors.py (18 tests: CRUD, filters, search, third_party auto-creation, link to existing third_party, partner validation, type validation, duplicate name)
+
+**Postman:**
+- Doctors folder (Get All, Get by ID, Create Internal, Create Partner Provided, Update, Delete)
+
+---
+
+## Migration Notes
+
+- All previous migration files deleted and replaced with a single fresh migration: `20260214_initial_schema.py`
+- The migration covers the entire schema from Phase 1 through Phase 3 including: third_parties, users, medicine_categories, equipment_categories, medical_device_categories, medicines, equipment, medical_devices, inventory, partners, doctors
 
 ---
 
@@ -193,4 +190,3 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 
 - Update this file before finishing each feature
 - Format: Endpoints → Tests → Postman requests
-- All 117 tests pass (Phase 1: 30 tests + Phase 2: 87 tests)

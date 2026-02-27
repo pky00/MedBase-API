@@ -16,6 +16,9 @@ from app.router import (
     equipment,
     medical_device,
     inventory,
+    third_party,
+    partner,
+    doctor,
 )
 
 logger = logging.getLogger("medbase.app")
@@ -57,6 +60,7 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
 app.include_router(user.router, prefix=settings.API_V1_PREFIX)
+app.include_router(third_party.router, prefix=settings.API_V1_PREFIX)
 app.include_router(medicine_category.router, prefix=settings.API_V1_PREFIX)
 app.include_router(equipment_category.router, prefix=settings.API_V1_PREFIX)
 app.include_router(medical_device_category.router, prefix=settings.API_V1_PREFIX)
@@ -64,6 +68,8 @@ app.include_router(medicine.router, prefix=settings.API_V1_PREFIX)
 app.include_router(equipment.router, prefix=settings.API_V1_PREFIX)
 app.include_router(medical_device.router, prefix=settings.API_V1_PREFIX)
 app.include_router(inventory.router, prefix=settings.API_V1_PREFIX)
+app.include_router(partner.router, prefix=settings.API_V1_PREFIX)
+app.include_router(doctor.router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/")

@@ -40,8 +40,8 @@ class TestGetMedicineCategories:
     ):
         """Test searching medicine categories."""
         # Create categories
-        cat1 = MedicineCategory(name="Antibiotics", description="Anti-bacterial medicines", created_by=admin_user.id, updated_by=admin_user.id)
-        cat2 = MedicineCategory(name="Painkillers", description="Pain relief medicines", created_by=admin_user.id, updated_by=admin_user.id)
+        cat1 = MedicineCategory(name="Antibiotics", description="Anti-bacterial medicines", created_by=admin_user.username, updated_by=admin_user.username)
+        cat2 = MedicineCategory(name="Painkillers", description="Pain relief medicines", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add_all([cat1, cat2])
         await db_session.commit()
 
@@ -62,7 +62,7 @@ class TestGetMedicineCategories:
     ):
         """Test pagination of medicine categories."""
         for i in range(5):
-            cat = MedicineCategory(name=f"Category {i}", created_by=admin_user.id, updated_by=admin_user.id)
+            cat = MedicineCategory(name=f"Category {i}", created_by=admin_user.username, updated_by=admin_user.username)
             db_session.add(cat)
         await db_session.commit()
 
@@ -88,7 +88,7 @@ class TestGetMedicineCategory:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test getting category by ID."""
-        cat = MedicineCategory(name="Vitamins", description="Vitamin supplements", created_by=admin_user.id, updated_by=admin_user.id)
+        cat = MedicineCategory(name="Vitamins", description="Vitamin supplements", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(cat)
         await db_session.commit()
         await db_session.refresh(cat)
@@ -149,8 +149,8 @@ class TestCreateMedicineCategory:
         assert db_cat is not None
         assert db_cat.name == "Antibiotics"
         assert db_cat.description == "Anti-bacterial medicines"
-        assert db_cat.created_by == admin_user.id
-        assert db_cat.updated_by == admin_user.id
+        assert db_cat.created_by == admin_user.username
+        assert db_cat.updated_by == admin_user.username
         assert db_cat.is_deleted is False
 
     @pytest.mark.asyncio
@@ -176,7 +176,7 @@ class TestCreateMedicineCategory:
         """Test creating a category with duplicate name fails."""
         from app.model.medicine_category import MedicineCategory
 
-        cat = MedicineCategory(name="Duplicate", created_by=admin_user.id, updated_by=admin_user.id)
+        cat = MedicineCategory(name="Duplicate", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(cat)
         await db_session.commit()
 
@@ -209,9 +209,9 @@ class TestUpdateMedicineCategory:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test updating a category and verify in database."""
-        admin_id = admin_user.id
+        admin_username = admin_user.username
 
-        cat = MedicineCategory(name="Old Name", description="Old Desc", created_by=admin_id, updated_by=admin_id)
+        cat = MedicineCategory(name="Old Name", description="Old Desc", created_by=admin_username, updated_by=admin_username)
         db_session.add(cat)
         await db_session.commit()
         await db_session.refresh(cat)
@@ -235,7 +235,7 @@ class TestUpdateMedicineCategory:
         )
         db_cat = result.scalar_one_or_none()
         assert db_cat.name == "New Name"
-        assert db_cat.updated_by == admin_id
+        assert db_cat.updated_by == admin_username
 
     @pytest.mark.asyncio
     async def test_update_category_not_found(
@@ -258,9 +258,9 @@ class TestDeleteMedicineCategory:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test deleting a category (soft delete) and verify in database."""
-        admin_id = admin_user.id
+        admin_username = admin_user.username
 
-        cat = MedicineCategory(name="To Delete", created_by=admin_id, updated_by=admin_id)
+        cat = MedicineCategory(name="To Delete", created_by=admin_username, updated_by=admin_username)
         db_session.add(cat)
         await db_session.commit()
         await db_session.refresh(cat)
@@ -287,14 +287,14 @@ class TestDeleteMedicineCategory:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test cannot delete category with linked medicines."""
-        admin_id = admin_user.id
+        admin_username = admin_user.username
 
-        cat = MedicineCategory(name="Has Medicines", created_by=admin_id, updated_by=admin_id)
+        cat = MedicineCategory(name="Has Medicines", created_by=admin_username, updated_by=admin_username)
         db_session.add(cat)
         await db_session.commit()
         await db_session.refresh(cat)
 
-        med = Medicine(name="Test Med", category_id=cat.id, created_by=admin_id, updated_by=admin_id)
+        med = Medicine(name="Test Med", category_id=cat.id, created_by=admin_username, updated_by=admin_username)
         db_session.add(med)
         await db_session.commit()
 

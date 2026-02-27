@@ -78,7 +78,7 @@ class InventoryService:
         item_type: str,
         item_id: int,
         quantity: int = 0,
-        created_by: Optional[int] = None,
+        created_by: Optional[str] = None,
     ) -> Inventory:
         """Create an inventory record."""
         inventory = Inventory(
@@ -97,7 +97,7 @@ class InventoryService:
         )
         return inventory
 
-    async def delete(self, item_type: str, item_id: int, deleted_by: Optional[int] = None) -> bool:
+    async def delete(self, item_type: str, item_id: int, deleted_by: Optional[str] = None) -> bool:
         """Soft delete an inventory record by item type and item ID."""
         inventory = await self.get_by_item(item_type, item_id)
         if not inventory:

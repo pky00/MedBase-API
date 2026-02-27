@@ -1,4 +1,4 @@
-.PHONY: help build up down logs shell test migrate migrate-create db-reset clean
+.PHONY: help build up down logs shell test migrate migrate-create db-reset clean populate clean-pyc
 
 # Default target
 help:
@@ -14,7 +14,9 @@ help:
 	@echo "  make migrate-create - Create new migration (MSG=message)"
 	@echo "  make db-reset       - Reset database (drop all and migrate)"
 	@echo "  make seed           - Seed initial admin user"
+	@echo "  make populate       - Populate database with dummy data"
 	@echo "  make clean          - Remove containers and volumes"
+	@echo "  make clean-pyc      - Remove all __pycache__ folders"
 	@echo ""
 
 # Build Docker images
@@ -79,9 +81,17 @@ db-reset:
 seed:
 	docker-compose exec api conda run -n medbase python scripts/seed.py
 
+# Populate database with dummy data
+populate:
+	docker-compose exec api conda run -n medbase python scripts/populate_dummy_data.py
+
 # Remove containers and volumes
 clean:
 	docker-compose down -v --remove-orphans
+
+# Remove all __pycache__ folders
+clean-pyc:
+	powershell -NoProfile -Command "Get-ChildItem -Recurse -Directory -Filter __pycache__ | Remove-Item -Recurse -Force"
 
 # Local development without Docker
 dev:

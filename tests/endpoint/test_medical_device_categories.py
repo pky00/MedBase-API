@@ -37,8 +37,8 @@ class TestGetMedicalDeviceCategories:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test searching medical device categories."""
-        cat1 = MedicalDeviceCategory(name="Monitors", description="Patient monitors", created_by=admin_user.id, updated_by=admin_user.id)
-        cat2 = MedicalDeviceCategory(name="Pumps", description="Infusion pumps", created_by=admin_user.id, updated_by=admin_user.id)
+        cat1 = MedicalDeviceCategory(name="Monitors", description="Patient monitors", created_by=admin_user.username, updated_by=admin_user.username)
+        cat2 = MedicalDeviceCategory(name="Pumps", description="Infusion pumps", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add_all([cat1, cat2])
         await db_session.commit()
 
@@ -62,7 +62,7 @@ class TestGetMedicalDeviceCategory:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test getting category by ID."""
-        cat = MedicalDeviceCategory(name="Imaging", description="Imaging devices", created_by=admin_user.id, updated_by=admin_user.id)
+        cat = MedicalDeviceCategory(name="Imaging", description="Imaging devices", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(cat)
         await db_session.commit()
         await db_session.refresh(cat)
@@ -108,14 +108,14 @@ class TestCreateMedicalDeviceCategory:
         db_cat = result.scalar_one_or_none()
         assert db_cat is not None
         assert db_cat.name == "Respiratory"
-        assert db_cat.created_by == admin_user.id
+        assert db_cat.created_by == admin_user.username
 
     @pytest.mark.asyncio
     async def test_create_category_duplicate_name(
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test creating a category with duplicate name fails."""
-        cat = MedicalDeviceCategory(name="Duplicate", created_by=admin_user.id, updated_by=admin_user.id)
+        cat = MedicalDeviceCategory(name="Duplicate", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(cat)
         await db_session.commit()
 
@@ -136,7 +136,7 @@ class TestUpdateMedicalDeviceCategory:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test updating a medical device category."""
-        cat = MedicalDeviceCategory(name="Old Name", created_by=admin_user.id, updated_by=admin_user.id)
+        cat = MedicalDeviceCategory(name="Old Name", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(cat)
         await db_session.commit()
         await db_session.refresh(cat)
@@ -169,7 +169,7 @@ class TestDeleteMedicalDeviceCategory:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test deleting a medical device category (soft delete)."""
-        cat = MedicalDeviceCategory(name="To Delete", created_by=admin_user.id, updated_by=admin_user.id)
+        cat = MedicalDeviceCategory(name="To Delete", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(cat)
         await db_session.commit()
         await db_session.refresh(cat)
@@ -194,12 +194,12 @@ class TestDeleteMedicalDeviceCategory:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test cannot delete category with linked medical devices."""
-        cat = MedicalDeviceCategory(name="Has Devices", created_by=admin_user.id, updated_by=admin_user.id)
+        cat = MedicalDeviceCategory(name="Has Devices", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(cat)
         await db_session.commit()
         await db_session.refresh(cat)
 
-        device = MedicalDevice(name="Test Device", category_id=cat.id, created_by=admin_user.id, updated_by=admin_user.id)
+        device = MedicalDevice(name="Test Device", category_id=cat.id, created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(device)
         await db_session.commit()
 

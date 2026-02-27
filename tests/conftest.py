@@ -11,6 +11,7 @@ os.environ["DATABASE_URL"] = os.getenv("TEST_DATABASE_URL", "")
 
 from app.utility.database import Base, get_db
 from app.utility.security import get_password_hash
+from app.model.third_party import ThirdParty  # noqa: F401
 from app.model.user import User
 from app.model.medicine_category import MedicineCategory  # noqa: F401
 from app.model.equipment_category import EquipmentCategory  # noqa: F401
@@ -19,6 +20,8 @@ from app.model.medicine import Medicine  # noqa: F401
 from app.model.equipment import Equipment  # noqa: F401
 from app.model.medical_device import MedicalDevice  # noqa: F401
 from app.model.inventory import Inventory  # noqa: F401
+from app.model.partner import Partner  # noqa: F401
+from app.model.doctor import Doctor  # noqa: F401
 from main import app
 
 
@@ -83,36 +86,52 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     app.dependency_overrides.clear()
 
 
-@pytest.fixture
-async def admin_user(db_session: AsyncSession) -> User:
-    """Create an admin user for testing."""
+async def _create_user_with_third_party(
+    db_session: AsyncSession,
+    username: str,
+    email: str,
+    password: str,
+    role: str,
+) -> User:
+    """Helper to create a user with its third_party record."""
+    tp = ThirdParty(
+        name=username,
+        type="user",
+        email=email,
+        is_active=True,
+    )
+    db_session.add(tp)
+    await db_session.flush()
+    await db_session.refresh(tp)
+
     user = User(
-        username="testadmin",
-        email="testadmin@test.com",
-        password_hash=get_password_hash("testpass123"),
-        role="admin",
+        third_party_id=tp.id,
+        username=username,
+        email=email,
+        password_hash=get_password_hash(password),
+        role=role,
         is_active=True,
     )
     db_session.add(user)
     await db_session.commit()
     await db_session.refresh(user)
     return user
+
+
+@pytest.fixture
+async def admin_user(db_session: AsyncSession) -> User:
+    """Create an admin user for testing."""
+    return await _create_user_with_third_party(
+        db_session, "testadmin", "testadmin@test.com", "testpass123", "admin"
+    )
 
 
 @pytest.fixture
 async def regular_user(db_session: AsyncSession) -> User:
     """Create a regular user for testing."""
-    user = User(
-        username="testuser",
-        email="testuser@test.com",
-        password_hash=get_password_hash("testpass123"),
-        role="user",
-        is_active=True,
+    return await _create_user_with_third_party(
+        db_session, "testuser", "testuser@test.com", "testpass123", "user"
     )
-    db_session.add(user)
-    await db_session.commit()
-    await db_session.refresh(user)
-    return user
 
 
 @pytest.fixture

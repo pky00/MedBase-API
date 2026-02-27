@@ -16,8 +16,8 @@ async def medicine_category(db_session: AsyncSession, admin_user: User) -> Medic
     cat = MedicineCategory(
         name="Antibiotics",
         description="Anti-bacterial medicines",
-        created_by=admin_user.id,
-        updated_by=admin_user.id,
+        created_by=admin_user.username,
+        updated_by=admin_user.username,
     )
     db_session.add(cat)
     await db_session.commit()
@@ -54,7 +54,7 @@ class TestGetMedicines:
         """Test filtering medicines by category."""
         med = Medicine(
             name="Amoxicillin", category_id=medicine_category.id,
-            created_by=admin_user.id, updated_by=admin_user.id,
+            created_by=admin_user.username, updated_by=admin_user.username,
         )
         db_session.add(med)
         await db_session.commit()
@@ -76,8 +76,8 @@ class TestGetMedicines:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test searching medicines."""
-        med1 = Medicine(name="Amoxicillin", description="Antibiotic", created_by=admin_user.id, updated_by=admin_user.id)
-        med2 = Medicine(name="Ibuprofen", description="Painkiller", created_by=admin_user.id, updated_by=admin_user.id)
+        med1 = Medicine(name="Amoxicillin", description="Antibiotic", created_by=admin_user.username, updated_by=admin_user.username)
+        med2 = Medicine(name="Ibuprofen", description="Painkiller", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add_all([med1, med2])
         await db_session.commit()
 
@@ -97,8 +97,8 @@ class TestGetMedicines:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test filtering by active status."""
-        med1 = Medicine(name="Active Med", is_active=True, created_by=admin_user.id, updated_by=admin_user.id)
-        med2 = Medicine(name="Inactive Med", is_active=False, created_by=admin_user.id, updated_by=admin_user.id)
+        med1 = Medicine(name="Active Med", is_active=True, created_by=admin_user.username, updated_by=admin_user.username)
+        med2 = Medicine(name="Inactive Med", is_active=False, created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add_all([med1, med2])
         await db_session.commit()
 
@@ -193,7 +193,7 @@ class TestCreateMedicine:
         db_med = result.scalar_one_or_none()
         assert db_med is not None
         assert db_med.name == "Amoxicillin"
-        assert db_med.created_by == admin_user.id
+        assert db_med.created_by == admin_user.username
 
         # Verify inventory record was auto-created
         result = await db_session.execute(
@@ -240,7 +240,7 @@ class TestCreateMedicine:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test creating medicine with duplicate name fails."""
-        med = Medicine(name="Duplicate Med", created_by=admin_user.id, updated_by=admin_user.id)
+        med = Medicine(name="Duplicate Med", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(med)
         await db_session.commit()
 
@@ -273,9 +273,9 @@ class TestUpdateMedicine:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test updating a medicine and verify in database."""
-        admin_id = admin_user.id
+        admin_username = admin_user.username
 
-        med = Medicine(name="Old Name", unit="tablets", created_by=admin_id, updated_by=admin_id)
+        med = Medicine(name="Old Name", unit="tablets", created_by=admin_username, updated_by=admin_username)
         db_session.add(med)
         await db_session.commit()
         await db_session.refresh(med)
@@ -299,7 +299,7 @@ class TestUpdateMedicine:
         )
         db_med = result.scalar_one_or_none()
         assert db_med.name == "New Name"
-        assert db_med.updated_by == admin_id
+        assert db_med.updated_by == admin_username
 
     @pytest.mark.asyncio
     async def test_update_medicine_not_found(self, client: AsyncClient, admin_headers: dict):
@@ -316,7 +316,7 @@ class TestUpdateMedicine:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test updating medicine with non-existent category."""
-        med = Medicine(name="Test Med", created_by=admin_user.id, updated_by=admin_user.id)
+        med = Medicine(name="Test Med", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(med)
         await db_session.commit()
         await db_session.refresh(med)
@@ -380,14 +380,14 @@ class TestDeleteMedicine:
     ):
         """Test cannot delete medicine when inventory quantity > 0."""
         # Create medicine with inventory > 0
-        med = Medicine(name="Has Stock", created_by=admin_user.id, updated_by=admin_user.id)
+        med = Medicine(name="Has Stock", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(med)
         await db_session.flush()
         await db_session.refresh(med)
 
         inv = Inventory(
             item_type="medicine", item_id=med.id, quantity=10,
-            created_by=admin_user.id, updated_by=admin_user.id,
+            created_by=admin_user.username, updated_by=admin_user.username,
         )
         db_session.add(inv)
         await db_session.commit()

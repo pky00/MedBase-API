@@ -114,7 +114,7 @@ async def create_medicine(
                 detail="Medicine category not found",
             )
 
-    medicine = await service.create(data, created_by=current_user.id)
+    medicine = await service.create(data, created_by=current_user.username)
 
     logger.info("Medicine created medicine_id=%d", medicine.id)
     return medicine
@@ -161,7 +161,7 @@ async def update_medicine(
                 detail="Medicine category not found",
             )
 
-    updated = await service.update(medicine_id, data, updated_by=current_user.id)
+    updated = await service.update(medicine_id, data, updated_by=current_user.username)
     logger.info("Medicine updated medicine_id=%d", medicine_id)
     return updated
 
@@ -194,6 +194,6 @@ async def delete_medicine(
             detail=f"Cannot delete medicine with inventory quantity {quantity}. Quantity must be 0.",
         )
 
-    await service.delete(medicine_id, deleted_by=current_user.id)
+    await service.delete(medicine_id, deleted_by=current_user.username)
     logger.info("Medicine deleted medicine_id=%d", medicine_id)
     return MessageResponse(message="Medicine deleted successfully")

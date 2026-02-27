@@ -23,5 +23,8 @@ pytest==8.0.0
 pytest-asyncio==0.23.5
 httpx==0.26.0
 
+# Storage (S3-compatible / Lightsail)
+aioboto3==13.4.0
+
 # Utilities
 python-dotenv==1.0.1

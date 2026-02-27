@@ -765,22 +765,268 @@
 					},
 					"response": []
 				},
-				{
-					"name": "Get Inventory by Item",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/inventory/item/medicine/1",
-							"host": ["{{base_url}}"],
-							"path": ["inventory", "item", "medicine", "1"]
-						},
-						"description": "Get inventory record by item type and item ID. item_type: medicine, equipment, medical_device."
+			{
+				"name": "Get Inventory by Item",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/inventory/item/medicine/1",
+						"host": ["{{base_url}}"],
+						"path": ["inventory", "item", "medicine", "1"]
 					},
-					"response": []
-				}
-			]
-		}
+					"description": "Get inventory record by item type and item ID. item_type: medicine, equipment, medical_device."
+				},
+				"response": []
+			}
+		]
+	},
+	{
+		"name": "Third Parties",
+		"item": [
+			{
+				"name": "Get All Third Parties",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/third-parties?page=1&size=10",
+						"host": ["{{base_url}}"],
+						"path": ["third-parties"],
+						"query": [
+							{ "key": "page", "value": "1" },
+							{ "key": "size", "value": "10" },
+							{ "key": "type", "value": "user", "disabled": true },
+							{ "key": "is_active", "value": "true", "disabled": true },
+							{ "key": "search", "value": "", "disabled": true },
+							{ "key": "sort", "value": "id", "disabled": true },
+							{ "key": "order", "value": "asc", "disabled": true }
+						]
+					},
+					"description": "Get all third parties. Read-only. Filters: type (user/doctor/patient/partner), is_active. Records created automatically when creating users, doctors, patients, or partners."
+				},
+				"response": []
+			},
+			{
+				"name": "Get Third Party by ID",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/third-parties/1",
+						"host": ["{{base_url}}"],
+						"path": ["third-parties", "1"]
+					},
+					"description": "Get third party by ID."
+				},
+				"response": []
+			}
+		]
+	},
+	{
+		"name": "Partners",
+		"item": [
+			{
+				"name": "Get All Partners",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/partners?page=1&size=10",
+						"host": ["{{base_url}}"],
+						"path": ["partners"],
+						"query": [
+							{ "key": "page", "value": "1" },
+							{ "key": "size", "value": "10" },
+							{ "key": "partner_type", "value": "donor", "disabled": true },
+							{ "key": "organization_type", "value": "NGO", "disabled": true },
+							{ "key": "is_active", "value": "true", "disabled": true },
+							{ "key": "search", "value": "", "disabled": true },
+							{ "key": "sort", "value": "id", "disabled": true },
+							{ "key": "order", "value": "asc", "disabled": true }
+						]
+					},
+					"description": "Get all partners with pagination, filters, and search. Filters: partner_type (donor/referral/both), organization_type (NGO/organization/individual/hospital/medical_center), is_active."
+				},
+				"response": []
+			},
+			{
+				"name": "Get Partner by ID",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/partners/1",
+						"host": ["{{base_url}}"],
+						"path": ["partners", "1"]
+					},
+					"description": "Get partner by ID. Includes donations summary (if donor) and treatments (if referral)."
+				},
+				"response": []
+			},
+			{
+				"name": "Create Partner",
+				"request": {
+					"method": "POST",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"name\": \"Red Cross\",\n    \"partner_type\": \"donor\",\n    \"organization_type\": \"NGO\",\n    \"contact_person\": \"John Doe\",\n    \"phone\": \"+1234567890\",\n    \"email\": \"contact@redcross.org\",\n    \"address\": \"123 Charity Ave\",\n    \"is_active\": true\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/partners",
+						"host": ["{{base_url}}"],
+						"path": ["partners"]
+					},
+					"description": "Create a new partner. partner_type: donor, referral, both. organization_type: NGO, organization, individual, hospital, medical_center."
+				},
+				"response": []
+			},
+			{
+				"name": "Update Partner",
+				"request": {
+					"method": "PUT",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"name\": \"Updated Partner Name\",\n    \"contact_person\": \"Jane Smith\",\n    \"phone\": \"+9876543210\",\n    \"is_active\": true\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/partners/1",
+						"host": ["{{base_url}}"],
+						"path": ["partners", "1"]
+					},
+					"description": "Update a partner."
+				},
+				"response": []
+			},
+			{
+				"name": "Delete Partner",
+				"request": {
+					"method": "DELETE",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/partners/1",
+						"host": ["{{base_url}}"],
+						"path": ["partners", "1"]
+					},
+					"description": "Delete a partner (soft delete)."
+				},
+				"response": []
+			}
+		]
+	},
+	{
+		"name": "Doctors",
+		"item": [
+			{
+				"name": "Get All Doctors",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/doctors?page=1&size=10",
+						"host": ["{{base_url}}"],
+						"path": ["doctors"],
+						"query": [
+							{ "key": "page", "value": "1" },
+							{ "key": "size", "value": "10" },
+							{ "key": "type", "value": "internal", "disabled": true },
+							{ "key": "is_active", "value": "true", "disabled": true },
+							{ "key": "partner_id", "value": "1", "disabled": true },
+							{ "key": "search", "value": "", "disabled": true },
+							{ "key": "sort", "value": "id", "disabled": true },
+							{ "key": "order", "value": "asc", "disabled": true }
+						]
+					},
+					"description": "Get all doctors with pagination, filters, and search. Filters: type (internal/external/partner_provided), is_active, partner_id."
+				},
+				"response": []
+			},
+			{
+				"name": "Get Doctor by ID",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/doctors/1",
+						"host": ["{{base_url}}"],
+						"path": ["doctors", "1"]
+					},
+					"description": "Get doctor by ID. Includes partner name if partner_provided."
+				},
+				"response": []
+			},
+			{
+				"name": "Create Doctor (Internal)",
+				"request": {
+					"method": "POST",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"name\": \"Dr. Ahmed Ali\",\n    \"specialization\": \"General Practice\",\n    \"phone\": \"+1234567890\",\n    \"email\": \"dr.ahmed@clinic.com\",\n    \"type\": \"internal\",\n    \"is_active\": true\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/doctors",
+						"host": ["{{base_url}}"],
+						"path": ["doctors"]
+					},
+					"description": "Create an internal doctor (clinic staff)."
+				},
+				"response": []
+			},
+			{
+				"name": "Create Doctor (Partner Provided)",
+				"request": {
+					"method": "POST",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"name\": \"Dr. Sara Hassan\",\n    \"specialization\": \"Surgery\",\n    \"phone\": \"+9876543210\",\n    \"email\": \"dr.sara@hospital.com\",\n    \"type\": \"partner_provided\",\n    \"partner_id\": 1,\n    \"is_active\": true\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/doctors",
+						"host": ["{{base_url}}"],
+						"path": ["doctors"]
+					},
+					"description": "Create a partner-provided doctor. Requires partner_id."
+				},
+				"response": []
+			},
+			{
+				"name": "Update Doctor",
+				"request": {
+					"method": "PUT",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"specialization\": \"Cardiology\",\n    \"is_active\": true\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/doctors/1",
+						"host": ["{{base_url}}"],
+						"path": ["doctors", "1"]
+					},
+					"description": "Update a doctor."
+				},
+				"response": []
+			},
+			{
+				"name": "Delete Doctor",
+				"request": {
+					"method": "DELETE",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/doctors/1",
+						"host": ["{{base_url}}"],
+						"path": ["doctors", "1"]
+					},
+					"description": "Delete a doctor (soft delete)."
+				},
+				"response": []
+			}
+		]
+	}
 	],
 	"auth": {
 		"type": "bearer",

@@ -14,6 +14,7 @@ Backend API for **MedBase** — a clinic management system designed for small me
 | Alembic | Database migrations |
 | Pydantic | Request/response validation |
 | JWT (python-jose) | Authentication |
+| aioboto3 | Lightsail/S3 file storage |
 | Docker + Conda | Containerization & environment |
 | pytest + httpx | Testing |
 
@@ -82,6 +83,13 @@ ACCESS_TOKEN_EXPIRE_MINUTES=60
 
 # Application
 DEBUG=false
+
+# Lightsail Bucket (S3-compatible file storage)
+LIGHTSAIL_BUCKET_NAME=your-bucket-name
+LIGHTSAIL_ACCESS_KEY=your-access-key
+LIGHTSAIL_SECRET_KEY=your-secret-key
+LIGHTSAIL_ENDPOINT=your-bucket-name.s3.your-region.amazonaws.com
+LIGHTSAIL_REGION=your-region
 ```
 
 ### 3. Build the Docker image
@@ -142,7 +150,9 @@ This creates a default admin account:
 | `make migrate-down` | Downgrade one migration |
 | `make db-reset` | Reset database (downgrade + upgrade) |
 | `make seed` | Seed initial admin user |
+| `make populate` | Populate database with dummy data |
 | `make clean` | Remove containers and volumes |
+| `make clean-pyc` | Remove all __pycache__ folders |
 | `make dev` | Run locally without Docker |
 | `make lint` | Run linter |
 | `make format` | Format code |

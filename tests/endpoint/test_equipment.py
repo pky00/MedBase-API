@@ -16,8 +16,8 @@ async def equipment_category(db_session: AsyncSession, admin_user: User) -> Equi
     cat = EquipmentCategory(
         name="Surgical Tools",
         description="Tools used in surgery",
-        created_by=admin_user.id,
-        updated_by=admin_user.id,
+        created_by=admin_user.username,
+        updated_by=admin_user.username,
     )
     db_session.add(cat)
     await db_session.commit()
@@ -51,8 +51,8 @@ class TestGetEquipment:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test filtering equipment by condition."""
-        e1 = Equipment(name="New Scalpel", condition="new", created_by=admin_user.id, updated_by=admin_user.id)
-        e2 = Equipment(name="Old Scalpel", condition="poor", created_by=admin_user.id, updated_by=admin_user.id)
+        e1 = Equipment(name="New Scalpel", condition="new", created_by=admin_user.username, updated_by=admin_user.username)
+        e2 = Equipment(name="Old Scalpel", condition="poor", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add_all([e1, e2])
         await db_session.commit()
 
@@ -72,8 +72,8 @@ class TestGetEquipment:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test searching equipment."""
-        e1 = Equipment(name="Scalpel", created_by=admin_user.id, updated_by=admin_user.id)
-        e2 = Equipment(name="Stethoscope", created_by=admin_user.id, updated_by=admin_user.id)
+        e1 = Equipment(name="Scalpel", created_by=admin_user.username, updated_by=admin_user.username)
+        e2 = Equipment(name="Stethoscope", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add_all([e1, e2])
         await db_session.commit()
 
@@ -162,7 +162,7 @@ class TestCreateEquipment:
         db_equip = result.scalar_one_or_none()
         assert db_equip is not None
         assert db_equip.name == "Surgical Scalpel"
-        assert db_equip.created_by == admin_user.id
+        assert db_equip.created_by == admin_user.username
 
         # Verify inventory auto-created
         result = await db_session.execute(
@@ -204,7 +204,7 @@ class TestCreateEquipment:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test creating equipment with duplicate name fails."""
-        equip = Equipment(name="Duplicate Equip", created_by=admin_user.id, updated_by=admin_user.id)
+        equip = Equipment(name="Duplicate Equip", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(equip)
         await db_session.commit()
 
@@ -225,8 +225,8 @@ class TestUpdateEquipment:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test updating equipment and verify in database."""
-        admin_id = admin_user.id
-        equip = Equipment(name="Old Name", condition="good", created_by=admin_id, updated_by=admin_id)
+        admin_username = admin_user.username
+        equip = Equipment(name="Old Name", condition="good", created_by=admin_username, updated_by=admin_username)
         db_session.add(equip)
         await db_session.commit()
         await db_session.refresh(equip)
@@ -250,7 +250,7 @@ class TestUpdateEquipment:
         )
         db_equip = result.scalar_one_or_none()
         assert db_equip.name == "New Name"
-        assert db_equip.updated_by == admin_id
+        assert db_equip.updated_by == admin_username
 
     @pytest.mark.asyncio
     async def test_update_equipment_not_found(self, client: AsyncClient, admin_headers: dict):
@@ -309,14 +309,14 @@ class TestDeleteEquipment:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test cannot delete equipment when inventory quantity > 0."""
-        equip = Equipment(name="Has Stock", created_by=admin_user.id, updated_by=admin_user.id)
+        equip = Equipment(name="Has Stock", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(equip)
         await db_session.flush()
         await db_session.refresh(equip)
 
         inv = Inventory(
             item_type="equipment", item_id=equip.id, quantity=5,
-            created_by=admin_user.id, updated_by=admin_user.id,
+            created_by=admin_user.username, updated_by=admin_user.username,
         )
         db_session.add(inv)
         await db_session.commit()

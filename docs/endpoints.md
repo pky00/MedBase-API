@@ -20,6 +20,21 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 
 ---
 
+## Third Parties
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/third-parties` | List all third parties |
+| GET | `/third-parties/{id}` | Get third party by ID |
+
+**Notes:**
+- Filters: `type`, `is_active`
+- `type` values: `user`, `doctor`, `patient`, `partner`
+- Third party records are created automatically when creating users, doctors, patients, or partners
+- Read-only — no direct create/update/delete (managed through linked entities)
+
+---
+
 ## Users (Admin Only)
 
 | Method | Endpoint | Description |
@@ -33,6 +48,7 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 **Notes:**
 - Filters: `role`, `is_active`
 - Admin cannot delete themselves
+- Creating a user automatically creates a third_party record (type: `user`)
 
 ---
 
@@ -154,15 +170,36 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/inventory-transactions` | List all transactions |
-| GET | `/inventory-transactions/{id}` | Get transaction by ID |
-| POST | `/inventory-transactions` | Create transaction (updates inventory) |
+| GET | `/inventory-transactions/{id}` | Get transaction by ID (includes items) |
+| POST | `/inventory-transactions` | Create transaction with items (updates inventory) |
+| PUT | `/inventory-transactions/{id}` | Update transaction |
 | DELETE | `/inventory-transactions/{id}` | Delete transaction |
 
 **Notes:**
-- Filters: `transaction_type`, `item_type`, `item_id`
+- Filters: `transaction_type`, `third_party_id`, `transaction_date`
 - `transaction_type` values: `purchase`, `donation`, `prescription`, `loss`, `breakage`, `expiration`, `destruction`
+- `third_party_id` links to the person/entity involved in the transaction:
+  - **Donation**: `third_party_id` must be a donor (partner with `partner_type` of `donor` or `both`) — required in request
+  - **Prescription**: `third_party_id` must be a doctor — required in request
+  - **Other types** (purchase, loss, breakage, expiration, destruction): `third_party_id` is automatically set to the logged-in user's third party
+- POST can include items array to create transaction with items in one request
 - Creating a transaction automatically updates inventory quantity (+ for purchase/donation, - for others)
 - This is the only way to modify inventory quantities
+
+---
+
+## Inventory Transaction Items
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/inventory-transactions/{transaction_id}/items` | List items for a transaction |
+| POST | `/inventory-transactions/{transaction_id}/items` | Add item to transaction |
+| PUT | `/inventory-transaction-items/{id}` | Update transaction item |
+| DELETE | `/inventory-transaction-items/{id}` | Delete transaction item |
+
+**Notes:**
+- `item_type` values: `medicine`, `equipment`, `medical_device`
+- Adding/removing items updates inventory automatically
 
 ---
 
@@ -180,40 +217,8 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 - Filters: `partner_type`, `organization_type`, `is_active`
 - `partner_type` values: `donor`, `referral`, `both`
 - `organization_type` values: `NGO`, `organization`, `individual`, `hospital`, `medical_center`
-- GET by ID returns donations (if donor) and treatments (if referral)
-
----
-
-## Donations
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/donations` | List all donations |
-| GET | `/donations/{id}` | Get donation by ID (includes items) |
-| POST | `/donations` | Create donation with items |
-| PUT | `/donations/{id}` | Update donation |
-| DELETE | `/donations/{id}` | Delete donation |
-
-**Notes:**
-- Filters: `partner_id`, `donation_date`
-- POST can include items array to create donation with items in one request
-- Creates inventory transactions automatically
-- Partner must have `partner_type` of `donor`, `referral` or `both`
-
----
-
-## Donation Items
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/donations/{donation_id}/items` | List items for a donation |
-| POST | `/donations/{donation_id}/items` | Add item to donation |
-| PUT | `/donation-items/{id}` | Update donation item |
-| DELETE | `/donation-items/{id}` | Delete donation item |
-
-**Notes:**
-- `item_type` values: `medicine`, `equipment`, `medical_device`
-- Adding items updates inventory automatically
+- If no `third_party_id` is provided, automatically creates a third_party record (type: `partner`); if provided, links to the existing one
+- GET by ID returns donation transactions (if donor) and treatments (if referral)
 
 ---
 
@@ -231,6 +236,7 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 - Filters: `type`, `is_active`, `partner_id`
 - `type` values: `internal`, `external`, `partner_provided`
 - If `partner_provided`, must include `partner_id`
+- If no `third_party_id` is provided, automatically creates a third_party record (type: `doctor`); if provided, links to the existing one
 
 ---
 
@@ -247,6 +253,7 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 **Notes:**
 - Filters: `is_active`, `gender`
 - Search searches: `first_name`, `last_name`, `phone`, `email`
+- If no `third_party_id` is provided, automatically creates a third_party record (type: `patient`); if provided, links to the existing one
 
 ---
 
@@ -319,39 +326,6 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 
 ---
 
-## Prescriptions
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/prescriptions` | List all prescriptions |
-| GET | `/prescriptions/{id}` | Get prescription by ID (includes items) |
-| POST | `/prescriptions` | Create prescription with items |
-| PUT | `/prescriptions/{id}` | Update prescription |
-| DELETE | `/prescriptions/{id}` | Delete prescription |
-
-**Notes:**
-- Filters: `patient_id`, `medical_record_id`
-- POST can include items array
-- Creating prescription items decreases inventory automatically
-
----
-
-## Prescription Items
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/prescriptions/{prescription_id}/items` | List items for prescription |
-| POST | `/prescriptions/{prescription_id}/items` | Add item to prescription |
-| PUT | `/prescription-items/{id}` | Update prescription item |
-| DELETE | `/prescription-items/{id}` | Delete prescription item |
-
-**Notes:**
-- `item_type` values: `medicine`, `medical_device`
-- `dosage` field only for medicines
-- Adding items decreases inventory automatically
-
----
-
 ## Treatments
 
 | Method | Endpoint | Description |
@@ -378,10 +352,10 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 | GET | `/dashboard/summary` | Get summary statistics |
 | GET | `/dashboard/inventory` | Inventory stats |
 | GET | `/dashboard/appointments` | Appointment stats |
-| GET | `/dashboard/donations` | Donation stats |
+| GET | `/dashboard/transactions` | Transaction stats |
 
 **Notes:**
-- Summary includes counts for: patients, appointments, inventory items, donations, partners
+- Summary includes counts for: patients, appointments, inventory items, transactions, partners
 - Inventory stats: low stock alerts, items by type
 - Appointment stats: today's appointments, upcoming, by status
-- Donation stats: recent donations, total items donated
+- Transaction stats: recent transactions, total items by transaction type
