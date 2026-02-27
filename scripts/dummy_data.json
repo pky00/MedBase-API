@@ -1,0 +1,131 @@
+{
+  "users": [
+    {
+      "username": "dr_entry",
+      "email": "entry@medbase.com",
+      "password": "password123",
+      "role": "user"
+    },
+    {
+      "username": "nurse_sara",
+      "email": "sara@medbase.com",
+      "password": "password123",
+      "role": "user"
+    }
+  ],
+  "medicine_categories": [
+    { "name": "Antibiotics", "description": "Medicines used to treat bacterial infections" },
+    { "name": "Painkillers", "description": "Medicines for pain relief" },
+    { "name": "Vitamins", "description": "Nutritional supplements and vitamins" },
+    { "name": "Antifungals", "description": "Medicines used to treat fungal infections" },
+    { "name": "Antihistamines", "description": "Medicines for allergic reactions" }
+  ],
+  "equipment_categories": [
+    { "name": "Surgical Instruments", "description": "Tools used in surgical procedures" },
+    { "name": "Diagnostic Equipment", "description": "Equipment used for diagnosis" },
+    { "name": "Patient Furniture", "description": "Beds, chairs, and other furniture" },
+    { "name": "Sterilization Equipment", "description": "Equipment for sterilizing tools" }
+  ],
+  "medical_device_categories": [
+    { "name": "Monitoring Devices", "description": "Devices for patient monitoring" },
+    { "name": "Respiratory Devices", "description": "Devices for respiratory support" },
+    { "name": "Imaging Devices", "description": "Devices for medical imaging" }
+  ],
+  "medicines": [
+    { "name": "Amoxicillin 500mg", "category": "Antibiotics", "description": "Broad-spectrum antibiotic", "unit": "tablets" },
+    { "name": "Azithromycin 250mg", "category": "Antibiotics", "description": "Macrolide antibiotic", "unit": "tablets" },
+    { "name": "Paracetamol 500mg", "category": "Painkillers", "description": "Fever and pain reducer", "unit": "tablets" },
+    { "name": "Ibuprofen 400mg", "category": "Painkillers", "description": "Anti-inflammatory painkiller", "unit": "tablets" },
+    { "name": "Vitamin C 1000mg", "category": "Vitamins", "description": "Immune system support", "unit": "tablets" },
+    { "name": "Vitamin D3 5000IU", "category": "Vitamins", "description": "Bone health supplement", "unit": "tablets" },
+    { "name": "Fluconazole 150mg", "category": "Antifungals", "description": "Antifungal medication", "unit": "tablets" },
+    { "name": "Cetirizine 10mg", "category": "Antihistamines", "description": "Allergy relief", "unit": "tablets" },
+    { "name": "Amoxicillin Syrup", "category": "Antibiotics", "description": "Liquid antibiotic for children", "unit": "ml" },
+    { "name": "Diclofenac Gel", "category": "Painkillers", "description": "Topical anti-inflammatory", "unit": "mg" }
+  ],
+  "equipment": [
+    { "name": "Scalpel Set", "category": "Surgical Instruments", "description": "Set of surgical scalpels", "condition": "new" },
+    { "name": "Forceps Kit", "category": "Surgical Instruments", "description": "Assorted medical forceps", "condition": "new" },
+    { "name": "Stethoscope", "category": "Diagnostic Equipment", "description": "Standard clinical stethoscope", "condition": "good" },
+    { "name": "Blood Pressure Cuff", "category": "Diagnostic Equipment", "description": "Manual sphygmomanometer", "condition": "good" },
+    { "name": "Examination Table", "category": "Patient Furniture", "description": "Adjustable examination table", "condition": "good" },
+    { "name": "Wheelchair", "category": "Patient Furniture", "description": "Standard folding wheelchair", "condition": "fair" },
+    { "name": "Autoclave Machine", "category": "Sterilization Equipment", "description": "Steam sterilizer for instruments", "condition": "new" }
+  ],
+  "medical_devices": [
+    { "name": "Pulse Oximeter", "category": "Monitoring Devices", "description": "Measures blood oxygen levels", "serial_number": "PO-2024-001" },
+    { "name": "ECG Monitor", "category": "Monitoring Devices", "description": "12-lead electrocardiogram monitor", "serial_number": "ECG-2024-001" },
+    { "name": "Nebulizer", "category": "Respiratory Devices", "description": "Aerosol medication delivery device", "serial_number": "NEB-2024-001" },
+    { "name": "Oxygen Concentrator", "category": "Respiratory Devices", "description": "Portable oxygen supply", "serial_number": "OC-2024-001" },
+    { "name": "Portable Ultrasound", "category": "Imaging Devices", "description": "Handheld ultrasound scanner", "serial_number": "US-2024-001" }
+  ],
+  "partners": [
+    {
+      "name": "Global Health Foundation",
+      "partner_type": "donor",
+      "organization_type": "NGO",
+      "contact_person": "John Smith",
+      "phone": "+1-555-0101",
+      "email": "john@ghf.org",
+      "address": "123 Charity Lane, New York, NY"
+    },
+    {
+      "name": "City General Hospital",
+      "partner_type": "referral",
+      "organization_type": "hospital",
+      "contact_person": "Dr. Emily Brown",
+      "phone": "+1-555-0202",
+      "email": "referrals@citygeneral.com",
+      "address": "456 Hospital Drive, Boston, MA"
+    },
+    {
+      "name": "MedAid International",
+      "partner_type": "both",
+      "organization_type": "NGO",
+      "contact_person": "Maria Garcia",
+      "phone": "+1-555-0303",
+      "email": "maria@medaid.org",
+      "address": "789 Aid Street, Chicago, IL"
+    },
+    {
+      "name": "Dr. Hassan Clinic",
+      "partner_type": "referral",
+      "organization_type": "medical_center",
+      "contact_person": "Dr. Hassan Ali",
+      "phone": "+1-555-0404",
+      "email": "info@hassanclinic.com",
+      "address": "321 Medical Blvd, Houston, TX"
+    }
+  ],
+  "doctors": [
+    {
+      "name": "Dr. Ahmad Khalil",
+      "specialization": "General Practice",
+      "phone": "+1-555-1001",
+      "email": "ahmad@medbase.com",
+      "type": "internal"
+    },
+    {
+      "name": "Dr. Fatima Noor",
+      "specialization": "Pediatrics",
+      "phone": "+1-555-1002",
+      "email": "fatima@medbase.com",
+      "type": "internal"
+    },
+    {
+      "name": "Dr. Omar Sayeed",
+      "specialization": "Orthopedics",
+      "phone": "+1-555-1003",
+      "email": "omar@external.com",
+      "type": "external"
+    },
+    {
+      "name": "Dr. Lina Mansour",
+      "specialization": "Dermatology",
+      "phone": "+1-555-1004",
+      "email": "lina@medaid.org",
+      "type": "partner_provided",
+      "partner_name": "MedAid International"
+    }
+  ]
+}

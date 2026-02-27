@@ -11,6 +11,7 @@ MedBase is a clinic management application designed for small medical clinics. I
 - **Frontend**: Angular
 - **Backend**: FastAPI (Python), SQLAlchemy, Alembic, Pydantic, Conda
 - **Database**: PostgreSQL (Amazon RDS)
+- **File Storage**: Amazon Lightsail Bucket (S3-compatible)
 - **Containerization**: Docker (backend)
 - **Deployment**: AWS
 
@@ -149,7 +150,8 @@ class Appointment(Base):
 - Dependency files: `environment.yml` + `requirements.txt`
 - Single Docker setup with hot reload for development
 - Database hosted on Amazon RDS (no local PostgreSQL containers)
-- All environment variables loaded from `.env` (`DATABASE_URL`, `TEST_DATABASE_URL`, etc.)
+- File storage via Amazon Lightsail Bucket (S3-compatible, using `aioboto3`)
+- All environment variables loaded from `.env` (`DATABASE_URL`, `TEST_DATABASE_URL`, `LIGHTSAIL_*`, etc.)
 - Makefile for common commands (build, run, test, migrate, etc.)
 
 **Testing**
