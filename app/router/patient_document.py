@@ -1,0 +1,147 @@
+import logging
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File, Form
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.utility.database import get_db
+from app.utility.auth import get_current_user
+from app.utility import storage
+from app.service.patient import PatientService
+from app.service.patient_document import PatientDocumentService
+from app.schema.patient_document import PatientDocumentResponse
+from app.schema.base import PaginatedResponse, MessageResponse
+from app.model.user import User
+
+logger = logging.getLogger("medbase.router.patient_document")
+
+router = APIRouter(tags=["Patient Documents"])
+
+
+def _add_file_url(doc) -> dict:
+    """Convert document to response dict with file_url."""
+    data = {
+        "id": doc.id,
+        "patient_id": doc.patient_id,
+        "document_name": doc.document_name,
+        "document_type": doc.document_type,
+        "file_path": doc.file_path,
+        "file_url": storage.get_file_url(doc.file_path),
+        "upload_date": doc.upload_date,
+        "is_deleted": doc.is_deleted,
+        "created_by": doc.created_by,
+        "created_at": doc.created_at,
+        "updated_by": doc.updated_by,
+        "updated_at": doc.updated_at,
+    }
+    return data
+
+
+@router.get(
+    "/patients/{patient_id}/documents",
+    response_model=PaginatedResponse[PatientDocumentResponse],
+)
+async def get_patient_documents(
+    patient_id: int,
+    page: int = Query(1, ge=1, description="Page number"),
+    size: int = Query(10, ge=1, le=100, description="Page size"),
+    document_type: Optional[str] = Query(None, description="Filter by document type"),
+    sort: str = Query("id", description="Sort field"),
+    order: str = Query("asc", description="Sort order (asc/desc)"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """List documents for a patient."""
+    logger.info("Listing documents for patient_id=%d by user_id=%d", patient_id, current_user.id)
+
+    # Verify patient exists
+    patient_service = PatientService(db)
+    patient = await patient_service.get_by_id(patient_id)
+    if not patient:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
+
+    service = PatientDocumentService(db)
+    documents, total = await service.get_all_for_patient(
+        patient_id=patient_id, page=page, size=size,
+        document_type=document_type, sort=sort, order=order,
+    )
+
+    items = [_add_file_url(doc) for doc in documents]
+
+    logger.info("Returning %d documents (total=%d) for patient_id=%d", len(documents), total, patient_id)
+    return PaginatedResponse(items=items, total=total, page=page, size=size)
+
+
+@router.get("/patient-documents/{document_id}", response_model=PatientDocumentResponse)
+async def get_patient_document(
+    document_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Get document by ID."""
+    logger.info("Fetching document_id=%d by user_id=%d", document_id, current_user.id)
+
+    service = PatientDocumentService(db)
+    doc = await service.get_by_id(document_id)
+
+    if not doc:
+        logger.warning("Document not found document_id=%d", document_id)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+
+    return _add_file_url(doc)
+
+
+@router.post(
+    "/patients/{patient_id}/documents",
+    response_model=PatientDocumentResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def upload_patient_document(
+    patient_id: int,
+    file: UploadFile = File(...),
+    document_type: Optional[str] = Form(None),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Upload a document for a patient. Accepts multipart/form-data."""
+    logger.info(
+        "Uploading document for patient_id=%d filename='%s' by user_id=%d",
+        patient_id, file.filename, current_user.id,
+    )
+
+    # Verify patient exists
+    patient_service = PatientService(db)
+    patient = await patient_service.get_by_id(patient_id)
+    if not patient:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
+
+    service = PatientDocumentService(db)
+    doc = await service.upload(
+        patient_id=patient_id,
+        file=file,
+        document_type=document_type,
+        created_by=current_user.username,
+    )
+
+    logger.info("Document uploaded document_id=%d patient_id=%d", doc.id, patient_id)
+    return _add_file_url(doc)
+
+
+@router.delete("/patient-documents/{document_id}", response_model=MessageResponse)
+async def delete_patient_document(
+    document_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Delete a patient document (soft delete)."""
+    logger.info("Deleting document_id=%d by user_id=%d", document_id, current_user.id)
+
+    service = PatientDocumentService(db)
+
+    doc = await service.get_by_id(document_id)
+    if not doc:
+        logger.warning("Document not found for deletion document_id=%d", document_id)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+
+    await service.delete(document_id, deleted_by=current_user.username)
+    logger.info("Document deleted document_id=%d", document_id)
+    return MessageResponse(message="Document deleted successfully")

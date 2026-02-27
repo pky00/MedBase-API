@@ -1026,6 +1026,181 @@
 				"response": []
 			}
 		]
+	},
+	{
+		"name": "Patients",
+		"item": [
+			{
+				"name": "Get All Patients",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/patients?page=1&size=10",
+						"host": ["{{base_url}}"],
+						"path": ["patients"],
+						"query": [
+							{ "key": "page", "value": "1" },
+							{ "key": "size", "value": "10" },
+							{ "key": "is_active", "value": "true", "disabled": true },
+							{ "key": "gender", "value": "male", "disabled": true },
+							{ "key": "search", "value": "", "disabled": true },
+							{ "key": "sort", "value": "id", "disabled": true },
+							{ "key": "order", "value": "asc", "disabled": true }
+						]
+					},
+					"description": "Get all patients with pagination, filters, and search. Filters: is_active, gender (male/female). Search: first_name, last_name, phone, email."
+				},
+				"response": []
+			},
+			{
+				"name": "Get Patient by ID",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/patients/1",
+						"host": ["{{base_url}}"],
+						"path": ["patients", "1"]
+					},
+					"description": "Get patient by ID."
+				},
+				"response": []
+			},
+			{
+				"name": "Create Patient",
+				"request": {
+					"method": "POST",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"first_name\": \"Ahmad\",\n    \"last_name\": \"Hassan\",\n    \"date_of_birth\": \"1990-05-15\",\n    \"gender\": \"male\",\n    \"phone\": \"+1234567890\",\n    \"email\": \"ahmad.hassan@example.com\",\n    \"address\": \"123 Main Street\",\n    \"emergency_contact\": \"Sara Hassan\",\n    \"emergency_phone\": \"+0987654321\",\n    \"is_active\": true\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/patients",
+						"host": ["{{base_url}}"],
+						"path": ["patients"]
+					},
+					"description": "Create a new patient. Auto-creates a third_party record (type: patient) if third_party_id not provided."
+				},
+				"response": []
+			},
+			{
+				"name": "Update Patient",
+				"request": {
+					"method": "PUT",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"first_name\": \"Ahmad\",\n    \"last_name\": \"Hassan Updated\",\n    \"phone\": \"+9876543210\",\n    \"emergency_contact\": \"Ali Hassan\",\n    \"is_active\": true\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/patients/1",
+						"host": ["{{base_url}}"],
+						"path": ["patients", "1"]
+					},
+					"description": "Update a patient."
+				},
+				"response": []
+			},
+			{
+				"name": "Delete Patient",
+				"request": {
+					"method": "DELETE",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/patients/1",
+						"host": ["{{base_url}}"],
+						"path": ["patients", "1"]
+					},
+					"description": "Delete a patient (soft delete)."
+				},
+				"response": []
+			}
+		]
+	},
+	{
+		"name": "Patient Documents",
+		"item": [
+			{
+				"name": "Get Patient Documents",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/patients/1/documents?page=1&size=10",
+						"host": ["{{base_url}}"],
+						"path": ["patients", "1", "documents"],
+						"query": [
+							{ "key": "page", "value": "1" },
+							{ "key": "size", "value": "10" },
+							{ "key": "document_type", "value": "lab_report", "disabled": true },
+							{ "key": "sort", "value": "id", "disabled": true },
+							{ "key": "order", "value": "asc", "disabled": true }
+						]
+					},
+					"description": "List all documents for a patient. Filter by document_type."
+				},
+				"response": []
+			},
+			{
+				"name": "Get Document by ID",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/patient-documents/1",
+						"host": ["{{base_url}}"],
+						"path": ["patient-documents", "1"]
+					},
+					"description": "Get document by ID. Returns file URL for download."
+				},
+				"response": []
+			},
+			{
+				"name": "Upload Document",
+				"request": {
+					"method": "POST",
+					"header": [],
+					"body": {
+						"mode": "formdata",
+						"formdata": [
+							{
+								"key": "file",
+								"type": "file",
+								"src": ""
+							},
+							{
+								"key": "document_type",
+								"value": "lab_report",
+								"type": "text"
+							}
+						]
+					},
+					"url": {
+						"raw": "{{base_url}}/patients/1/documents",
+						"host": ["{{base_url}}"],
+						"path": ["patients", "1", "documents"]
+					},
+					"description": "Upload a document for a patient. Accepts multipart/form-data. document_type is optional."
+				},
+				"response": []
+			},
+			{
+				"name": "Delete Document",
+				"request": {
+					"method": "DELETE",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/patient-documents/1",
+						"host": ["{{base_url}}"],
+						"path": ["patient-documents", "1"]
+					},
+					"description": "Delete a patient document (soft delete). Also removes file from storage."
+				},
+				"response": []
+			}
+		]
 	}
 	],
 	"auth": {

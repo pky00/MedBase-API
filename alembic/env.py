@@ -29,6 +29,8 @@ from app.model.medical_device import MedicalDevice  # noqa: F401
 from app.model.inventory import Inventory  # noqa: F401
 from app.model.partner import Partner  # noqa: F401
 from app.model.doctor import Doctor  # noqa: F401
+from app.model.patient import Patient  # noqa: F401
+from app.model.patient_document import PatientDocument  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -6,7 +6,7 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 
 ---
 
-## Current Phase: Phase 3 - Partners & Doctors
+## Current Phase: Phase 4 - Patients
 
 ---
 
@@ -23,6 +23,8 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 | 8 | Medical Devices | 2026-02-11 | Medical device CRUD with category/serial number, auto inventory creation, delete restriction |
 | 9 | Partners | 2026-02-14 | Partner CRUD with donor/referral/both types, organization types, third_party_id (auto-created or linked), search, filters |
 | 10 | Doctors | 2026-02-14 | Doctor CRUD with internal/external/partner_provided types, third_party_id (auto-created or linked), partner validation |
+| 11 | Patients | 2026-02-27 | Patient CRUD with third_party auto-creation, gender filter, search by name/phone/email, pagination |
+| 12 | Patient Documents | 2026-02-27 | Document upload to Lightsail bucket (S3), list/get/delete, multipart/form-data, document_type filter |
 
 ---
 
@@ -179,10 +181,57 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 
 ---
 
+## Phase 4 Details
+
+### Feature 11: Patients
+**Status:** Complete
+
+**Endpoints:**
+- GET `/api/v1/patients` - List all patients (paginated, filterable by is_active, gender, searchable by first_name, last_name, phone, email)
+- GET `/api/v1/patients/{id}` - Get patient by ID
+- POST `/api/v1/patients` - Create patient (auto-creates third_party if third_party_id not provided)
+- PUT `/api/v1/patients/{id}` - Update patient (syncs third_party name)
+- DELETE `/api/v1/patients/{id}` - Delete patient (soft delete)
+
+**Model:**
+- id, third_party_id (FK), first_name, last_name, date_of_birth, gender (male/female), phone, email, address
+- emergency_contact, emergency_phone, is_active, is_deleted, audit columns
+
+**Tests:**
+- test_patients.py (20 tests: CRUD, filters by gender/is_active, search by first_name/last_name, pagination, third_party auto-creation, link to existing third_party, invalid third_party, validation errors, soft delete verification)
+
+**Postman:**
+- Patients folder (Get All, Get by ID, Create, Update, Delete)
+
+### Feature 12: Patient Documents
+**Status:** Complete
+
+**Endpoints:**
+- GET `/api/v1/patients/{patient_id}/documents` - List documents for patient (paginated, filterable by document_type)
+- GET `/api/v1/patient-documents/{id}` - Get document by ID (includes file_url)
+- POST `/api/v1/patients/{patient_id}/documents` - Upload document (multipart/form-data)
+- DELETE `/api/v1/patient-documents/{id}` - Delete document (soft delete, removes from storage)
+
+**Model:**
+- id, patient_id (FK), document_name, document_type, file_path, upload_date, is_deleted, audit columns
+
+**Storage:**
+- Files uploaded to Amazon Lightsail Bucket (S3-compatible) via aioboto3
+- Storage utility: `app/utility/storage.py` (upload_file, delete_file, get_file_url)
+- File key format: `patient-documents/{patient_id}/{uuid}.{ext}`
+
+**Tests:**
+- test_patient_documents.py (14 tests: list, filter by type, pagination, get by ID, upload with/without type, upload for non-existent patient, delete, soft delete verification, S3 operations mocked)
+
+**Postman:**
+- Patient Documents folder (Get Patient Documents, Get Document by ID, Upload Document, Delete Document)
+
+---
+
 ## Migration Notes
 
-- All previous migration files deleted and replaced with a single fresh migration: `20260214_initial_schema.py`
-- The migration covers the entire schema from Phase 1 through Phase 3 including: third_parties, users, medicine_categories, equipment_categories, medical_device_categories, medicines, equipment, medical_devices, inventory, partners, doctors
+- Initial migration: `20260226_193257_039074b781f1_initial.py` (Phase 1-3 schema)
+- Phase 4 migration: `20260227_add_patients_and_patient_documents.py` (patients and patient_documents tables)
 
 ---
 
