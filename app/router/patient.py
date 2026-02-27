@@ -29,7 +29,6 @@ async def get_patients(
     search: Optional[str] = Query(None, description="Search in first_name, last_name, phone, email"),
     sort: str = Query("id", description="Sort field"),
     order: str = Query("asc", description="Sort order (asc/desc)"),
-    with_documents: bool = Query(False, description="Include patient documents in response"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -37,23 +36,13 @@ async def get_patients(
     logger.info("Listing patients page=%d size=%d by user_id=%d", page, size, current_user.id)
 
     service = PatientService(db)
-    patients, total, docs_map = await service.get_all(
+    patients, total = await service.get_all(
         page=page, size=size, is_active=is_active,
         gender=gender, search=search, sort=sort, order=order,
-        with_documents=with_documents,
     )
 
-    if docs_map is not None:
-        items = []
-        for p in patients:
-            data = PatientResponse.model_validate(p).model_dump()
-            data["documents"] = docs_map.get(p.id, [])
-            items.append(data)
-    else:
-        items = patients
-
     logger.info("Returning %d patients (total=%d)", len(patients), total)
-    return PaginatedResponse(items=items, total=total, page=page, size=size)
+    return PaginatedResponse(items=patients, total=total, page=page, size=size)
 
 
 @router.get("/{patient_id}", response_model=PatientResponse)

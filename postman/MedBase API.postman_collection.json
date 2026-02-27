@@ -1046,11 +1046,10 @@
 							{ "key": "gender", "value": "male", "disabled": true },
 							{ "key": "search", "value": "", "disabled": true },
 							{ "key": "sort", "value": "id", "disabled": true },
-							{ "key": "order", "value": "asc", "disabled": true },
-							{ "key": "with_documents", "value": "true", "disabled": true }
+							{ "key": "order", "value": "asc", "disabled": true }
 						]
 					},
-					"description": "Get all patients with pagination, filters, and search. Filters: is_active, gender (male/female). Search: first_name, last_name, phone, email. Use with_documents=true to include documents."
+					"description": "Get all patients with pagination, filters, and search. Filters: is_active, gender (male/female). Search: first_name, last_name, phone, email."
 				},
 				"response": []
 			},

@@ -94,15 +94,8 @@ class PatientService:
         search: Optional[str] = None,
         sort: str = "id",
         order: str = "asc",
-        with_documents: bool = False,
-    ) -> Tuple[List[Patient], int, Optional[dict]]:
-        """Get all patients with pagination, filtering, and sorting.
-
-        When with_documents=True, performs an outerjoin with patient_documents
-        and returns a docs_map (dict[int, List[dict]]) as the third element.
-        Each document dict includes file_url resolved from the Lightsail bucket.
-        When with_documents=False, the third element is None.
-        """
+    ) -> Tuple[List[Patient], int]:
+        """Get all patients with pagination, filtering, and sorting."""
         query = select(Patient).where(Patient.is_deleted == False)
 
         if is_active is not None:
@@ -137,30 +130,7 @@ class PatientService:
         patients = list(result.scalars().all())
 
         logger.debug("Queried patients: total=%d returned=%d", total, len(patients))
-
-        if not with_documents or not patients:
-            return patients, total, None
-
-        # Outerjoin with patient_documents for the fetched patients
-        patient_ids = [p.id for p in patients]
-        doc_result = await self.db.execute(
-            select(Patient.id, PatientDocument)
-            .outerjoin(
-                PatientDocument,
-                (PatientDocument.patient_id == Patient.id) & (PatientDocument.is_deleted == False),
-            )
-            .where(Patient.id.in_(patient_ids))
-            .order_by(PatientDocument.id.asc())
-        )
-        doc_rows = doc_result.all()
-
-        # Group documents by patient_id, resolve file_url one by one
-        docs_map: dict[int, List[dict]] = {pid: [] for pid in patient_ids}
-        for patient_id, doc in doc_rows:
-            if doc is not None:
-                docs_map[patient_id].append(_document_to_dict(doc))
-
-        return patients, total, docs_map
+        return patients, total
 
     async def create(self, data: PatientCreate, created_by: Optional[str] = None) -> Patient:
         """Create a new patient. Auto-creates a third_party record if third_party_id not provided."""
