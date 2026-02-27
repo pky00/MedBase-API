@@ -19,6 +19,7 @@ from app.service.equipment import EquipmentService
 from app.service.medical_device import MedicalDeviceService
 from app.service.partner import PartnerService
 from app.service.doctor import DoctorService
+from app.service.patient import PatientService
 
 from app.schema.user import UserCreate
 from app.schema.medicine_category import MedicineCategoryCreate
@@ -29,6 +30,7 @@ from app.schema.equipment import EquipmentCreate
 from app.schema.medical_device import MedicalDeviceCreate
 from app.schema.partner import PartnerCreate
 from app.schema.doctor import DoctorCreate
+from app.schema.patient import PatientCreate
 
 CREATED_BY = "admin"
 
@@ -193,6 +195,21 @@ async def populate():
                 created_by=CREATED_BY,
             )
             print(f"  [created] Doctor '{d['name']}'")
+
+        await db.commit()
+
+        # --- Patients ---
+        patient_service = PatientService(db)
+        for p in data.get("patients", []):
+            existing = await patient_service.get_by_name(p["first_name"], p["last_name"])
+            if existing:
+                print(f"  [skip] Patient '{p['first_name']} {p['last_name']}' already exists")
+                continue
+            await patient_service.create(
+                PatientCreate(**p),
+                created_by=CREATED_BY,
+            )
+            print(f"  [created] Patient '{p['first_name']} {p['last_name']}'")
 
         await db.commit()
 
