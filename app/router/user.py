@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.utility.database import get_db
 from app.utility.auth import get_current_admin_user
 from app.service.user import UserService
+from app.service.third_party import ThirdPartyService
 from app.schema.user import UserCreate, UserUpdate, UserResponse
 from app.schema.user import UserRole
 from app.schema.base import PaginatedResponse, MessageResponse
@@ -131,7 +132,17 @@ async def create_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
         )
-    
+
+    # Check for duplicate name in third_parties table
+    tp_service = ThirdPartyService(db)
+    existing_tp = await tp_service.get_by_name(user_data.name)
+    if existing_tp:
+        logger.warning("Name already exists in third parties name='%s'", user_data.name)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Name already exists in third parties"
+        )
+
     user = await user_service.create(user_data, created_by=current_user.username)
     logger.info("User created user_id=%d username='%s'", user.id, user.username)
     return user

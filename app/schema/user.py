@@ -20,7 +20,8 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     """Schema for creating a new user."""
-    
+
+    name: str = Field(..., min_length=1, max_length=255, description="Full name for third party record")
     password: str = Field(..., min_length=6, max_length=100)
     role: UserRole = UserRole.USER
     is_active: bool = True

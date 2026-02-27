@@ -25,6 +25,7 @@ async def seed_admin():
         
         # Create admin user
         admin_data = UserCreate(
+            name="Admin",
             username="admin",
             email="admin@medbase.com",
             password="admin123",  # Change in production!

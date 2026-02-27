@@ -7,6 +7,7 @@ from app.utility.database import get_db
 from app.utility.auth import get_current_user
 from app.service.doctor import DoctorService
 from app.service.partner import PartnerService
+from app.service.third_party import ThirdPartyService
 from app.schema.doctor import (
     DoctorCreate,
     DoctorUpdate,
@@ -93,13 +94,23 @@ async def create_doctor(
 
     service = DoctorService(db)
 
-    # Check for duplicate name
+    # Check for duplicate name in doctors table
     existing = await service.get_by_name(data.name)
     if existing:
         logger.warning("Doctor name already exists name='%s'", data.name)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Doctor name already exists",
+        )
+
+    # Check for duplicate name in third_parties table
+    tp_service = ThirdPartyService(db)
+    existing_tp = await tp_service.get_by_name(data.name)
+    if existing_tp:
+        logger.warning("Name already exists in third parties name='%s'", data.name)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Name already exists in third parties",
         )
 
     # If partner_provided, partner_id is required

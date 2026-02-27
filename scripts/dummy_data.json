@@ -2,12 +2,14 @@
   "users": [
     {
       "username": "dr_entry",
+      "name": "Dr. Entry Clerk",
       "email": "entry@medbase.com",
       "password": "password123",
       "role": "user"
     },
     {
       "username": "nurse_sara",
+      "name": "Nurse Sara Ahmed",
       "email": "sara@medbase.com",
       "password": "password123",
       "role": "user"
@@ -126,6 +128,61 @@
       "email": "lina@medaid.org",
       "type": "partner_provided",
       "partner_name": "MedAid International"
+    }
+  ],
+  "patients": [
+    {
+      "first_name": "Ali",
+      "last_name": "Hassan",
+      "date_of_birth": "1985-03-15",
+      "gender": "male",
+      "phone": "+1-555-2001",
+      "email": "ali.hassan@email.com",
+      "address": "45 Oak Street, Springfield, IL",
+      "emergency_contact": "Fatima Hassan",
+      "emergency_phone": "+1-555-2002"
+    },
+    {
+      "first_name": "Maryam",
+      "last_name": "Khoury",
+      "date_of_birth": "1992-07-22",
+      "gender": "female",
+      "phone": "+1-555-2003",
+      "email": "maryam.khoury@email.com",
+      "address": "78 Pine Avenue, Dallas, TX",
+      "emergency_contact": "Samir Khoury",
+      "emergency_phone": "+1-555-2004"
+    },
+    {
+      "first_name": "Youssef",
+      "last_name": "El-Amin",
+      "date_of_birth": "1978-11-03",
+      "gender": "male",
+      "phone": "+1-555-2005",
+      "email": "youssef@email.com",
+      "address": "120 Maple Drive, Miami, FL",
+      "emergency_contact": "Nadia El-Amin",
+      "emergency_phone": "+1-555-2006"
+    },
+    {
+      "first_name": "Layla",
+      "last_name": "Rashid",
+      "date_of_birth": "2001-01-30",
+      "gender": "female",
+      "phone": "+1-555-2007",
+      "email": "layla.rashid@email.com",
+      "address": "33 Cedar Lane, Seattle, WA"
+    },
+    {
+      "first_name": "Omar",
+      "last_name": "Farah",
+      "date_of_birth": "1965-09-18",
+      "gender": "male",
+      "phone": "+1-555-2009",
+      "email": "omar.farah@email.com",
+      "address": "200 Birch Road, Denver, CO",
+      "emergency_contact": "Amina Farah",
+      "emergency_phone": "+1-555-2010"
     }
   ]
 }

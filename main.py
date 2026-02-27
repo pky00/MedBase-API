@@ -19,6 +19,8 @@ from app.router import (
     third_party,
     partner,
     doctor,
+    patient,
+    patient_document,
 )
 
 logger = logging.getLogger("medbase.app")
@@ -70,6 +72,8 @@ app.include_router(medical_device.router, prefix=settings.API_V1_PREFIX)
 app.include_router(inventory.router, prefix=settings.API_V1_PREFIX)
 app.include_router(partner.router, prefix=settings.API_V1_PREFIX)
 app.include_router(doctor.router, prefix=settings.API_V1_PREFIX)
+app.include_router(patient.router, prefix=settings.API_V1_PREFIX)
+app.include_router(patient_document.router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/")
