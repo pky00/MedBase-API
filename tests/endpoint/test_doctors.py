@@ -275,6 +275,23 @@ class TestCreateDoctor:
         assert "already exists" in response.json()["detail"]
 
     @pytest.mark.asyncio
+    async def test_create_doctor_duplicate_name_in_third_parties(
+        self, client: AsyncClient, admin_headers: dict, db_session: AsyncSession,
+    ):
+        """Test creating doctor with name that already exists in third_parties fails."""
+        tp = ThirdParty(name="Existing TP Doctor", type="patient", is_active=True)
+        db_session.add(tp)
+        await db_session.commit()
+
+        response = await client.post(
+            "/api/v1/doctors",
+            json={"name": "Existing TP Doctor", "type": "internal"},
+            headers=admin_headers,
+        )
+        assert response.status_code == 400
+        assert "already exists in third parties" in response.json()["detail"]
+
+    @pytest.mark.asyncio
     async def test_create_doctor_empty_name(self, client: AsyncClient, admin_headers: dict):
         """Test creating doctor with empty name fails."""
         response = await client.post(

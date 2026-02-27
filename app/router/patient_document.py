@@ -5,9 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.utility.database import get_db
 from app.utility.auth import get_current_user
-from app.utility import storage
 from app.service.patient import PatientService
-from app.service.patient_document import PatientDocumentService
+from app.service.patient_document import PatientDocumentService, document_to_response
 from app.schema.patient_document import PatientDocumentResponse
 from app.schema.base import PaginatedResponse, MessageResponse
 from app.model.user import User
@@ -15,25 +14,6 @@ from app.model.user import User
 logger = logging.getLogger("medbase.router.patient_document")
 
 router = APIRouter(tags=["Patient Documents"])
-
-
-def _add_file_url(doc) -> dict:
-    """Convert document to response dict with file_url."""
-    data = {
-        "id": doc.id,
-        "patient_id": doc.patient_id,
-        "document_name": doc.document_name,
-        "document_type": doc.document_type,
-        "file_path": doc.file_path,
-        "file_url": storage.get_file_url(doc.file_path),
-        "upload_date": doc.upload_date,
-        "is_deleted": doc.is_deleted,
-        "created_by": doc.created_by,
-        "created_at": doc.created_at,
-        "updated_by": doc.updated_by,
-        "updated_at": doc.updated_at,
-    }
-    return data
 
 
 @router.get(
@@ -65,7 +45,7 @@ async def get_patient_documents(
         document_type=document_type, sort=sort, order=order,
     )
 
-    items = [_add_file_url(doc) for doc in documents]
+    items = [document_to_response(doc) for doc in documents]
 
     logger.info("Returning %d documents (total=%d) for patient_id=%d", len(documents), total, patient_id)
     return PaginatedResponse(items=items, total=total, page=page, size=size)
@@ -87,7 +67,7 @@ async def get_patient_document(
         logger.warning("Document not found document_id=%d", document_id)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
-    return _add_file_url(doc)
+    return document_to_response(doc)
 
 
 @router.post(
@@ -123,7 +103,7 @@ async def upload_patient_document(
     )
 
     logger.info("Document uploaded document_id=%d patient_id=%d", doc.id, patient_id)
-    return _add_file_url(doc)
+    return document_to_response(doc)
 
 
 @router.delete("/patient-documents/{document_id}", response_model=MessageResponse)

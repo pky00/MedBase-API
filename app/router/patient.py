@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.utility.database import get_db
 from app.utility.auth import get_current_user
 from app.service.patient import PatientService
+from app.service.patient_document import PatientDocumentService, document_to_response
 from app.schema.patient import (
     PatientCreate,
     PatientUpdate,
@@ -29,6 +30,7 @@ async def get_patients(
     search: Optional[str] = Query(None, description="Search in first_name, last_name, phone, email"),
     sort: str = Query("id", description="Sort field"),
     order: str = Query("asc", description="Sort order (asc/desc)"),
+    with_documents: bool = Query(False, description="Include patient documents in response"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -41,13 +43,25 @@ async def get_patients(
         gender=gender, search=search, sort=sort, order=order,
     )
 
+    items = patients
+    if with_documents and patients:
+        doc_service = PatientDocumentService(db)
+        patient_ids = [p.id for p in patients]
+        docs_by_patient = await doc_service.get_all_for_patient_ids(patient_ids)
+        items = []
+        for p in patients:
+            data = PatientResponse.model_validate(p).model_dump()
+            data["documents"] = docs_by_patient.get(p.id, [])
+            items.append(data)
+
     logger.info("Returning %d patients (total=%d)", len(patients), total)
-    return PaginatedResponse(items=patients, total=total, page=page, size=size)
+    return PaginatedResponse(items=items, total=total, page=page, size=size)
 
 
 @router.get("/{patient_id}", response_model=PatientResponse)
 async def get_patient(
     patient_id: int,
+    with_documents: bool = Query(False, description="Include patient documents in response"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -60,6 +74,13 @@ async def get_patient(
     if not patient:
         logger.warning("Patient not found patient_id=%d", patient_id)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
+
+    if with_documents:
+        doc_service = PatientDocumentService(db)
+        docs, _ = await doc_service.get_all_for_patient(patient_id, page=1, size=1000)
+        data = PatientResponse.model_validate(patient).model_dump()
+        data["documents"] = [document_to_response(d) for d in docs]
+        return data
 
     return patient
 
@@ -78,10 +99,29 @@ async def create_patient(
 
     service = PatientService(db)
 
+    # Check for duplicate name in patients table
+    full_name = f"{data.first_name} {data.last_name}"
+    existing = await service.get_by_name(data.first_name, data.last_name)
+    if existing:
+        logger.warning("Patient name already exists name='%s'", full_name)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Patient name already exists",
+        )
+
+    # Check for duplicate name in third_parties table
+    from app.service.third_party import ThirdPartyService
+    tp_service = ThirdPartyService(db)
+    existing_tp = await tp_service.get_by_name(full_name)
+    if existing_tp:
+        logger.warning("Name already exists in third parties name='%s'", full_name)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Name already exists in third parties",
+        )
+
     # Validate third_party_id if provided
     if data.third_party_id:
-        from app.service.third_party import ThirdPartyService
-        tp_service = ThirdPartyService(db)
         tp = await tp_service.get_by_id(data.third_party_id)
         if not tp:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Third party not found")

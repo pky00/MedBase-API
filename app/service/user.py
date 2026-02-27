@@ -94,7 +94,7 @@ class UserService:
         # Auto-create third_party record
         tp_service = ThirdPartyService(self.db)
         third_party = await tp_service.create(
-            name=user_data.username,
+            name=user_data.name,
             type=ThirdPartyType.USER,
             email=user_data.email,
             is_active=user_data.is_active,

@@ -135,7 +135,7 @@
 						"header": [{ "key": "Content-Type", "value": "application/json" }],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"newuser\",\n    \"email\": \"newuser@example.com\",\n    \"password\": \"password123\",\n    \"role\": \"user\",\n    \"is_active\": true\n}"
+							"raw": "{\n    \"username\": \"newuser\",\n    \"name\": \"New User\",\n    \"email\": \"newuser@example.com\",\n    \"password\": \"password123\",\n    \"role\": \"user\",\n    \"is_active\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/users",
@@ -1046,10 +1046,11 @@
 							{ "key": "gender", "value": "male", "disabled": true },
 							{ "key": "search", "value": "", "disabled": true },
 							{ "key": "sort", "value": "id", "disabled": true },
-							{ "key": "order", "value": "asc", "disabled": true }
+							{ "key": "order", "value": "asc", "disabled": true },
+							{ "key": "with_documents", "value": "true", "disabled": true }
 						]
 					},
-					"description": "Get all patients with pagination, filters, and search. Filters: is_active, gender (male/female). Search: first_name, last_name, phone, email."
+					"description": "Get all patients with pagination, filters, and search. Filters: is_active, gender (male/female). Search: first_name, last_name, phone, email. Use with_documents=true to include documents."
 				},
 				"response": []
 			},
@@ -1061,9 +1062,12 @@
 					"url": {
 						"raw": "{{base_url}}/patients/1",
 						"host": ["{{base_url}}"],
-						"path": ["patients", "1"]
+						"path": ["patients", "1"],
+						"query": [
+							{ "key": "with_documents", "value": "true", "disabled": true }
+						]
 					},
-					"description": "Get patient by ID."
+					"description": "Get patient by ID. Use with_documents=true to include documents."
 				},
 				"response": []
 			},

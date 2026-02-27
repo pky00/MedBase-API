@@ -17,6 +17,17 @@ class PatientService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
+    async def get_by_name(self, first_name: str, last_name: str) -> Optional[Patient]:
+        """Get patient by first_name and last_name."""
+        result = await self.db.execute(
+            select(Patient).where(
+                Patient.first_name == first_name,
+                Patient.last_name == last_name,
+                Patient.is_deleted == False,
+            )
+        )
+        return result.scalar_one_or_none()
+
     async def get_by_id(self, patient_id: int) -> Optional[Patient]:
         """Get patient by ID."""
         result = await self.db.execute(

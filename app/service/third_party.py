@@ -19,6 +19,16 @@ class ThirdPartyService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
+    async def get_by_name(self, name: str) -> Optional[ThirdParty]:
+        """Get third party by name."""
+        result = await self.db.execute(
+            select(ThirdParty).where(
+                ThirdParty.name == name,
+                ThirdParty.is_deleted == False,
+            )
+        )
+        return result.scalar_one_or_none()
+
     async def get_by_id(self, third_party_id: int) -> Optional[ThirdParty]:
         """Get third party by ID."""
         result = await self.db.execute(

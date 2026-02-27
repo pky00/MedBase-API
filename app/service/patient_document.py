@@ -11,6 +11,24 @@ from app.utility import storage
 logger = logging.getLogger("medbase.service.patient_document")
 
 
+def document_to_response(doc: PatientDocument) -> dict:
+    """Convert a PatientDocument model to a response dict with file_url."""
+    return {
+        "id": doc.id,
+        "patient_id": doc.patient_id,
+        "document_name": doc.document_name,
+        "document_type": doc.document_type,
+        "file_path": doc.file_path,
+        "file_url": storage.get_file_url(doc.file_path),
+        "upload_date": doc.upload_date,
+        "is_deleted": doc.is_deleted,
+        "created_by": doc.created_by,
+        "created_at": doc.created_at,
+        "updated_by": doc.updated_by,
+        "updated_at": doc.updated_at,
+    }
+
+
 class PatientDocumentService:
     """Service layer for patient document operations."""
 
@@ -63,6 +81,22 @@ class PatientDocumentService:
 
         logger.debug("Queried patient documents: patient_id=%d total=%d returned=%d", patient_id, total, len(documents))
         return list(documents), total
+
+    async def get_all_for_patient_ids(self, patient_ids: List[int]) -> dict[int, List[dict]]:
+        """Get all documents for multiple patients, grouped by patient_id. Returns response dicts with file_url."""
+        if not patient_ids:
+            return {}
+        result = await self.db.execute(
+            select(PatientDocument).where(
+                PatientDocument.patient_id.in_(patient_ids),
+                PatientDocument.is_deleted == False,
+            ).order_by(PatientDocument.id.asc())
+        )
+        docs = result.scalars().all()
+        grouped: dict[int, List[dict]] = {pid: [] for pid in patient_ids}
+        for doc in docs:
+            grouped[doc.patient_id].append(document_to_response(doc))
+        return grouped
 
     async def upload(
         self,

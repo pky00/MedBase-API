@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from enum import StrEnum
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, Field, ConfigDict
 
 
@@ -56,3 +56,4 @@ class PatientResponse(PatientBase):
     created_at: datetime
     updated_by: Optional[str] = None
     updated_at: datetime
+    documents: Optional[List[dict]] = None
