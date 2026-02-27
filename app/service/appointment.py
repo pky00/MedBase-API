@@ -1,0 +1,268 @@
+import logging
+from typing import Optional, List, Tuple
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func, or_
+
+from app.model.appointment import Appointment
+from app.model.vital_sign import VitalSign
+from app.model.medical_record import MedicalRecord
+from app.model.patient import Patient
+from app.model.doctor import Doctor
+from app.model.partner import Partner
+from app.schema.appointment import AppointmentCreate, AppointmentUpdate
+
+logger = logging.getLogger("medbase.service.appointment")
+
+
+class AppointmentService:
+    """Service layer for appointment operations."""
+
+    def __init__(self, db: AsyncSession):
+        self.db = db
+
+    async def get_by_id(self, appointment_id: int) -> Optional[Appointment]:
+        """Get appointment by ID."""
+        result = await self.db.execute(
+            select(Appointment).where(
+                Appointment.id == appointment_id,
+                Appointment.is_deleted == False,
+            )
+        )
+        return result.scalar_one_or_none()
+
+    async def get_by_id_with_details(self, appointment_id: int) -> Optional[dict]:
+        """Get appointment by ID with patient/doctor/partner names, vitals, and medical record."""
+        result = await self.db.execute(
+            select(
+                Appointment,
+                func.concat(Patient.first_name, ' ', Patient.last_name).label("patient_name"),
+                Doctor.name.label("doctor_name"),
+                Partner.name.label("partner_name"),
+            )
+            .outerjoin(Patient, Appointment.patient_id == Patient.id)
+            .outerjoin(Doctor, Appointment.doctor_id == Doctor.id)
+            .outerjoin(Partner, Appointment.partner_id == Partner.id)
+            .where(
+                Appointment.id == appointment_id,
+                Appointment.is_deleted == False,
+            )
+        )
+        row = result.one_or_none()
+        if not row:
+            return None
+
+        appointment = row[0]
+
+        # Get vital signs
+        vitals_result = await self.db.execute(
+            select(VitalSign).where(
+                VitalSign.appointment_id == appointment_id,
+                VitalSign.is_deleted == False,
+            )
+        )
+        vital_signs = vitals_result.scalar_one_or_none()
+
+        # Get medical record
+        record_result = await self.db.execute(
+            select(MedicalRecord).where(
+                MedicalRecord.appointment_id == appointment_id,
+                MedicalRecord.is_deleted == False,
+            )
+        )
+        medical_record = record_result.scalar_one_or_none()
+
+        return {
+            "appointment": appointment,
+            "patient_name": row[1],
+            "doctor_name": row[2],
+            "partner_name": row[3],
+            "vital_signs": vital_signs,
+            "medical_record": medical_record,
+        }
+
+    async def get_all(
+        self,
+        page: int = 1,
+        size: int = 10,
+        patient_id: Optional[int] = None,
+        doctor_id: Optional[int] = None,
+        partner_id: Optional[int] = None,
+        status: Optional[str] = None,
+        type: Optional[str] = None,
+        location: Optional[str] = None,
+        appointment_date: Optional[str] = None,
+        search: Optional[str] = None,
+        sort: str = "id",
+        order: str = "asc",
+    ) -> Tuple[List[dict], int]:
+        """Get all appointments with pagination, filtering, and sorting."""
+        query = (
+            select(
+                Appointment,
+                func.concat(Patient.first_name, ' ', Patient.last_name).label("patient_name"),
+                Doctor.name.label("doctor_name"),
+                Partner.name.label("partner_name"),
+            )
+            .outerjoin(Patient, Appointment.patient_id == Patient.id)
+            .outerjoin(Doctor, Appointment.doctor_id == Doctor.id)
+            .outerjoin(Partner, Appointment.partner_id == Partner.id)
+            .where(Appointment.is_deleted == False)
+        )
+
+        if patient_id is not None:
+            query = query.where(Appointment.patient_id == patient_id)
+        if doctor_id is not None:
+            query = query.where(Appointment.doctor_id == doctor_id)
+        if partner_id is not None:
+            query = query.where(Appointment.partner_id == partner_id)
+        if status is not None:
+            query = query.where(Appointment.status == status)
+        if type is not None:
+            query = query.where(Appointment.type == type)
+        if location is not None:
+            query = query.where(Appointment.location == location)
+        if appointment_date is not None:
+            query = query.where(func.date(Appointment.appointment_date) == appointment_date)
+        if search:
+            search_term = f"%{search}%"
+            query = query.where(
+                or_(
+                    Patient.first_name.ilike(search_term),
+                    Patient.last_name.ilike(search_term),
+                    Doctor.name.ilike(search_term),
+                    Partner.name.ilike(search_term),
+                )
+            )
+
+        # Count query
+        count_query = select(func.count()).select_from(
+            select(Appointment.id)
+            .outerjoin(Patient, Appointment.patient_id == Patient.id)
+            .outerjoin(Doctor, Appointment.doctor_id == Doctor.id)
+            .outerjoin(Partner, Appointment.partner_id == Partner.id)
+            .where(Appointment.is_deleted == False)
+        )
+        # Apply same filters to count
+        if patient_id is not None:
+            count_query = select(func.count()).select_from(
+                select(Appointment.id).where(Appointment.is_deleted == False, Appointment.patient_id == patient_id).subquery()
+            )
+        else:
+            count_subq = select(Appointment.id).where(Appointment.is_deleted == False)
+            if doctor_id is not None:
+                count_subq = count_subq.where(Appointment.doctor_id == doctor_id)
+            if partner_id is not None:
+                count_subq = count_subq.where(Appointment.partner_id == partner_id)
+            if status is not None:
+                count_subq = count_subq.where(Appointment.status == status)
+            if type is not None:
+                count_subq = count_subq.where(Appointment.type == type)
+            if location is not None:
+                count_subq = count_subq.where(Appointment.location == location)
+            if appointment_date is not None:
+                count_subq = count_subq.where(func.date(Appointment.appointment_date) == appointment_date)
+            count_query = select(func.count()).select_from(count_subq.subquery())
+
+        total_result = await self.db.execute(count_query)
+        total = total_result.scalar()
+
+        sort_column = getattr(Appointment, sort, Appointment.id)
+        if order.lower() == "desc":
+            query = query.order_by(sort_column.desc())
+        else:
+            query = query.order_by(sort_column.asc())
+
+        offset = (page - 1) * size
+        query = query.offset(offset).limit(size)
+
+        result = await self.db.execute(query)
+        rows = result.all()
+
+        appointments = []
+        for row in rows:
+            appt = row[0]
+            appointments.append({
+                "id": appt.id,
+                "patient_id": appt.patient_id,
+                "doctor_id": appt.doctor_id,
+                "partner_id": appt.partner_id,
+                "appointment_date": appt.appointment_date,
+                "status": appt.status,
+                "type": appt.type,
+                "location": appt.location,
+                "notes": appt.notes,
+                "is_deleted": appt.is_deleted,
+                "created_by": appt.created_by,
+                "created_at": appt.created_at,
+                "updated_by": appt.updated_by,
+                "updated_at": appt.updated_at,
+                "patient_name": row[1],
+                "doctor_name": row[2],
+                "partner_name": row[3],
+            })
+
+        logger.debug("Queried appointments: total=%d returned=%d", total, len(appointments))
+        return appointments, total
+
+    async def create(self, data: AppointmentCreate, created_by: Optional[str] = None) -> Appointment:
+        """Create a new appointment."""
+        appointment = Appointment(
+            patient_id=data.patient_id,
+            doctor_id=data.doctor_id,
+            partner_id=data.partner_id,
+            appointment_date=data.appointment_date,
+            status=data.status,
+            type=data.type,
+            location=data.location,
+            notes=data.notes,
+            created_by=created_by,
+            updated_by=created_by,
+        )
+        self.db.add(appointment)
+        await self.db.flush()
+        await self.db.refresh(appointment)
+
+        logger.info("Created appointment id=%d patient_id=%d", appointment.id, data.patient_id)
+        return appointment
+
+    async def update(self, appointment_id: int, data: AppointmentUpdate, updated_by: Optional[str] = None) -> Optional[Appointment]:
+        """Update an appointment."""
+        appointment = await self.get_by_id(appointment_id)
+        if not appointment:
+            return None
+
+        update_data = data.model_dump(exclude_unset=True)
+        for field, value in update_data.items():
+            setattr(appointment, field, value)
+
+        appointment.updated_by = updated_by
+        await self.db.flush()
+        await self.db.refresh(appointment)
+
+        logger.info("Updated appointment id=%d fields=%s", appointment_id, list(update_data.keys()))
+        return appointment
+
+    async def update_status(self, appointment_id: int, status: str, updated_by: Optional[str] = None) -> Optional[Appointment]:
+        """Update appointment status."""
+        appointment = await self.get_by_id(appointment_id)
+        if not appointment:
+            return None
+
+        appointment.status = status
+        appointment.updated_by = updated_by
+        await self.db.flush()
+        await self.db.refresh(appointment)
+
+        logger.info("Updated appointment id=%d status=%s", appointment_id, status)
+        return appointment
+
+    async def delete(self, appointment_id: int, deleted_by: Optional[str] = None) -> bool:
+        """Soft delete an appointment."""
+        appointment = await self.get_by_id(appointment_id)
+        if not appointment:
+            return False
+        appointment.is_deleted = True
+        appointment.updated_by = deleted_by
+        await self.db.flush()
+        logger.info("Soft-deleted appointment id=%d", appointment_id)
+        return True
