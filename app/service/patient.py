@@ -59,30 +59,24 @@ class PatientService:
         return result.scalar_one_or_none()
 
     async def get_by_id_with_documents(self, patient_id: int) -> Optional[Tuple[Patient, List[dict]]]:
-        """Get patient by ID with documents via outerjoin.
+        """Get patient by ID with documents.
 
         Returns (patient, documents_list) or None if not found.
         Each document dict includes file_url resolved from the Lightsail bucket.
         """
-        result = await self.db.execute(
-            select(Patient, PatientDocument)
-            .outerjoin(
-                PatientDocument,
-                (PatientDocument.patient_id == Patient.id) & (PatientDocument.is_deleted == False),
-            )
-            .where(Patient.id == patient_id, Patient.is_deleted == False)
-            .order_by(PatientDocument.id.asc())
-        )
-        rows = result.all()
-        if not rows:
+        patient = await self.get_by_id(patient_id)
+        if not patient:
             return None
 
-        patient = rows[0][0]
-        documents = []
-        for _, doc in rows:
-            if doc is not None:
-                documents.append(_document_to_dict(doc))
+        result = await self.db.execute(
+            select(PatientDocument).where(
+                PatientDocument.patient_id == patient_id,
+                PatientDocument.is_deleted == False,
+            ).order_by(PatientDocument.id.asc())
+        )
+        docs = result.scalars().all()
 
+        documents = [_document_to_dict(doc) for doc in docs]
         return patient, documents
 
     async def get_all(
