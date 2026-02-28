@@ -70,6 +70,12 @@ Before finishing any feature, update `BE.PROGRESS.md`:
 - NO `selectinload()` or lazy loading
 - Use explicit `outerjoin()` + `contains_eager()`
 
+### Layer Separation
+- **No model or query code in routers** — routers handle HTTP concerns only (request/response, auth, validation). All database queries and model operations belong in the service layer.
+
+### Code Style
+- **All imports at the top of the file** — no inline or mid-file imports
+
 ### API Endpoints
 - Pagination: `page` and `size` parameters
 - Sorting: sortable fields as specified
