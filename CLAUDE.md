@@ -114,6 +114,7 @@ Before finishing any feature, update `BE.PROGRESS.md`:
 
 ## Environment Variables
 
+- Reference `.env.example` in the project root to see required environment variables
 - If you are missing any environment variables during development, **ask the user for them** — do not guess or hardcode values
 
 ---
@@ -143,6 +144,7 @@ Before finishing any feature, update `BE.PROGRESS.md`:
 - Open a PR when all features in the phase are complete
 - Phase ends only when the PR is merged
 - PR will be merged after owner approval
+- **Always run tests before pushing to GitHub** — never push code that fails tests
 
 ---
 
