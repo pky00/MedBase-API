@@ -25,6 +25,9 @@ from app.router import (
     vital_sign,
     medical_record,
     treatment,
+    inventory_transaction,
+    inventory_transaction_item,
+    statistics,
 )
 
 logger = logging.getLogger("medbase.app")
@@ -82,6 +85,9 @@ app.include_router(appointment.router, prefix=settings.API_V1_PREFIX)
 app.include_router(vital_sign.router, prefix=settings.API_V1_PREFIX)
 app.include_router(medical_record.router, prefix=settings.API_V1_PREFIX)
 app.include_router(treatment.router, prefix=settings.API_V1_PREFIX)
+app.include_router(inventory_transaction.router, prefix=settings.API_V1_PREFIX)
+app.include_router(inventory_transaction_item.router, prefix=settings.API_V1_PREFIX)
+app.include_router(statistics.router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/")
