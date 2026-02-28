@@ -1530,7 +1530,7 @@
 							{ "key": "order", "value": "asc", "disabled": true }
 						]
 					},
-					"description": "List all treatments with pagination and filters. Filters: patient_id, partner_id, appointment_id, status (in_progress/cancelled)."
+					"description": "List all treatments with pagination and filters. Filters: patient_id, partner_id, appointment_id, status (pending/completed)."
 				},
 				"response": []
 			},
@@ -1593,7 +1593,7 @@
 					"header": [{ "key": "Content-Type", "value": "application/json" }],
 					"body": {
 						"mode": "raw",
-						"raw": "{\n    \"status\": \"in_progress\"\n}"
+						"raw": "{\n    \"status\": \"completed\"\n}"
 					},
 					"url": {
 						"raw": "{{base_url}}/treatments/:id/status",
@@ -1601,7 +1601,7 @@
 						"path": ["treatments", ":id", "status"],
 						"variable": [{ "key": "id", "value": "1" }]
 					},
-					"description": "Update treatment status. Values: in_progress, cancelled."
+					"description": "Update treatment status. Values: pending, completed."
 				},
 				"response": []
 			},

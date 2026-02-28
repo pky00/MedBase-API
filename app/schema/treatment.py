@@ -6,8 +6,8 @@ from pydantic import BaseModel, Field, ConfigDict
 
 
 class TreatmentStatus(StrEnum):
-    IN_PROGRESS = "in_progress"
-    CANCELLED = "cancelled"
+    PENDING = "pending"
+    COMPLETED = "completed"
 
 
 class TreatmentBase(BaseModel):
@@ -25,7 +25,7 @@ class TreatmentBase(BaseModel):
 
 class TreatmentCreate(TreatmentBase):
     """Schema for creating a treatment."""
-    status: TreatmentStatus = TreatmentStatus.IN_PROGRESS
+    status: TreatmentStatus = TreatmentStatus.PENDING
 
 
 class TreatmentUpdate(BaseModel):
