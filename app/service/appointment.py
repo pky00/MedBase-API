@@ -38,6 +38,8 @@ class AppointmentService:
                 func.concat(Patient.first_name, ' ', Patient.last_name).label("patient_name"),
                 Doctor.name.label("doctor_name"),
                 Partner.name.label("partner_name"),
+                VitalSign,
+                MedicalRecord,
             )
             .outerjoin(Patient, Appointment.patient_id == Patient.id)
             .outerjoin(Doctor, Appointment.doctor_id == Doctor.id)
@@ -53,25 +55,7 @@ class AppointmentService:
         if not row:
             return None
 
-        # Get vital signs
-        vitals_result = await self.db.execute(
-            select(VitalSign).where(
-                VitalSign.appointment_id == appointment_id,
-                VitalSign.is_deleted == False,
-            )
-        )
-        vital_signs = vitals_result.scalar_one_or_none()
-
-        # Get medical record
-        record_result = await self.db.execute(
-            select(MedicalRecord).where(
-                MedicalRecord.appointment_id == appointment_id,
-                MedicalRecord.is_deleted == False,
-            )
-        )
-        medical_record = record_result.scalar_one_or_none()
-
-        return AppointmentDetailResponse.from_row(row, vital_signs=vital_signs, medical_record=medical_record)
+        return AppointmentDetailResponse.from_row(row, vital_signs=row[4], medical_record=row[5])
 
     async def get_all(
         self,
