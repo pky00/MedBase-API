@@ -38,6 +38,7 @@ Follow this order strictly:
 1. **Endpoints** — Implement the API endpoints
 2. **Tests** — Write endpoint tests and database tests
 3. **Postman** — Create Postman request examples
+4. **Dummy Data** — Add seed script in `scripts/` folder
 
 ### 4. Update Progress
 Before finishing any feature, update `BE.PROGRESS.md`:
@@ -74,6 +75,7 @@ Before finishing any feature, update `BE.PROGRESS.md`:
 - Sorting: sortable fields as specified
 - Filtering: exact match filters
 - Searching: text search where applicable
+- **Count queries**: In `get_all` functions, derive the count query from the main query (reuse it with `.with_only_columns()`) instead of building a separate count query with duplicated filters
 
 ### Authentication
 - JWT Bearer tokens
@@ -116,6 +118,34 @@ Before finishing any feature, update `BE.PROGRESS.md`:
 
 ---
 
+## Development Flow
+
+**Approach**
+- Features developed independently in sequential order
+- Frontend and Backend developed separately
+- Backend order per feature: Endpoints → Tests → Postman requests → Dummy Data (seed script in `scripts/` folder)
+
+**Progress Tracking**
+- `BE.PROGRESS.md` — backend progress
+- `FE.PROGRESS.md` — frontend progress
+- `plan.md` — feature list and development sequence
+- **Rule**: Update progress file before finishing each feature
+
+**Documentation Files**
+- `database.sql` — database schema (Backend)
+- `endpoints.md` — API endpoints list (Backend, copied to Frontend)
+- `Postman collection` — (Backend, copied to Frontend)
+- `pages.md` — page layouts and functionality (Frontend)
+- `README.md` — project description, setup instructions, and how to run (in each repo root)
+
+**PR Workflow**
+- Each phase requires a Pull Request (PR)
+- Open a PR when all features in the phase are complete
+- Phase ends only when the PR is merged
+- PR will be merged after owner approval
+
+---
+
 ## Important Rules
 
 1. **Never skip features** — Complete in order
@@ -123,4 +153,4 @@ Before finishing any feature, update `BE.PROGRESS.md`:
 3. **Follow the docs** — They are your source of truth
 4. **Test everything** — No feature is complete without tests
 5. **Document in Postman** — Create requests for every endpoint
-6. **Develop → Test → Postman** — Follow this order strictly for every feature
+6. **Develop → Test → Postman → Dummy Data** — Follow this order strictly for every feature
