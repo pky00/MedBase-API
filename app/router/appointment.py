@@ -75,28 +75,7 @@ async def get_appointment(
         logger.warning("Appointment not found appointment_id=%d", appointment_id)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found")
 
-    appointment = result["appointment"]
-    return AppointmentDetailResponse(
-        id=appointment.id,
-        patient_id=appointment.patient_id,
-        doctor_id=appointment.doctor_id,
-        partner_id=appointment.partner_id,
-        appointment_date=appointment.appointment_date,
-        status=appointment.status,
-        type=appointment.type,
-        location=appointment.location,
-        notes=appointment.notes,
-        is_deleted=appointment.is_deleted,
-        created_by=appointment.created_by,
-        created_at=appointment.created_at,
-        updated_by=appointment.updated_by,
-        updated_at=appointment.updated_at,
-        patient_name=result["patient_name"],
-        doctor_name=result["doctor_name"],
-        partner_name=result["partner_name"],
-        vital_signs=result["vital_signs"],
-        medical_record=result["medical_record"],
-    )
+    return result
 
 
 @router.post("", response_model=AppointmentResponse, status_code=status.HTTP_201_CREATED)

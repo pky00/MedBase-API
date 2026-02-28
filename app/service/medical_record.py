@@ -6,7 +6,7 @@ from sqlalchemy import select, func
 from app.model.medical_record import MedicalRecord
 from app.model.appointment import Appointment
 from app.model.patient import Patient
-from app.schema.medical_record import MedicalRecordCreate, MedicalRecordUpdate
+from app.schema.medical_record import MedicalRecordCreate, MedicalRecordUpdate, MedicalRecordResponse
 
 logger = logging.getLogger("medbase.service.medical_record")
 
@@ -27,7 +27,7 @@ class MedicalRecordService:
         )
         return result.scalar_one_or_none()
 
-    async def get_by_id_with_patient(self, record_id: int) -> Optional[dict]:
+    async def get_by_id_with_patient(self, record_id: int) -> Optional[MedicalRecordResponse]:
         """Get medical record by ID with patient name."""
         result = await self.db.execute(
             select(
@@ -45,21 +45,7 @@ class MedicalRecordService:
         if not row:
             return None
 
-        record = row[0]
-        return {
-            "id": record.id,
-            "appointment_id": record.appointment_id,
-            "chief_complaint": record.chief_complaint,
-            "diagnosis": record.diagnosis,
-            "treatment_notes": record.treatment_notes,
-            "follow_up_date": record.follow_up_date,
-            "is_deleted": record.is_deleted,
-            "created_by": record.created_by,
-            "created_at": record.created_at,
-            "updated_by": record.updated_by,
-            "updated_at": record.updated_at,
-            "patient_name": row[1],
-        }
+        return MedicalRecordResponse.from_row(row)
 
     async def get_by_appointment_id(self, appointment_id: int) -> Optional[MedicalRecord]:
         """Get medical record for an appointment."""
@@ -91,16 +77,12 @@ class MedicalRecordService:
             .where(MedicalRecord.is_deleted == False)
         )
 
-        count_subq = select(MedicalRecord.id).where(MedicalRecord.is_deleted == False)
-
         if patient_id is not None:
             query = query.where(Appointment.patient_id == patient_id)
-            count_subq = count_subq.outerjoin(Appointment, MedicalRecord.appointment_id == Appointment.id).where(Appointment.patient_id == patient_id)
         if appointment_id is not None:
             query = query.where(MedicalRecord.appointment_id == appointment_id)
-            count_subq = count_subq.where(MedicalRecord.appointment_id == appointment_id)
 
-        count_query = select(func.count()).select_from(count_subq.subquery())
+        count_query = select(func.count()).select_from(query.subquery())
         total_result = await self.db.execute(count_query)
         total = total_result.scalar()
 
@@ -116,23 +98,10 @@ class MedicalRecordService:
         result = await self.db.execute(query)
         rows = result.all()
 
-        records = []
-        for row in rows:
-            rec = row[0]
-            records.append({
-                "id": rec.id,
-                "appointment_id": rec.appointment_id,
-                "chief_complaint": rec.chief_complaint,
-                "diagnosis": rec.diagnosis,
-                "treatment_notes": rec.treatment_notes,
-                "follow_up_date": rec.follow_up_date,
-                "is_deleted": rec.is_deleted,
-                "created_by": rec.created_by,
-                "created_at": rec.created_at,
-                "updated_by": rec.updated_by,
-                "updated_at": rec.updated_at,
-                "patient_name": row[1],
-            })
+        records = [
+            MedicalRecordResponse.from_row(row).model_dump()
+            for row in rows
+        ]
 
         logger.debug("Queried medical records: total=%d returned=%d", total, len(records))
         return records, total

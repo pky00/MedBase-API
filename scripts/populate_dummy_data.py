@@ -20,6 +20,10 @@ from app.service.medical_device import MedicalDeviceService
 from app.service.partner import PartnerService
 from app.service.doctor import DoctorService
 from app.service.patient import PatientService
+from app.service.appointment import AppointmentService
+from app.service.vital_sign import VitalSignService
+from app.service.medical_record import MedicalRecordService
+from app.service.treatment import TreatmentService
 
 from app.schema.user import UserCreate
 from app.schema.medicine_category import MedicineCategoryCreate
@@ -31,6 +35,10 @@ from app.schema.medical_device import MedicalDeviceCreate
 from app.schema.partner import PartnerCreate
 from app.schema.doctor import DoctorCreate
 from app.schema.patient import PatientCreate
+from app.schema.appointment import AppointmentCreate
+from app.schema.vital_sign import VitalSignCreate
+from app.schema.medical_record import MedicalRecordCreate
+from app.schema.treatment import TreatmentCreate
 
 CREATED_BY = "admin"
 
@@ -182,34 +190,129 @@ async def populate():
 
         # --- Doctors ---
         doctor_service = DoctorService(db)
+        doctor_map = {}
         for d in data.get("doctors", []):
             existing = await doctor_service.get_by_name(d["name"])
             if existing:
+                doctor_map[d["name"]] = existing.id
                 print(f"  [skip] Doctor '{d['name']}' already exists")
                 continue
             partner_name = d.pop("partner_name", None)
             if partner_name:
                 d["partner_id"] = partner_map.get(partner_name)
-            await doctor_service.create(
+            doctor = await doctor_service.create(
                 DoctorCreate(**d),
                 created_by=CREATED_BY,
             )
+            doctor_map[d["name"]] = doctor.id
             print(f"  [created] Doctor '{d['name']}'")
 
         await db.commit()
 
         # --- Patients ---
         patient_service = PatientService(db)
+        patient_map = {}
         for p in data.get("patients", []):
+            full_name = f"{p['first_name']} {p['last_name']}"
             existing = await patient_service.get_by_name(p["first_name"], p["last_name"])
             if existing:
-                print(f"  [skip] Patient '{p['first_name']} {p['last_name']}' already exists")
+                patient_map[full_name] = existing.id
+                print(f"  [skip] Patient '{full_name}' already exists")
                 continue
-            await patient_service.create(
+            patient = await patient_service.create(
                 PatientCreate(**p),
                 created_by=CREATED_BY,
             )
-            print(f"  [created] Patient '{p['first_name']} {p['last_name']}'")
+            patient_map[full_name] = patient.id
+            print(f"  [created] Patient '{full_name}'")
+
+        await db.commit()
+
+        # --- Appointments ---
+        appt_service = AppointmentService(db)
+        appointment_ids = []
+        for a in data.get("appointments", []):
+            appt_data = {
+                "patient_id": patient_map.get(a["patient_name"]),
+                "doctor_id": doctor_map.get(a.get("doctor_name")),
+                "appointment_date": a["appointment_date"],
+                "type": a["type"],
+                "location": a.get("location", "internal"),
+                "status": a.get("status", "scheduled"),
+                "notes": a.get("notes"),
+            }
+            if a.get("partner_name"):
+                appt_data["partner_id"] = partner_map.get(a["partner_name"])
+            appt = await appt_service.create(
+                AppointmentCreate(**appt_data),
+                created_by=CREATED_BY,
+            )
+            appointment_ids.append(appt.id)
+            print(f"  [created] Appointment id={appt.id} for patient '{a['patient_name']}'")
+
+        await db.commit()
+
+        # --- Vital Signs ---
+        vital_service = VitalSignService(db)
+        for v in data.get("vital_signs", []):
+            appt_index = v.pop("appointment_index")
+            if appt_index >= len(appointment_ids):
+                print(f"  [skip] Vital sign - appointment index {appt_index} out of range")
+                continue
+            appt_id = appointment_ids[appt_index]
+            existing = await vital_service.get_by_appointment_id(appt_id)
+            if existing:
+                print(f"  [skip] Vital signs for appointment id={appt_id} already exist")
+                continue
+            vital = await vital_service.create(
+                appt_id,
+                VitalSignCreate(**v),
+                created_by=CREATED_BY,
+            )
+            print(f"  [created] Vital signs id={vital.id} for appointment id={appt_id}")
+
+        await db.commit()
+
+        # --- Medical Records ---
+        record_service = MedicalRecordService(db)
+        for mr in data.get("medical_records", []):
+            appt_index = mr.pop("appointment_index")
+            if appt_index >= len(appointment_ids):
+                print(f"  [skip] Medical record - appointment index {appt_index} out of range")
+                continue
+            appt_id = appointment_ids[appt_index]
+            existing = await record_service.get_by_appointment_id(appt_id)
+            if existing:
+                print(f"  [skip] Medical record for appointment id={appt_id} already exists")
+                continue
+            record = await record_service.create(
+                appt_id,
+                MedicalRecordCreate(**mr),
+                created_by=CREATED_BY,
+            )
+            print(f"  [created] Medical record id={record.id} for appointment id={appt_id}")
+
+        await db.commit()
+
+        # --- Treatments ---
+        treatment_service = TreatmentService(db)
+        for t in data.get("treatments", []):
+            treatment_data = {
+                "patient_id": patient_map.get(t["patient_name"]),
+                "partner_id": partner_map.get(t["partner_name"]),
+                "treatment_type": t["treatment_type"],
+                "description": t.get("description"),
+                "treatment_date": t.get("treatment_date"),
+                "cost": t.get("cost"),
+                "notes": t.get("notes"),
+            }
+            if "appointment_index" in t and t["appointment_index"] < len(appointment_ids):
+                treatment_data["appointment_id"] = appointment_ids[t["appointment_index"]]
+            treatment = await treatment_service.create(
+                TreatmentCreate(**treatment_data),
+                created_by=CREATED_BY,
+            )
+            print(f"  [created] Treatment id={treatment.id} '{t['treatment_type']}' for patient '{t['patient_name']}'")
 
         await db.commit()
 

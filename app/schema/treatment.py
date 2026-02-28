@@ -6,9 +6,7 @@ from pydantic import BaseModel, Field, ConfigDict
 
 
 class TreatmentStatus(StrEnum):
-    PENDING = "pending"
     IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
     CANCELLED = "cancelled"
 
 
@@ -27,7 +25,7 @@ class TreatmentBase(BaseModel):
 
 class TreatmentCreate(TreatmentBase):
     """Schema for creating a treatment."""
-    status: TreatmentStatus = TreatmentStatus.PENDING
+    status: TreatmentStatus = TreatmentStatus.IN_PROGRESS
 
 
 class TreatmentUpdate(BaseModel):
@@ -71,3 +69,29 @@ class TreatmentResponse(BaseModel):
     updated_at: datetime
     patient_name: Optional[str] = None
     partner_name: Optional[str] = None
+
+    @classmethod
+    def from_row(cls, row) -> "TreatmentResponse":
+        """Build from a SQLAlchemy row of (Treatment, patient_name, partner_name)."""
+        treatment = row[0]
+        return cls.model_validate(
+            {
+                "id": treatment.id,
+                "patient_id": treatment.patient_id,
+                "appointment_id": treatment.appointment_id,
+                "partner_id": treatment.partner_id,
+                "treatment_type": treatment.treatment_type,
+                "description": treatment.description,
+                "treatment_date": treatment.treatment_date,
+                "status": treatment.status,
+                "cost": treatment.cost,
+                "notes": treatment.notes,
+                "is_deleted": treatment.is_deleted,
+                "created_by": treatment.created_by,
+                "created_at": treatment.created_at,
+                "updated_by": treatment.updated_by,
+                "updated_at": treatment.updated_at,
+                "patient_name": row[1],
+                "partner_name": row[2],
+            }
+        )

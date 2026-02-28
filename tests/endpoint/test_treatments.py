@@ -117,7 +117,7 @@ async def treatment(
         treatment_type="Surgery",
         description="Minor surgery",
         treatment_date=date(2026, 3, 5),
-        status="pending",
+        status="in_progress",
         cost=500.00,
         notes="Requires local anesthesia",
         created_by=admin_user.username,
@@ -178,13 +178,13 @@ class TestGetTreatments:
     ):
         """Test filtering treatments by status."""
         response = await client.get(
-            "/api/v1/treatments", params={"status": "pending"}, headers=admin_headers,
+            "/api/v1/treatments", params={"status": "in_progress"}, headers=admin_headers,
         )
         assert response.status_code == 200
         data = response.json()
         assert data["total"] >= 1
         for item in data["items"]:
-            assert item["status"] == "pending"
+            assert item["status"] == "in_progress"
 
     @pytest.mark.asyncio
     async def test_get_treatments_filter_by_patient(
@@ -259,7 +259,7 @@ class TestGetTreatment:
         data = response.json()
         assert data["treatment_type"] == "Surgery"
         assert data["description"] == "Minor surgery"
-        assert data["status"] == "pending"
+        assert data["status"] == "in_progress"
         assert "patient_name" in data
         assert "partner_name" in data
 
@@ -297,7 +297,7 @@ class TestCreateTreatment:
         assert data["patient_id"] == patient.id
         assert data["partner_id"] == referral_partner.id
         assert data["treatment_type"] == "X-Ray"
-        assert data["status"] == "pending"
+        assert data["status"] == "in_progress"
 
         # Verify in database
         result = await db_session.execute(
@@ -499,32 +499,18 @@ class TestUpdateTreatmentStatus:
     """Tests for PUT /api/v1/treatments/{id}/status"""
 
     @pytest.mark.asyncio
-    async def test_update_status_success(
+    async def test_update_status_to_cancelled(
         self, client: AsyncClient, admin_headers: dict, treatment: Treatment,
     ):
-        """Test updating treatment status."""
+        """Test cancelling a treatment."""
         response = await client.put(
             f"/api/v1/treatments/{treatment.id}/status",
-            json={"status": "in_progress"},
+            json={"status": "cancelled"},
             headers=admin_headers,
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["status"] == "in_progress"
-
-    @pytest.mark.asyncio
-    async def test_update_status_to_completed(
-        self, client: AsyncClient, admin_headers: dict, treatment: Treatment,
-    ):
-        """Test completing a treatment."""
-        response = await client.put(
-            f"/api/v1/treatments/{treatment.id}/status",
-            json={"status": "completed"},
-            headers=admin_headers,
-        )
-        assert response.status_code == 200
-        data = response.json()
-        assert data["status"] == "completed"
+        assert data["status"] == "cancelled"
 
     @pytest.mark.asyncio
     async def test_update_status_not_found(self, client: AsyncClient, admin_headers: dict):

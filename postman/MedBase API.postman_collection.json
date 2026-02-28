@@ -1242,9 +1242,10 @@
 					"method": "GET",
 					"header": [],
 					"url": {
-						"raw": "{{base_url}}/appointments/1",
+						"raw": "{{base_url}}/appointments/:id",
 						"host": ["{{base_url}}"],
-						"path": ["appointments", "1"]
+						"path": ["appointments", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
 					},
 					"description": "Get appointment by ID. Includes vital signs and medical record."
 				},
@@ -1278,9 +1279,10 @@
 						"raw": "{\n    \"notes\": \"Updated appointment notes\",\n    \"appointment_date\": \"2026-03-16T10:00:00\"\n}"
 					},
 					"url": {
-						"raw": "{{base_url}}/appointments/1",
+						"raw": "{{base_url}}/appointments/:id",
 						"host": ["{{base_url}}"],
-						"path": ["appointments", "1"]
+						"path": ["appointments", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
 					},
 					"description": "Update an appointment. Cannot update completed appointments."
 				},
@@ -1296,9 +1298,10 @@
 						"raw": "{\n    \"status\": \"in_progress\"\n}"
 					},
 					"url": {
-						"raw": "{{base_url}}/appointments/1/status",
+						"raw": "{{base_url}}/appointments/:id/status",
 						"host": ["{{base_url}}"],
-						"path": ["appointments", "1", "status"]
+						"path": ["appointments", ":id", "status"],
+						"variable": [{ "key": "id", "value": "1" }]
 					},
 					"description": "Update appointment status. Values: scheduled, in_progress, completed, cancelled."
 				},
@@ -1310,9 +1313,10 @@
 					"method": "DELETE",
 					"header": [],
 					"url": {
-						"raw": "{{base_url}}/appointments/1",
+						"raw": "{{base_url}}/appointments/:id",
 						"host": ["{{base_url}}"],
-						"path": ["appointments", "1"]
+						"path": ["appointments", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
 					},
 					"description": "Delete an appointment (soft delete)."
 				},
@@ -1329,9 +1333,10 @@
 					"method": "GET",
 					"header": [],
 					"url": {
-						"raw": "{{base_url}}/appointments/1/vitals",
+						"raw": "{{base_url}}/appointments/:appointment_id/vitals",
 						"host": ["{{base_url}}"],
-						"path": ["appointments", "1", "vitals"]
+						"path": ["appointments", ":appointment_id", "vitals"],
+						"variable": [{ "key": "appointment_id", "value": "1" }]
 					},
 					"description": "Get vital signs for an appointment. One vital signs record per appointment."
 				},
@@ -1347,9 +1352,10 @@
 						"raw": "{\n    \"blood_pressure_systolic\": 120,\n    \"blood_pressure_diastolic\": 80,\n    \"heart_rate\": 72,\n    \"temperature\": 36.6,\n    \"respiratory_rate\": 16,\n    \"weight\": 70.5,\n    \"height\": 175.0,\n    \"notes\": \"Normal vitals\"\n}"
 					},
 					"url": {
-						"raw": "{{base_url}}/appointments/1/vitals",
+						"raw": "{{base_url}}/appointments/:appointment_id/vitals",
 						"host": ["{{base_url}}"],
-						"path": ["appointments", "1", "vitals"]
+						"path": ["appointments", ":appointment_id", "vitals"],
+						"variable": [{ "key": "appointment_id", "value": "1" }]
 					},
 					"description": "Add vital signs to an appointment. One record per appointment. All fields optional. Cannot add to completed appointments."
 				},
@@ -1365,9 +1371,10 @@
 						"raw": "{\n    \"heart_rate\": 85,\n    \"notes\": \"After exercise\"\n}"
 					},
 					"url": {
-						"raw": "{{base_url}}/vital-signs/1",
+						"raw": "{{base_url}}/vital-signs/:id",
 						"host": ["{{base_url}}"],
-						"path": ["vital-signs", "1"]
+						"path": ["vital-signs", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
 					},
 					"description": "Update vital signs. Cannot edit if appointment is completed."
 				},
@@ -1379,9 +1386,10 @@
 					"method": "DELETE",
 					"header": [],
 					"url": {
-						"raw": "{{base_url}}/vital-signs/1",
+						"raw": "{{base_url}}/vital-signs/:id",
 						"host": ["{{base_url}}"],
-						"path": ["vital-signs", "1"]
+						"path": ["vital-signs", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
 					},
 					"description": "Delete vital signs (soft delete)."
 				},
@@ -1420,9 +1428,10 @@
 					"method": "GET",
 					"header": [],
 					"url": {
-						"raw": "{{base_url}}/medical-records/1",
+						"raw": "{{base_url}}/medical-records/:id",
 						"host": ["{{base_url}}"],
-						"path": ["medical-records", "1"]
+						"path": ["medical-records", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
 					},
 					"description": "Get medical record by ID. Includes patient name."
 				},
@@ -1434,9 +1443,10 @@
 					"method": "GET",
 					"header": [],
 					"url": {
-						"raw": "{{base_url}}/appointments/1/medical-record",
+						"raw": "{{base_url}}/appointments/:appointment_id/medical-record",
 						"host": ["{{base_url}}"],
-						"path": ["appointments", "1", "medical-record"]
+						"path": ["appointments", ":appointment_id", "medical-record"],
+						"variable": [{ "key": "appointment_id", "value": "1" }]
 					},
 					"description": "Get the medical record for a specific appointment."
 				},
@@ -1452,9 +1462,10 @@
 						"raw": "{\n    \"chief_complaint\": \"Headache and dizziness\",\n    \"diagnosis\": \"Tension headache\",\n    \"treatment_notes\": \"Prescribed rest and analgesics\",\n    \"follow_up_date\": \"2026-04-01\"\n}"
 					},
 					"url": {
-						"raw": "{{base_url}}/appointments/1/medical-record",
+						"raw": "{{base_url}}/appointments/:appointment_id/medical-record",
 						"host": ["{{base_url}}"],
-						"path": ["appointments", "1", "medical-record"]
+						"path": ["appointments", ":appointment_id", "medical-record"],
+						"variable": [{ "key": "appointment_id", "value": "1" }]
 					},
 					"description": "Create a medical record for an appointment. One record per appointment. Cannot add to completed appointments."
 				},
@@ -1470,9 +1481,10 @@
 						"raw": "{\n    \"diagnosis\": \"Migraine\",\n    \"treatment_notes\": \"Updated treatment plan\"\n}"
 					},
 					"url": {
-						"raw": "{{base_url}}/medical-records/1",
+						"raw": "{{base_url}}/medical-records/:id",
 						"host": ["{{base_url}}"],
-						"path": ["medical-records", "1"]
+						"path": ["medical-records", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
 					},
 					"description": "Update a medical record. Cannot edit if appointment is completed."
 				},
@@ -1484,9 +1496,10 @@
 					"method": "DELETE",
 					"header": [],
 					"url": {
-						"raw": "{{base_url}}/medical-records/1",
+						"raw": "{{base_url}}/medical-records/:id",
 						"host": ["{{base_url}}"],
-						"path": ["medical-records", "1"]
+						"path": ["medical-records", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
 					},
 					"description": "Delete a medical record (soft delete)."
 				},
@@ -1517,7 +1530,7 @@
 							{ "key": "order", "value": "asc", "disabled": true }
 						]
 					},
-					"description": "List all treatments with pagination and filters. Filters: patient_id, partner_id, appointment_id, status (pending/in_progress/completed/cancelled)."
+					"description": "List all treatments with pagination and filters. Filters: patient_id, partner_id, appointment_id, status (in_progress/cancelled)."
 				},
 				"response": []
 			},
@@ -1527,9 +1540,10 @@
 					"method": "GET",
 					"header": [],
 					"url": {
-						"raw": "{{base_url}}/treatments/1",
+						"raw": "{{base_url}}/treatments/:id",
 						"host": ["{{base_url}}"],
-						"path": ["treatments", "1"]
+						"path": ["treatments", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
 					},
 					"description": "Get treatment by ID. Includes patient and partner names."
 				},
@@ -1563,9 +1577,10 @@
 						"raw": "{\n    \"description\": \"Updated treatment description\",\n    \"cost\": 750.00,\n    \"notes\": \"Updated notes\"\n}"
 					},
 					"url": {
-						"raw": "{{base_url}}/treatments/1",
+						"raw": "{{base_url}}/treatments/:id",
 						"host": ["{{base_url}}"],
-						"path": ["treatments", "1"]
+						"path": ["treatments", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
 					},
 					"description": "Update a treatment."
 				},
@@ -1581,11 +1596,12 @@
 						"raw": "{\n    \"status\": \"in_progress\"\n}"
 					},
 					"url": {
-						"raw": "{{base_url}}/treatments/1/status",
+						"raw": "{{base_url}}/treatments/:id/status",
 						"host": ["{{base_url}}"],
-						"path": ["treatments", "1", "status"]
+						"path": ["treatments", ":id", "status"],
+						"variable": [{ "key": "id", "value": "1" }]
 					},
-					"description": "Update treatment status. Values: pending, in_progress, completed, cancelled."
+					"description": "Update treatment status. Values: in_progress, cancelled."
 				},
 				"response": []
 			},
@@ -1595,9 +1611,10 @@
 					"method": "DELETE",
 					"header": [],
 					"url": {
-						"raw": "{{base_url}}/treatments/1",
+						"raw": "{{base_url}}/treatments/:id",
 						"host": ["{{base_url}}"],
-						"path": ["treatments", "1"]
+						"path": ["treatments", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
 					},
 					"description": "Delete a treatment (soft delete)."
 				},

@@ -14,6 +14,6 @@ class Treatment(BaseModel):
     treatment_type = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     treatment_date = Column(Date, nullable=True)
-    status = Column(String, nullable=False, default="pending")
+    status = Column(String, nullable=False, default="in_progress")
     cost = Column(Numeric(12, 2), nullable=True)
     notes = Column(Text, nullable=True)

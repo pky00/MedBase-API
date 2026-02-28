@@ -6,7 +6,7 @@ from sqlalchemy import select, func
 from app.model.treatment import Treatment
 from app.model.patient import Patient
 from app.model.partner import Partner
-from app.schema.treatment import TreatmentCreate, TreatmentUpdate
+from app.schema.treatment import TreatmentCreate, TreatmentUpdate, TreatmentResponse
 
 logger = logging.getLogger("medbase.service.treatment")
 
@@ -27,7 +27,7 @@ class TreatmentService:
         )
         return result.scalar_one_or_none()
 
-    async def get_by_id_with_names(self, treatment_id: int) -> Optional[dict]:
+    async def get_by_id_with_names(self, treatment_id: int) -> Optional[TreatmentResponse]:
         """Get treatment by ID with patient and partner names."""
         result = await self.db.execute(
             select(
@@ -46,26 +46,7 @@ class TreatmentService:
         if not row:
             return None
 
-        treatment = row[0]
-        return {
-            "id": treatment.id,
-            "patient_id": treatment.patient_id,
-            "appointment_id": treatment.appointment_id,
-            "partner_id": treatment.partner_id,
-            "treatment_type": treatment.treatment_type,
-            "description": treatment.description,
-            "treatment_date": treatment.treatment_date,
-            "status": treatment.status,
-            "cost": treatment.cost,
-            "notes": treatment.notes,
-            "is_deleted": treatment.is_deleted,
-            "created_by": treatment.created_by,
-            "created_at": treatment.created_at,
-            "updated_by": treatment.updated_by,
-            "updated_at": treatment.updated_at,
-            "patient_name": row[1],
-            "partner_name": row[2],
-        }
+        return TreatmentResponse.from_row(row)
 
     async def get_all(
         self,
@@ -90,22 +71,16 @@ class TreatmentService:
             .where(Treatment.is_deleted == False)
         )
 
-        count_subq = select(Treatment.id).where(Treatment.is_deleted == False)
-
         if patient_id is not None:
             query = query.where(Treatment.patient_id == patient_id)
-            count_subq = count_subq.where(Treatment.patient_id == patient_id)
         if partner_id is not None:
             query = query.where(Treatment.partner_id == partner_id)
-            count_subq = count_subq.where(Treatment.partner_id == partner_id)
         if appointment_id is not None:
             query = query.where(Treatment.appointment_id == appointment_id)
-            count_subq = count_subq.where(Treatment.appointment_id == appointment_id)
         if status is not None:
             query = query.where(Treatment.status == status)
-            count_subq = count_subq.where(Treatment.status == status)
 
-        count_query = select(func.count()).select_from(count_subq.subquery())
+        count_query = select(func.count()).select_from(query.subquery())
         total_result = await self.db.execute(count_query)
         total = total_result.scalar()
 
@@ -121,28 +96,10 @@ class TreatmentService:
         result = await self.db.execute(query)
         rows = result.all()
 
-        treatments = []
-        for row in rows:
-            t = row[0]
-            treatments.append({
-                "id": t.id,
-                "patient_id": t.patient_id,
-                "appointment_id": t.appointment_id,
-                "partner_id": t.partner_id,
-                "treatment_type": t.treatment_type,
-                "description": t.description,
-                "treatment_date": t.treatment_date,
-                "status": t.status,
-                "cost": t.cost,
-                "notes": t.notes,
-                "is_deleted": t.is_deleted,
-                "created_by": t.created_by,
-                "created_at": t.created_at,
-                "updated_by": t.updated_by,
-                "updated_at": t.updated_at,
-                "patient_name": row[1],
-                "partner_name": row[2],
-            })
+        treatments = [
+            TreatmentResponse.from_row(row).model_dump()
+            for row in rows
+        ]
 
         logger.debug("Queried treatments: total=%d returned=%d", total, len(treatments))
         return treatments, total

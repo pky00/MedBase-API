@@ -9,7 +9,7 @@ from app.model.medical_record import MedicalRecord
 from app.model.patient import Patient
 from app.model.doctor import Doctor
 from app.model.partner import Partner
-from app.schema.appointment import AppointmentCreate, AppointmentUpdate
+from app.schema.appointment import AppointmentCreate, AppointmentUpdate, AppointmentDetailResponse, AppointmentResponse
 
 logger = logging.getLogger("medbase.service.appointment")
 
@@ -30,7 +30,7 @@ class AppointmentService:
         )
         return result.scalar_one_or_none()
 
-    async def get_by_id_with_details(self, appointment_id: int) -> Optional[dict]:
+    async def get_by_id_with_details(self, appointment_id: int) -> Optional[AppointmentDetailResponse]:
         """Get appointment by ID with patient/doctor/partner names, vitals, and medical record."""
         result = await self.db.execute(
             select(
@@ -42,6 +42,8 @@ class AppointmentService:
             .outerjoin(Patient, Appointment.patient_id == Patient.id)
             .outerjoin(Doctor, Appointment.doctor_id == Doctor.id)
             .outerjoin(Partner, Appointment.partner_id == Partner.id)
+            .outerjoin(VitalSign, (VitalSign.appointment_id == Appointment.id) & (VitalSign.is_deleted == False))
+            .outerjoin(MedicalRecord, (MedicalRecord.appointment_id == Appointment.id) & (MedicalRecord.is_deleted == False))
             .where(
                 Appointment.id == appointment_id,
                 Appointment.is_deleted == False,
@@ -50,8 +52,6 @@ class AppointmentService:
         row = result.one_or_none()
         if not row:
             return None
-
-        appointment = row[0]
 
         # Get vital signs
         vitals_result = await self.db.execute(
@@ -71,14 +71,7 @@ class AppointmentService:
         )
         medical_record = record_result.scalar_one_or_none()
 
-        return {
-            "appointment": appointment,
-            "patient_name": row[1],
-            "doctor_name": row[2],
-            "partner_name": row[3],
-            "vital_signs": vital_signs,
-            "medical_record": medical_record,
-        }
+        return AppointmentDetailResponse.from_row(row, vital_signs=vital_signs, medical_record=medical_record)
 
     async def get_all(
         self,
@@ -102,10 +95,14 @@ class AppointmentService:
                 func.concat(Patient.first_name, ' ', Patient.last_name).label("patient_name"),
                 Doctor.name.label("doctor_name"),
                 Partner.name.label("partner_name"),
+                VitalSign.id.label("vital_sign_id"),
+                MedicalRecord.id.label("medical_record_id"),
             )
             .outerjoin(Patient, Appointment.patient_id == Patient.id)
             .outerjoin(Doctor, Appointment.doctor_id == Doctor.id)
             .outerjoin(Partner, Appointment.partner_id == Partner.id)
+            .outerjoin(VitalSign, (VitalSign.appointment_id == Appointment.id) & (VitalSign.is_deleted == False))
+            .outerjoin(MedicalRecord, (MedicalRecord.appointment_id == Appointment.id) & (MedicalRecord.is_deleted == False))
             .where(Appointment.is_deleted == False)
         )
 
@@ -134,35 +131,7 @@ class AppointmentService:
                 )
             )
 
-        # Count query
-        count_query = select(func.count()).select_from(
-            select(Appointment.id)
-            .outerjoin(Patient, Appointment.patient_id == Patient.id)
-            .outerjoin(Doctor, Appointment.doctor_id == Doctor.id)
-            .outerjoin(Partner, Appointment.partner_id == Partner.id)
-            .where(Appointment.is_deleted == False)
-        )
-        # Apply same filters to count
-        if patient_id is not None:
-            count_query = select(func.count()).select_from(
-                select(Appointment.id).where(Appointment.is_deleted == False, Appointment.patient_id == patient_id).subquery()
-            )
-        else:
-            count_subq = select(Appointment.id).where(Appointment.is_deleted == False)
-            if doctor_id is not None:
-                count_subq = count_subq.where(Appointment.doctor_id == doctor_id)
-            if partner_id is not None:
-                count_subq = count_subq.where(Appointment.partner_id == partner_id)
-            if status is not None:
-                count_subq = count_subq.where(Appointment.status == status)
-            if type is not None:
-                count_subq = count_subq.where(Appointment.type == type)
-            if location is not None:
-                count_subq = count_subq.where(Appointment.location == location)
-            if appointment_date is not None:
-                count_subq = count_subq.where(func.date(Appointment.appointment_date) == appointment_date)
-            count_query = select(func.count()).select_from(count_subq.subquery())
-
+        count_query = select(func.count()).select_from(query.subquery())
         total_result = await self.db.execute(count_query)
         total = total_result.scalar()
 
@@ -178,28 +147,10 @@ class AppointmentService:
         result = await self.db.execute(query)
         rows = result.all()
 
-        appointments = []
-        for row in rows:
-            appt = row[0]
-            appointments.append({
-                "id": appt.id,
-                "patient_id": appt.patient_id,
-                "doctor_id": appt.doctor_id,
-                "partner_id": appt.partner_id,
-                "appointment_date": appt.appointment_date,
-                "status": appt.status,
-                "type": appt.type,
-                "location": appt.location,
-                "notes": appt.notes,
-                "is_deleted": appt.is_deleted,
-                "created_by": appt.created_by,
-                "created_at": appt.created_at,
-                "updated_by": appt.updated_by,
-                "updated_at": appt.updated_at,
-                "patient_name": row[1],
-                "doctor_name": row[2],
-                "partner_name": row[3],
-            })
+        appointments = [
+            AppointmentResponse.from_row(row).model_dump()
+            for row in rows
+        ]
 
         logger.debug("Queried appointments: total=%d returned=%d", total, len(appointments))
         return appointments, total

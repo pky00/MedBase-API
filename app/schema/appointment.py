@@ -120,9 +120,63 @@ class AppointmentResponse(BaseModel):
     doctor_name: Optional[str] = None
     partner_name: Optional[str] = None
 
+    @classmethod
+    def from_row(cls, row) -> "AppointmentResponse":
+        """Build from a SQLAlchemy row of (Appointment, patient_name, doctor_name, partner_name, ...)."""
+        appt = row[0]
+        return cls.model_validate(
+            {
+                "id": appt.id,
+                "patient_id": appt.patient_id,
+                "doctor_id": appt.doctor_id,
+                "partner_id": appt.partner_id,
+                "appointment_date": appt.appointment_date,
+                "status": appt.status,
+                "type": appt.type,
+                "location": appt.location,
+                "notes": appt.notes,
+                "is_deleted": appt.is_deleted,
+                "created_by": appt.created_by,
+                "created_at": appt.created_at,
+                "updated_by": appt.updated_by,
+                "updated_at": appt.updated_at,
+                "patient_name": row[1],
+                "doctor_name": row[2],
+                "partner_name": row[3],
+            }
+        )
+
 
 class AppointmentDetailResponse(AppointmentResponse):
     """Schema for appointment detail response with vitals and medical record."""
 
     vital_signs: Optional[VitalSignResponse] = None
     medical_record: Optional[MedicalRecordResponse] = None
+
+    @classmethod
+    def from_row(cls, row, vital_signs=None, medical_record=None) -> "AppointmentDetailResponse":
+        """Build from a SQLAlchemy row with optional vitals and medical record."""
+        appt = row[0]
+        return cls.model_validate(
+            {
+                "id": appt.id,
+                "patient_id": appt.patient_id,
+                "doctor_id": appt.doctor_id,
+                "partner_id": appt.partner_id,
+                "appointment_date": appt.appointment_date,
+                "status": appt.status,
+                "type": appt.type,
+                "location": appt.location,
+                "notes": appt.notes,
+                "is_deleted": appt.is_deleted,
+                "created_by": appt.created_by,
+                "created_at": appt.created_at,
+                "updated_by": appt.updated_by,
+                "updated_at": appt.updated_at,
+                "patient_name": row[1],
+                "doctor_name": row[2],
+                "partner_name": row[3],
+                "vital_signs": vital_signs,
+                "medical_record": medical_record,
+            }
+        )
