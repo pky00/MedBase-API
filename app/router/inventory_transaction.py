@@ -7,8 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.utility.database import get_db
 from app.utility.auth import get_current_user
 from app.service.inventory_transaction import InventoryTransactionService
-from app.service.partner import PartnerService
-from app.service.doctor import DoctorService
 from app.schema.inventory_transaction import (
     InventoryTransactionCreate,
     InventoryTransactionUpdate,
@@ -83,60 +81,32 @@ async def create_transaction(
         data.transaction_type, current_user.id,
     )
 
+    service = InventoryTransactionService(db)
+
     # Determine third_party_id based on transaction type
     if data.transaction_type in AUTO_THIRD_PARTY_TYPES:
-        # Auto-set to current user's third_party
         third_party_id = current_user.third_party_id
     elif data.transaction_type == "donation":
-        # Must provide third_party_id pointing to a donor partner
         if not data.third_party_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="third_party_id is required for donation transactions",
             )
-        # Validate the third_party_id belongs to a donor partner
-        partner_service = PartnerService(db)
-        from sqlalchemy import select
-        from app.model.partner import Partner
-        result = await db.execute(
-            select(Partner).where(
-                Partner.third_party_id == data.third_party_id,
-                Partner.is_deleted == False,
-            )
-        )
-        partner = result.scalar_one_or_none()
-        if not partner:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="third_party_id must belong to a partner for donation transactions",
-            )
-        if partner.partner_type not in ("donor", "both"):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Partner must have partner_type of 'donor' or 'both' for donations",
-            )
+        try:
+            await service.validate_donation_third_party(data.third_party_id)
+        except ValueError as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
         third_party_id = data.third_party_id
     elif data.transaction_type == "prescription":
-        # Must provide third_party_id pointing to a doctor
         if not data.third_party_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="third_party_id is required for prescription transactions",
             )
-        from sqlalchemy import select
-        from app.model.doctor import Doctor
-        result = await db.execute(
-            select(Doctor).where(
-                Doctor.third_party_id == data.third_party_id,
-                Doctor.is_deleted == False,
-            )
-        )
-        doctor = result.scalar_one_or_none()
-        if not doctor:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="third_party_id must belong to a doctor for prescription transactions",
-            )
+        try:
+            await service.validate_prescription_third_party(data.third_party_id)
+        except ValueError as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
         third_party_id = data.third_party_id
     else:
         third_party_id = current_user.third_party_id
@@ -144,9 +114,11 @@ async def create_transaction(
     # Validate items if provided
     if data.items:
         for item in data.items:
-            await _validate_inventory_item(db, item.item_type, item.item_id)
+            try:
+                await service.validate_inventory_item(item.item_type, item.item_id)
+            except ValueError as e:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-    service = InventoryTransactionService(db)
     try:
         transaction = await service.create(data, third_party_id, created_by=current_user.username)
     except ValueError as e:
@@ -154,7 +126,6 @@ async def create_transaction(
 
     logger.info("Inventory transaction created id=%d", transaction.id)
 
-    # Return with items
     result = await service.get_by_id_with_items(transaction.id)
     return result
 
@@ -200,23 +171,3 @@ async def delete_transaction(
     await service.delete(transaction_id, deleted_by=current_user.username)
     logger.info("Inventory transaction deleted transaction_id=%d", transaction_id)
     return MessageResponse(message="Inventory transaction deleted successfully")
-
-
-async def _validate_inventory_item(db: AsyncSession, item_type: str, item_id: int) -> None:
-    """Validate that an inventory item exists."""
-    from sqlalchemy import select
-    from app.model.inventory import Inventory
-
-    result = await db.execute(
-        select(Inventory).where(
-            Inventory.item_type == item_type,
-            Inventory.item_id == item_id,
-            Inventory.is_deleted == False,
-        )
-    )
-    inventory = result.scalar_one_or_none()
-    if not inventory:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Inventory record not found for {item_type} id={item_id}",
-        )

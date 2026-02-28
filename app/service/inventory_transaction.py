@@ -7,6 +7,11 @@ from app.model.inventory_transaction import InventoryTransaction
 from app.model.inventory_transaction_item import InventoryTransactionItem
 from app.model.inventory import Inventory
 from app.model.third_party import ThirdParty
+from app.model.partner import Partner
+from app.model.doctor import Doctor
+from app.model.medicine import Medicine
+from app.model.equipment import Equipment
+from app.model.medical_device import MedicalDevice
 from app.schema.inventory_transaction import (
     InventoryTransactionCreate,
     InventoryTransactionUpdate,
@@ -86,6 +91,64 @@ class InventoryTransactionService:
         inventory.updated_by = updated_by
         await self.db.flush()
 
+    # ---- Validation helpers ----
+
+    async def validate_donation_third_party(self, third_party_id: int) -> None:
+        """Validate that third_party_id belongs to a donor partner."""
+        result = await self.db.execute(
+            select(Partner).where(
+                Partner.third_party_id == third_party_id,
+                Partner.is_deleted == False,
+            )
+        )
+        partner = result.scalar_one_or_none()
+        if not partner:
+            raise ValueError("third_party_id must belong to a partner for donation transactions")
+        if partner.partner_type not in ("donor", "both"):
+            raise ValueError("Partner must have partner_type of 'donor' or 'both' for donations")
+
+    async def validate_prescription_third_party(self, third_party_id: int) -> None:
+        """Validate that third_party_id belongs to a doctor."""
+        result = await self.db.execute(
+            select(Doctor).where(
+                Doctor.third_party_id == third_party_id,
+                Doctor.is_deleted == False,
+            )
+        )
+        doctor = result.scalar_one_or_none()
+        if not doctor:
+            raise ValueError("third_party_id must belong to a doctor for prescription transactions")
+
+    async def validate_inventory_item(self, item_type: str, item_id: int) -> None:
+        """Validate that an inventory record exists for the given item."""
+        result = await self.db.execute(
+            select(Inventory).where(
+                Inventory.item_type == item_type,
+                Inventory.item_id == item_id,
+                Inventory.is_deleted == False,
+            )
+        )
+        inventory = result.scalar_one_or_none()
+        if not inventory:
+            raise ValueError(f"Inventory record not found for {item_type} id={item_id}")
+
+    async def build_item_response(self, item: InventoryTransactionItem) -> TransactionItemResponse:
+        """Build a TransactionItemResponse from a model instance."""
+        item_name = await self._get_item_name(item.item_type, item.item_id)
+        return TransactionItemResponse(
+            id=item.id,
+            transaction_id=item.transaction_id,
+            item_type=item.item_type,
+            item_id=item.item_id,
+            quantity=item.quantity,
+            is_deleted=item.is_deleted,
+            created_by=item.created_by,
+            created_at=item.created_at,
+            updated_by=item.updated_by,
+            updated_at=item.updated_at,
+            item_name=item_name,
+        )
+
     # ---- Transaction CRUD ----
 
     async def get_by_id(self, transaction_id: int) -> Optional[InventoryTransaction]:
@@ -163,10 +226,6 @@ class InventoryTransactionService:
 
     async def _get_item_name(self, item_type: str, item_id: int) -> Optional[str]:
         """Get the name of an inventory item by type and ID."""
-        from app.model.medicine import Medicine
-        from app.model.equipment import Equipment
-        from app.model.medical_device import MedicalDevice
-
         model_map = {
             "medicine": Medicine,
             "equipment": Equipment,

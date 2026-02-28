@@ -62,11 +62,8 @@ async def add_transaction_item(
     if not transaction:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Inventory transaction not found")
 
-    # Validate inventory item exists
-    from app.router.inventory_transaction import _validate_inventory_item
-    await _validate_inventory_item(db, data.item_type, data.item_id)
-
     try:
+        await service.validate_inventory_item(data.item_type, data.item_id)
         item = await service.create_item(
             transaction_id, data, transaction.transaction_type,
             created_by=current_user.username,
@@ -74,22 +71,8 @@ async def add_transaction_item(
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-    # Build response with item name
-    item_name = await service._get_item_name(item.item_type, item.item_id)
     logger.info("Transaction item created item_id=%d", item.id)
-    return TransactionItemResponse(
-        id=item.id,
-        transaction_id=item.transaction_id,
-        item_type=item.item_type,
-        item_id=item.item_id,
-        quantity=item.quantity,
-        is_deleted=item.is_deleted,
-        created_by=item.created_by,
-        created_at=item.created_at,
-        updated_by=item.updated_by,
-        updated_at=item.updated_at,
-        item_name=item_name,
-    )
+    return await service.build_item_response(item)
 
 
 @router.put(
@@ -111,34 +94,23 @@ async def update_transaction_item(
         logger.warning("Transaction item not found item_id=%d", item_id)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction item not found")
 
-    # Validate new inventory item if changing
+    # Validate new inventory item if changing type or id
     update_data = data.model_dump(exclude_unset=True)
-    new_item_type = update_data.get("item_type", item.item_type)
-    new_item_id = update_data.get("item_id", item.item_id)
     if "item_type" in update_data or "item_id" in update_data:
-        from app.router.inventory_transaction import _validate_inventory_item
-        await _validate_inventory_item(db, new_item_type, new_item_id)
+        new_item_type = update_data.get("item_type", item.item_type)
+        new_item_id = update_data.get("item_id", item.item_id)
+        try:
+            await service.validate_inventory_item(new_item_type, new_item_id)
+        except ValueError as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
     try:
         updated = await service.update_item(item_id, data, updated_by=current_user.username)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-    item_name = await service._get_item_name(updated.item_type, updated.item_id)
     logger.info("Transaction item updated item_id=%d", item_id)
-    return TransactionItemResponse(
-        id=updated.id,
-        transaction_id=updated.transaction_id,
-        item_type=updated.item_type,
-        item_id=updated.item_id,
-        quantity=updated.quantity,
-        is_deleted=updated.is_deleted,
-        created_by=updated.created_by,
-        created_at=updated.created_at,
-        updated_by=updated.updated_by,
-        updated_at=updated.updated_at,
-        item_name=item_name,
-    )
+    return await service.build_item_response(updated)
 
 
 @router.delete(

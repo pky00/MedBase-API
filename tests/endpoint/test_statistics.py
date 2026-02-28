@@ -159,14 +159,14 @@ async def dashboard_data(db_session: AsyncSession, admin_user: User):
 
 
 class TestSummaryStats:
-    """Tests for GET /api/v1/dashboard/summary"""
+    """Tests for GET /api/v1/statistics/summary"""
 
     @pytest.mark.asyncio
     async def test_get_summary_authenticated(
         self, client: AsyncClient, admin_headers: dict, dashboard_data,
     ):
         """Test getting summary statistics."""
-        response = await client.get("/api/v1/dashboard/summary", headers=admin_headers)
+        response = await client.get("/api/v1/statistics/summary", headers=admin_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["total_patients"] >= 2
@@ -182,7 +182,7 @@ class TestSummaryStats:
     @pytest.mark.asyncio
     async def test_get_summary_unauthenticated(self, client: AsyncClient):
         """Test getting summary without authentication."""
-        response = await client.get("/api/v1/dashboard/summary")
+        response = await client.get("/api/v1/statistics/summary")
         assert response.status_code == 401
 
     @pytest.mark.asyncio
@@ -190,7 +190,7 @@ class TestSummaryStats:
         self, client: AsyncClient, admin_headers: dict,
     ):
         """Test summary with empty database returns zeros."""
-        response = await client.get("/api/v1/dashboard/summary", headers=admin_headers)
+        response = await client.get("/api/v1/statistics/summary", headers=admin_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["total_patients"] == 0
@@ -198,14 +198,14 @@ class TestSummaryStats:
 
 
 class TestInventoryStats:
-    """Tests for GET /api/v1/dashboard/inventory"""
+    """Tests for GET /api/v1/statistics/inventory"""
 
     @pytest.mark.asyncio
     async def test_get_inventory_stats(
         self, client: AsyncClient, admin_headers: dict, dashboard_data,
     ):
         """Test getting inventory statistics."""
-        response = await client.get("/api/v1/dashboard/inventory", headers=admin_headers)
+        response = await client.get("/api/v1/statistics/inventory", headers=admin_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["total_items"] >= 2
@@ -219,7 +219,7 @@ class TestInventoryStats:
         self, client: AsyncClient, admin_headers: dict, dashboard_data,
     ):
         """Test that low stock items are detected (threshold = 10)."""
-        response = await client.get("/api/v1/dashboard/inventory", headers=admin_headers)
+        response = await client.get("/api/v1/statistics/inventory", headers=admin_headers)
         assert response.status_code == 200
         data = response.json()
         # Medicine with qty=5 should be in low stock
@@ -229,19 +229,19 @@ class TestInventoryStats:
     @pytest.mark.asyncio
     async def test_inventory_stats_unauthenticated(self, client: AsyncClient):
         """Test getting inventory stats without authentication."""
-        response = await client.get("/api/v1/dashboard/inventory")
+        response = await client.get("/api/v1/statistics/inventory")
         assert response.status_code == 401
 
 
 class TestAppointmentStats:
-    """Tests for GET /api/v1/dashboard/appointments"""
+    """Tests for GET /api/v1/statistics/appointments"""
 
     @pytest.mark.asyncio
     async def test_get_appointment_stats(
         self, client: AsyncClient, admin_headers: dict, dashboard_data,
     ):
         """Test getting appointment statistics."""
-        response = await client.get("/api/v1/dashboard/appointments", headers=admin_headers)
+        response = await client.get("/api/v1/statistics/appointments", headers=admin_headers)
         assert response.status_code == 200
         data = response.json()
         assert "today_count" in data
@@ -257,7 +257,7 @@ class TestAppointmentStats:
         self, client: AsyncClient, admin_headers: dict, dashboard_data,
     ):
         """Test that status breakdown is correct."""
-        response = await client.get("/api/v1/dashboard/appointments", headers=admin_headers)
+        response = await client.get("/api/v1/statistics/appointments", headers=admin_headers)
         assert response.status_code == 200
         data = response.json()
         statuses = {s["status"]: s["count"] for s in data["by_status"]}
@@ -267,19 +267,19 @@ class TestAppointmentStats:
     @pytest.mark.asyncio
     async def test_appointment_stats_unauthenticated(self, client: AsyncClient):
         """Test getting appointment stats without authentication."""
-        response = await client.get("/api/v1/dashboard/appointments")
+        response = await client.get("/api/v1/statistics/appointments")
         assert response.status_code == 401
 
 
 class TestTransactionStats:
-    """Tests for GET /api/v1/dashboard/transactions"""
+    """Tests for GET /api/v1/statistics/transactions"""
 
     @pytest.mark.asyncio
     async def test_get_transaction_stats(
         self, client: AsyncClient, admin_headers: dict, dashboard_data,
     ):
         """Test getting transaction statistics."""
-        response = await client.get("/api/v1/dashboard/transactions", headers=admin_headers)
+        response = await client.get("/api/v1/statistics/transactions", headers=admin_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["total_transactions"] >= 1
@@ -292,7 +292,7 @@ class TestTransactionStats:
         self, client: AsyncClient, admin_headers: dict, dashboard_data,
     ):
         """Test that type breakdown is correct."""
-        response = await client.get("/api/v1/dashboard/transactions", headers=admin_headers)
+        response = await client.get("/api/v1/statistics/transactions", headers=admin_headers)
         assert response.status_code == 200
         data = response.json()
         types = {t["transaction_type"]: t for t in data["by_type"]}
@@ -304,7 +304,7 @@ class TestTransactionStats:
         self, client: AsyncClient, admin_headers: dict, dashboard_data,
     ):
         """Test that recent transactions include third party name and item count."""
-        response = await client.get("/api/v1/dashboard/transactions", headers=admin_headers)
+        response = await client.get("/api/v1/statistics/transactions", headers=admin_headers)
         assert response.status_code == 200
         data = response.json()
         recent = data["recent_transactions"]
@@ -316,5 +316,5 @@ class TestTransactionStats:
     @pytest.mark.asyncio
     async def test_transaction_stats_unauthenticated(self, client: AsyncClient):
         """Test getting transaction stats without authentication."""
-        response = await client.get("/api/v1/dashboard/transactions")
+        response = await client.get("/api/v1/statistics/transactions")
         assert response.status_code == 401

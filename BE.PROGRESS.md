@@ -370,10 +370,10 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 **Status:** Complete
 
 **Endpoints:**
-- GET `/api/v1/dashboard/summary` - Overall counts (patients, appointments, inventory, transactions, partners, doctors, active counts)
-- GET `/api/v1/dashboard/inventory` - Inventory stats (total items/qty, low stock alerts with threshold=10, items grouped by type)
-- GET `/api/v1/dashboard/appointments` - Appointment stats (today's count, upcoming, by status, by month for last 6 months, total completed/cancelled)
-- GET `/api/v1/dashboard/transactions` - Transaction stats (total count, grouped by type with item counts, last 10 recent transactions)
+- GET `/api/v1/statistics/summary` - Overall counts (patients, appointments, inventory, transactions, partners, doctors, active counts)
+- GET `/api/v1/statistics/inventory` - Inventory stats (total items/qty, low stock alerts with threshold=10, items grouped by type)
+- GET `/api/v1/statistics/appointments` - Appointment stats (today's count, upcoming, by status, by month for last 6 months, total completed/cancelled)
+- GET `/api/v1/statistics/transactions` - Transaction stats (total count, grouped by type with item counts, last 10 recent transactions)
 
 **Tests:**
 - test_statistics.py (16 tests: summary with data/empty/unauth, inventory stats/low stock/unauth, appointment stats/by status/unauth, transaction stats/by type/recent/unauth)

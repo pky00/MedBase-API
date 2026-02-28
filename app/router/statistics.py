@@ -15,7 +15,7 @@ from app.model.user import User
 
 logger = logging.getLogger("medbase.router.statistics")
 
-router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
+router = APIRouter(prefix="/statistics", tags=["Statistics"])
 
 
 @router.get("/summary", response_model=SummaryStats)
