@@ -6,7 +6,7 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 
 ---
 
-## Current Phase: Phase 4 - Patients
+## Current Phase: Phase 5 - Appointments & Records
 
 ---
 
@@ -25,6 +25,10 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 | 10 | Doctors | 2026-02-14 | Doctor CRUD with internal/external/partner_provided types, third_party_id (auto-created or linked), partner validation |
 | 11 | Patients | 2026-02-27 | Patient CRUD with third_party auto-creation, gender filter, search by name/phone/email, pagination |
 | 12 | Patient Documents | 2026-02-27 | Document upload to Lightsail bucket (S3), list/get/delete, multipart/form-data, document_type filter |
+| 13 | Appointments | 2026-02-27 | Appointment CRUD with status flow, patient/doctor/partner links, internal/external locations, filters, pagination |
+| 14 | Vital Signs | 2026-02-27 | One vital signs record per appointment, all fields optional, cannot edit when completed |
+| 15 | Medical Records | 2026-02-27 | One medical record per appointment, patient_id/appointment_id filters, cannot edit when completed |
+| 16 | Treatments | 2026-02-27 | Multiple treatments per appointment, referral partner validation, status flow, patient/partner names |
 
 ---
 
@@ -228,10 +232,107 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 
 ---
 
+## Phase 5 Details
+
+### Feature 13: Appointments
+**Status:** Complete
+
+**Endpoints:**
+- GET `/api/v1/appointments` - List all appointments (paginated, filterable by patient_id, doctor_id, partner_id, status, type, location, appointment_date, searchable)
+- GET `/api/v1/appointments/{id}` - Get appointment by ID (includes vitals, medical record, patient/doctor/partner names)
+- POST `/api/v1/appointments` - Create appointment (validates patient, doctor, partner; external requires partner_id)
+- PUT `/api/v1/appointments/{id}` - Update appointment (cannot update completed appointments)
+- PUT `/api/v1/appointments/{id}/status` - Update appointment status
+- DELETE `/api/v1/appointments/{id}` - Delete appointment (soft delete)
+
+**Model:**
+- id, patient_id (FK), doctor_id (FK, optional), partner_id (FK, optional), appointment_date, status (scheduled/in_progress/completed/cancelled), type (scheduled/walk_in), location (internal/external), notes, is_deleted, audit columns
+
+**Tests:**
+- test_appointments.py (25 tests: list, filters by status/type/patient_id/location, pagination, names in response, get by ID with details, create scheduled/walk_in/external, external without partner fails, invalid patient/doctor/type, update success/not found/completed fails, status updates, delete/soft delete verification)
+
+**Postman:**
+- Appointments folder (Get All, Get by ID, Create, Update, Update Status, Delete)
+
+### Feature 14: Vital Signs
+**Status:** Complete
+
+**Endpoints:**
+- GET `/api/v1/appointments/{appointment_id}/vitals` - Get vitals for appointment
+- POST `/api/v1/appointments/{appointment_id}/vitals` - Add vitals to appointment (one per appointment)
+- PUT `/api/v1/vital-signs/{id}` - Update vital signs (cannot edit if completed)
+- DELETE `/api/v1/vital-signs/{id}` - Delete vital signs (soft delete)
+
+**Model:**
+- id, appointment_id (FK), blood_pressure_systolic, blood_pressure_diastolic, heart_rate, temperature, respiratory_rate, weight, height, notes, is_deleted, audit columns
+
+**Business Rules:**
+- One vital signs record per appointment
+- All vital sign fields are optional
+- Cannot add/edit if appointment is completed
+
+**Tests:**
+- test_vital_signs.py (14 tests: get vitals success/no vitals/appointment not found, create success/optional fields/duplicate fails/completed fails/appointment not found, update success/not found/completed fails, delete success/not found)
+
+**Postman:**
+- Vital Signs folder (Get Vitals, Add Vitals, Update, Delete)
+
+### Feature 15: Medical Records
+**Status:** Complete
+
+**Endpoints:**
+- GET `/api/v1/medical-records` - List all medical records (paginated, filterable by patient_id, appointment_id)
+- GET `/api/v1/medical-records/{id}` - Get medical record by ID (includes patient_name)
+- GET `/api/v1/appointments/{appointment_id}/medical-record` - Get record for appointment
+- POST `/api/v1/appointments/{appointment_id}/medical-record` - Create record for appointment (one per appointment)
+- PUT `/api/v1/medical-records/{id}` - Update medical record (cannot edit if completed)
+- DELETE `/api/v1/medical-records/{id}` - Delete medical record (soft delete)
+
+**Model:**
+- id, appointment_id (FK), chief_complaint, diagnosis, treatment_notes, follow_up_date, is_deleted, audit columns
+
+**Business Rules:**
+- One medical record per appointment
+- Cannot add/edit if appointment is completed
+
+**Tests:**
+- test_medical_records.py (19 tests: list, filters by patient/appointment, patient_name in response, get by ID/not found, get for appointment/no record/appointment not found, create success/minimal/duplicate fails/completed fails/appointment not found, update success/not found/completed fails, delete success/not found)
+
+**Postman:**
+- Medical Records folder (Get All, Get by ID, Get for Appointment, Create, Update, Delete)
+
+### Feature 16: Treatments
+**Status:** Complete
+
+**Endpoints:**
+- GET `/api/v1/treatments` - List all treatments (paginated, filterable by patient_id, partner_id, appointment_id, status)
+- GET `/api/v1/treatments/{id}` - Get treatment by ID (includes patient_name, partner_name)
+- POST `/api/v1/treatments` - Create treatment (partner must be referral/both, appointment optional, multiple per appointment allowed)
+- PUT `/api/v1/treatments/{id}` - Update treatment
+- PUT `/api/v1/treatments/{id}/status` - Update treatment status
+- DELETE `/api/v1/treatments/{id}` - Delete treatment (soft delete)
+
+**Model:**
+- id, patient_id (FK), appointment_id (FK, optional), partner_id (FK), treatment_type, description, treatment_date, status (pending/in_progress/completed/cancelled), cost, notes, is_deleted, audit columns
+
+**Business Rules:**
+- Partner must have partner_type of 'referral' or 'both'
+- Can optionally link to an appointment
+- Multiple treatments allowed per appointment
+
+**Tests:**
+- test_treatments.py (24 tests: list, filters by status/patient/partner, pagination, names in response, get by ID/not found, create success/with appointment/multiple per appointment/donor fails/invalid patient/partner/appointment/empty type, update success/not found/invalid partner type, status updates/not found/invalid value, delete/soft delete verification)
+
+**Postman:**
+- Treatments folder (Get All, Get by ID, Create, Update, Update Status, Delete)
+
+---
+
 ## Migration Notes
 
 - Initial migration: `20260226_193257_039074b781f1_initial.py` (Phase 1-3 schema)
 - Phase 4 migration: `20260227_add_patients_and_patient_documents.py` (patients and patient_documents tables)
+- Phase 5 migration: `20260227_add_phase5_appointments_records_treatments.py` (appointments, vital_signs, medical_records, treatments tables)
 
 ---
 

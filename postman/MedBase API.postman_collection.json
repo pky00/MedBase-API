@@ -1204,6 +1204,423 @@
 				"response": []
 			}
 		]
+	},
+	{
+		"name": "Appointments",
+		"item": [
+			{
+				"name": "Get All Appointments",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/appointments?page=1&size=10",
+						"host": ["{{base_url}}"],
+						"path": ["appointments"],
+						"query": [
+							{ "key": "page", "value": "1" },
+							{ "key": "size", "value": "10" },
+							{ "key": "patient_id", "value": "1", "disabled": true },
+							{ "key": "doctor_id", "value": "1", "disabled": true },
+							{ "key": "partner_id", "value": "1", "disabled": true },
+							{ "key": "status", "value": "scheduled", "disabled": true },
+							{ "key": "type", "value": "scheduled", "disabled": true },
+							{ "key": "location", "value": "internal", "disabled": true },
+							{ "key": "appointment_date", "value": "2026-03-01", "disabled": true },
+							{ "key": "search", "value": "", "disabled": true },
+							{ "key": "sort", "value": "id", "disabled": true },
+							{ "key": "order", "value": "asc", "disabled": true }
+						]
+					},
+					"description": "Get all appointments with pagination, filters, and search. Filters: patient_id, doctor_id, partner_id, status (scheduled/in_progress/completed/cancelled), type (scheduled/walk_in), location (internal/external), appointment_date."
+				},
+				"response": []
+			},
+			{
+				"name": "Get Appointment by ID",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/appointments/:id",
+						"host": ["{{base_url}}"],
+						"path": ["appointments", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
+					},
+					"description": "Get appointment by ID. Includes vital signs and medical record."
+				},
+				"response": []
+			},
+			{
+				"name": "Create Appointment",
+				"request": {
+					"method": "POST",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"patient_id\": 1,\n    \"doctor_id\": 1,\n    \"appointment_date\": \"2026-03-15T09:00:00\",\n    \"type\": \"scheduled\",\n    \"location\": \"internal\",\n    \"notes\": \"Follow-up visit\"\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/appointments",
+						"host": ["{{base_url}}"],
+						"path": ["appointments"]
+					},
+					"description": "Create a new appointment. External appointments require partner_id."
+				},
+				"response": []
+			},
+			{
+				"name": "Update Appointment",
+				"request": {
+					"method": "PUT",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"notes\": \"Updated appointment notes\",\n    \"appointment_date\": \"2026-03-16T10:00:00\"\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/appointments/:id",
+						"host": ["{{base_url}}"],
+						"path": ["appointments", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
+					},
+					"description": "Update an appointment. Cannot update completed appointments."
+				},
+				"response": []
+			},
+			{
+				"name": "Update Appointment Status",
+				"request": {
+					"method": "PUT",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"status\": \"in_progress\"\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/appointments/:id/status",
+						"host": ["{{base_url}}"],
+						"path": ["appointments", ":id", "status"],
+						"variable": [{ "key": "id", "value": "1" }]
+					},
+					"description": "Update appointment status. Values: scheduled, in_progress, completed, cancelled."
+				},
+				"response": []
+			},
+			{
+				"name": "Delete Appointment",
+				"request": {
+					"method": "DELETE",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/appointments/:id",
+						"host": ["{{base_url}}"],
+						"path": ["appointments", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
+					},
+					"description": "Delete an appointment (soft delete)."
+				},
+				"response": []
+			}
+		]
+	},
+	{
+		"name": "Vital Signs",
+		"item": [
+			{
+				"name": "Get Vitals for Appointment",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/appointments/:appointment_id/vitals",
+						"host": ["{{base_url}}"],
+						"path": ["appointments", ":appointment_id", "vitals"],
+						"variable": [{ "key": "appointment_id", "value": "1" }]
+					},
+					"description": "Get vital signs for an appointment. One vital signs record per appointment."
+				},
+				"response": []
+			},
+			{
+				"name": "Add Vitals to Appointment",
+				"request": {
+					"method": "POST",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"blood_pressure_systolic\": 120,\n    \"blood_pressure_diastolic\": 80,\n    \"heart_rate\": 72,\n    \"temperature\": 36.6,\n    \"respiratory_rate\": 16,\n    \"weight\": 70.5,\n    \"height\": 175.0,\n    \"notes\": \"Normal vitals\"\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/appointments/:appointment_id/vitals",
+						"host": ["{{base_url}}"],
+						"path": ["appointments", ":appointment_id", "vitals"],
+						"variable": [{ "key": "appointment_id", "value": "1" }]
+					},
+					"description": "Add vital signs to an appointment. One record per appointment. All fields optional. Cannot add to completed appointments."
+				},
+				"response": []
+			},
+			{
+				"name": "Update Vital Signs",
+				"request": {
+					"method": "PUT",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"heart_rate\": 85,\n    \"notes\": \"After exercise\"\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/vital-signs/:id",
+						"host": ["{{base_url}}"],
+						"path": ["vital-signs", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
+					},
+					"description": "Update vital signs. Cannot edit if appointment is completed."
+				},
+				"response": []
+			},
+			{
+				"name": "Delete Vital Signs",
+				"request": {
+					"method": "DELETE",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/vital-signs/:id",
+						"host": ["{{base_url}}"],
+						"path": ["vital-signs", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
+					},
+					"description": "Delete vital signs (soft delete)."
+				},
+				"response": []
+			}
+		]
+	},
+	{
+		"name": "Medical Records",
+		"item": [
+			{
+				"name": "Get All Medical Records",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/medical-records?page=1&size=10",
+						"host": ["{{base_url}}"],
+						"path": ["medical-records"],
+						"query": [
+							{ "key": "page", "value": "1" },
+							{ "key": "size", "value": "10" },
+							{ "key": "patient_id", "value": "1", "disabled": true },
+							{ "key": "appointment_id", "value": "1", "disabled": true },
+							{ "key": "sort", "value": "id", "disabled": true },
+							{ "key": "order", "value": "asc", "disabled": true }
+						]
+					},
+					"description": "List all medical records with pagination and filters. Filters: patient_id, appointment_id."
+				},
+				"response": []
+			},
+			{
+				"name": "Get Medical Record by ID",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/medical-records/:id",
+						"host": ["{{base_url}}"],
+						"path": ["medical-records", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
+					},
+					"description": "Get medical record by ID. Includes patient name."
+				},
+				"response": []
+			},
+			{
+				"name": "Get Record for Appointment",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/appointments/:appointment_id/medical-record",
+						"host": ["{{base_url}}"],
+						"path": ["appointments", ":appointment_id", "medical-record"],
+						"variable": [{ "key": "appointment_id", "value": "1" }]
+					},
+					"description": "Get the medical record for a specific appointment."
+				},
+				"response": []
+			},
+			{
+				"name": "Create Record for Appointment",
+				"request": {
+					"method": "POST",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"chief_complaint\": \"Headache and dizziness\",\n    \"diagnosis\": \"Tension headache\",\n    \"treatment_notes\": \"Prescribed rest and analgesics\",\n    \"follow_up_date\": \"2026-04-01\"\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/appointments/:appointment_id/medical-record",
+						"host": ["{{base_url}}"],
+						"path": ["appointments", ":appointment_id", "medical-record"],
+						"variable": [{ "key": "appointment_id", "value": "1" }]
+					},
+					"description": "Create a medical record for an appointment. One record per appointment. Cannot add to completed appointments."
+				},
+				"response": []
+			},
+			{
+				"name": "Update Medical Record",
+				"request": {
+					"method": "PUT",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"diagnosis\": \"Migraine\",\n    \"treatment_notes\": \"Updated treatment plan\"\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/medical-records/:id",
+						"host": ["{{base_url}}"],
+						"path": ["medical-records", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
+					},
+					"description": "Update a medical record. Cannot edit if appointment is completed."
+				},
+				"response": []
+			},
+			{
+				"name": "Delete Medical Record",
+				"request": {
+					"method": "DELETE",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/medical-records/:id",
+						"host": ["{{base_url}}"],
+						"path": ["medical-records", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
+					},
+					"description": "Delete a medical record (soft delete)."
+				},
+				"response": []
+			}
+		]
+	},
+	{
+		"name": "Treatments",
+		"item": [
+			{
+				"name": "Get All Treatments",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/treatments?page=1&size=10",
+						"host": ["{{base_url}}"],
+						"path": ["treatments"],
+						"query": [
+							{ "key": "page", "value": "1" },
+							{ "key": "size", "value": "10" },
+							{ "key": "patient_id", "value": "1", "disabled": true },
+							{ "key": "partner_id", "value": "1", "disabled": true },
+							{ "key": "appointment_id", "value": "1", "disabled": true },
+							{ "key": "status", "value": "pending", "disabled": true },
+							{ "key": "sort", "value": "id", "disabled": true },
+							{ "key": "order", "value": "asc", "disabled": true }
+						]
+					},
+					"description": "List all treatments with pagination and filters. Filters: patient_id, partner_id, appointment_id, status (pending/completed)."
+				},
+				"response": []
+			},
+			{
+				"name": "Get Treatment by ID",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/treatments/:id",
+						"host": ["{{base_url}}"],
+						"path": ["treatments", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
+					},
+					"description": "Get treatment by ID. Includes patient and partner names."
+				},
+				"response": []
+			},
+			{
+				"name": "Create Treatment",
+				"request": {
+					"method": "POST",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"patient_id\": 1,\n    \"partner_id\": 1,\n    \"appointment_id\": 1,\n    \"treatment_type\": \"Surgery\",\n    \"description\": \"Minor surgery procedure\",\n    \"treatment_date\": \"2026-03-20\",\n    \"cost\": 500.00,\n    \"notes\": \"Requires local anesthesia\"\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/treatments",
+						"host": ["{{base_url}}"],
+						"path": ["treatments"]
+					},
+					"description": "Create a new treatment. Partner must have partner_type of 'referral' or 'both'. appointment_id is optional. Multiple treatments can be linked to one appointment."
+				},
+				"response": []
+			},
+			{
+				"name": "Update Treatment",
+				"request": {
+					"method": "PUT",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"description\": \"Updated treatment description\",\n    \"cost\": 750.00,\n    \"notes\": \"Updated notes\"\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/treatments/:id",
+						"host": ["{{base_url}}"],
+						"path": ["treatments", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
+					},
+					"description": "Update a treatment."
+				},
+				"response": []
+			},
+			{
+				"name": "Update Treatment Status",
+				"request": {
+					"method": "PUT",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"status\": \"completed\"\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/treatments/:id/status",
+						"host": ["{{base_url}}"],
+						"path": ["treatments", ":id", "status"],
+						"variable": [{ "key": "id", "value": "1" }]
+					},
+					"description": "Update treatment status. Values: pending, completed."
+				},
+				"response": []
+			},
+			{
+				"name": "Delete Treatment",
+				"request": {
+					"method": "DELETE",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/treatments/:id",
+						"host": ["{{base_url}}"],
+						"path": ["treatments", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
+					},
+					"description": "Delete a treatment (soft delete)."
+				},
+				"response": []
+			}
+		]
 	}
 	],
 	"auth": {

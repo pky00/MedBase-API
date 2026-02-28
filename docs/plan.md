@@ -26,8 +26,8 @@
 
 | # | Feature | Description | BE | FE |
 |---|---------|-------------|----|----|
-| 9 | Partners | Partner records (donors, referral partners, or both). Each partner gets a third_party record | Pending | Pending |
-| 10 | Doctors | Doctor records (clinic staff, external, partner-provided). Each doctor gets a third_party record | Pending | Pending |
+| 9 | Partners | Partner records (donors, referral partners, or both). Each partner gets a third_party record | Done | Pending |
+| 10 | Doctors | Doctor records (clinic staff, external, partner-provided). Each doctor gets a third_party record | Done | Pending |
 
 ### Inventory Transactions — Migration Notes
 
@@ -69,8 +69,8 @@ The original plan had separate `donations`/`donation_items` tables, separate `pr
 
 | # | Feature | Description | BE | FE |
 |---|---------|-------------|----|----|
-| 11 | Patients | Patient records and data. Each patient gets a third_party record | Pending | Pending |
-| 12 | Patient Documents | Document upload and storage for patients | Pending | Pending |
+| 11 | Patients | Patient records and data. Each patient gets a third_party record | Done | Pending |
+| 12 | Patient Documents | Document upload and storage for patients | Done | Pending |
 
 ---
 
@@ -78,10 +78,10 @@ The original plan had separate `donations`/`donation_items` tables, separate `pr
 
 | # | Feature | Description | BE | FE |
 |---|---------|-------------|----|----|
-| 13 | Appointments | Appointments management | Pending | Pending |
-| 14 | Vital Signs | Vital signs recording per appointment | Pending | Pending |
-| 15 | Medical Records | Medical record per appointment | Pending | Pending |
-| 16 | Appointment Flow | Page to process appointment: begin → vitals + record (optional) → treatment (optional) → complete. Usually vitals + record, sometimes treatment only | Pending | Pending |
+| 13 | Appointments | Appointments management | Done | Pending |
+| 14 | Vital Signs | Vital signs recording per appointment | Done | Pending |
+| 15 | Medical Records | Medical record per appointment | Done | Pending |
+| 16 | Appointment Flow | Page to process appointment: begin → vitals + record (optional) → treatment (optional) → complete. Usually vitals + record, sometimes treatment only | - | Pending |
 
 ---
 
@@ -90,7 +90,7 @@ The original plan had separate `donations`/`donation_items` tables, separate `pr
 | # | Feature | Description | BE | FE |
 |---|---------|-------------|----|----|
 | 17 | Inventory Transactions | Inventory transactions with transaction items (see migration notes below) | Pending | Pending |
-| 18 | Treatments | External treatments via partners | Pending | Pending |
+| 18 | Treatments | External treatments via partners | Done | Pending |
 
 ---
 

@@ -6,27 +6,15 @@ from sqlalchemy import select, func
 from fastapi import UploadFile
 
 from app.model.patient_document import PatientDocument
+from app.schema.patient_document import PatientDocumentResponse
 from app.utility import storage
 
 logger = logging.getLogger("medbase.service.patient_document")
 
 
-def document_to_response(doc: PatientDocument) -> dict:
-    """Convert a PatientDocument model to a response dict with file_url."""
-    return {
-        "id": doc.id,
-        "patient_id": doc.patient_id,
-        "document_name": doc.document_name,
-        "document_type": doc.document_type,
-        "file_path": doc.file_path,
-        "file_url": storage.get_file_url(doc.file_path),
-        "upload_date": doc.upload_date,
-        "is_deleted": doc.is_deleted,
-        "created_by": doc.created_by,
-        "created_at": doc.created_at,
-        "updated_by": doc.updated_by,
-        "updated_at": doc.updated_at,
-    }
+def document_to_response(doc: PatientDocument) -> PatientDocumentResponse:
+    """Convert a PatientDocument model to a response with file_url."""
+    return PatientDocumentResponse.from_model(doc, storage.get_file_url(doc.file_path))
 
 
 class PatientDocumentService:

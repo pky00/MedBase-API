@@ -6,29 +6,12 @@ from sqlalchemy import select, func, or_
 from app.model.patient import Patient
 from app.model.patient_document import PatientDocument
 from app.schema.patient import PatientCreate, PatientUpdate
+from app.schema.patient_document import PatientDocumentResponse
 from app.service.third_party import ThirdPartyService
 from app.schema.third_party import ThirdPartyType
 from app.utility import storage
 
 logger = logging.getLogger("medbase.service.patient")
-
-
-def _document_to_dict(doc: PatientDocument) -> dict:
-    """Convert a PatientDocument to a dict with file_url from Lightsail bucket."""
-    return {
-        "id": doc.id,
-        "patient_id": doc.patient_id,
-        "document_name": doc.document_name,
-        "document_type": doc.document_type,
-        "file_path": doc.file_path,
-        "file_url": storage.get_file_url(doc.file_path),
-        "upload_date": doc.upload_date,
-        "is_deleted": doc.is_deleted,
-        "created_by": doc.created_by,
-        "created_at": doc.created_at,
-        "updated_by": doc.updated_by,
-        "updated_at": doc.updated_at,
-    }
 
 
 class PatientService:
@@ -58,7 +41,7 @@ class PatientService:
         )
         return result.scalar_one_or_none()
 
-    async def get_by_id_with_documents(self, patient_id: int) -> Optional[Tuple[Patient, List[dict]]]:
+    async def get_by_id_with_documents(self, patient_id: int) -> Optional[Tuple[Patient, List[PatientDocumentResponse]]]:
         """Get patient by ID with documents.
 
         Returns (patient, documents_list) or None if not found.
@@ -76,7 +59,7 @@ class PatientService:
         )
         docs = result.scalars().all()
 
-        documents = [_document_to_dict(doc) for doc in docs]
+        documents = [PatientDocumentResponse.from_model(doc, storage.get_file_url(doc.file_path)) for doc in docs]
         return patient, documents
 
     async def get_all(

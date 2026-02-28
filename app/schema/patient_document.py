@@ -20,3 +20,23 @@ class PatientDocumentResponse(BaseModel):
     created_at: datetime
     updated_by: Optional[str] = None
     updated_at: datetime
+
+    @classmethod
+    def from_model(cls, doc, file_url: str) -> "PatientDocumentResponse":
+        """Build from a PatientDocument model with resolved file_url."""
+        return cls.model_validate(
+            {
+                "id": doc.id,
+                "patient_id": doc.patient_id,
+                "document_name": doc.document_name,
+                "document_type": doc.document_type,
+                "file_path": doc.file_path,
+                "file_url": file_url,
+                "upload_date": doc.upload_date,
+                "is_deleted": doc.is_deleted,
+                "created_by": doc.created_by,
+                "created_at": doc.created_at,
+                "updated_by": doc.updated_by,
+                "updated_at": doc.updated_at,
+            }
+        )

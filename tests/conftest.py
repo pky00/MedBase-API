@@ -24,6 +24,10 @@ from app.model.partner import Partner  # noqa: F401
 from app.model.doctor import Doctor  # noqa: F401
 from app.model.patient import Patient  # noqa: F401
 from app.model.patient_document import PatientDocument  # noqa: F401
+from app.model.appointment import Appointment  # noqa: F401
+from app.model.vital_sign import VitalSign  # noqa: F401
+from app.model.medical_record import MedicalRecord  # noqa: F401
+from app.model.treatment import Treatment  # noqa: F401
 from main import app
 
 

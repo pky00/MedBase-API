@@ -184,5 +184,136 @@
       "emergency_contact": "Amina Farah",
       "emergency_phone": "+1-555-2010"
     }
+  ],
+  "appointments": [
+    {
+      "patient_name": "Ali Hassan",
+      "doctor_name": "Dr. Ahmad Khalil",
+      "appointment_date": "2026-03-01T09:00:00",
+      "type": "scheduled",
+      "location": "internal",
+      "status": "scheduled",
+      "notes": "Routine checkup"
+    },
+    {
+      "patient_name": "Maryam Khoury",
+      "doctor_name": "Dr. Fatima Noor",
+      "appointment_date": "2026-03-02T10:30:00",
+      "type": "scheduled",
+      "location": "internal",
+      "status": "in_progress",
+      "notes": "Follow-up for flu symptoms"
+    },
+    {
+      "patient_name": "Youssef El-Amin",
+      "doctor_name": "Dr. Omar Sayeed",
+      "partner_name": "City General Hospital",
+      "appointment_date": "2026-03-03T14:00:00",
+      "type": "scheduled",
+      "location": "external",
+      "status": "scheduled",
+      "notes": "Orthopedic consultation"
+    },
+    {
+      "patient_name": "Layla Rashid",
+      "doctor_name": "Dr. Lina Mansour",
+      "partner_name": "MedAid International",
+      "appointment_date": "2026-03-04T11:00:00",
+      "type": "walk_in",
+      "location": "internal",
+      "status": "in_progress",
+      "notes": "Skin rash evaluation"
+    },
+    {
+      "patient_name": "Omar Farah",
+      "doctor_name": "Dr. Ahmad Khalil",
+      "appointment_date": "2026-03-05T08:30:00",
+      "type": "scheduled",
+      "location": "internal",
+      "status": "scheduled",
+      "notes": "Blood pressure monitoring"
+    }
+  ],
+  "vital_signs": [
+    {
+      "appointment_index": 0,
+      "blood_pressure_systolic": 120,
+      "blood_pressure_diastolic": 80,
+      "heart_rate": 72,
+      "temperature": 36.6,
+      "respiratory_rate": 16,
+      "weight": 75.5,
+      "height": 175.0,
+      "notes": "Normal vitals"
+    },
+    {
+      "appointment_index": 1,
+      "blood_pressure_systolic": 118,
+      "blood_pressure_diastolic": 76,
+      "heart_rate": 88,
+      "temperature": 38.2,
+      "respiratory_rate": 20,
+      "weight": 62.0,
+      "height": 163.0,
+      "notes": "Elevated temperature - flu symptoms"
+    },
+    {
+      "appointment_index": 3,
+      "blood_pressure_systolic": 110,
+      "blood_pressure_diastolic": 70,
+      "heart_rate": 68,
+      "temperature": 36.8,
+      "respiratory_rate": 15,
+      "weight": 55.0,
+      "height": 160.0,
+      "notes": "Vitals within normal range"
+    }
+  ],
+  "medical_records": [
+    {
+      "appointment_index": 1,
+      "chief_complaint": "Persistent cough and fever for 3 days",
+      "diagnosis": "Upper respiratory tract infection",
+      "treatment_notes": "Prescribed antibiotics and rest. Follow up in 1 week.",
+      "follow_up_date": "2026-03-09"
+    },
+    {
+      "appointment_index": 3,
+      "chief_complaint": "Itchy red rash on arms and neck",
+      "diagnosis": "Contact dermatitis",
+      "treatment_notes": "Prescribed topical corticosteroid cream. Avoid known irritants.",
+      "follow_up_date": "2026-03-18"
+    }
+  ],
+  "treatments": [
+    {
+      "patient_name": "Maryam Khoury",
+      "partner_name": "City General Hospital",
+      "appointment_index": 1,
+      "treatment_type": "Antibiotic Therapy",
+      "description": "Course of oral antibiotics for respiratory infection",
+      "treatment_date": "2026-03-02",
+      "cost": 150.00,
+      "notes": "Complete full course of antibiotics"
+    },
+    {
+      "patient_name": "Youssef El-Amin",
+      "partner_name": "City General Hospital",
+      "treatment_type": "Physiotherapy",
+      "description": "Physical therapy sessions for knee rehabilitation",
+      "treatment_date": "2026-03-10",
+      "cost": 500.00,
+      "notes": "6 sessions recommended"
+    },
+    {
+      "patient_name": "Layla Rashid",
+      "partner_name": "MedAid International",
+      "appointment_index": 3,
+      "treatment_type": "Dermatological Treatment",
+      "description": "Topical treatment for contact dermatitis",
+      "treatment_date": "2026-03-04",
+      "cost": 75.00,
+      "notes": "Apply cream twice daily"
+    }
   ]
 }
