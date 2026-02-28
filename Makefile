@@ -1,4 +1,4 @@
-.PHONY: help build up down logs shell test migrate migrate-create db-reset clean populate clean-pyc
+.PHONY: help build up down logs shell test migrate migrate-create db-reset db-fresh clean populate clean-pyc
 
 # Default target
 help:
@@ -13,6 +13,7 @@ help:
 	@echo "  make migrate        - Run database migrations"
 	@echo "  make migrate-create - Create new migration (MSG=message)"
 	@echo "  make db-reset       - Reset database (drop all and migrate)"
+	@echo "  make db-fresh       - Reset, migrate, seed, and populate"
 	@echo "  make seed           - Seed initial admin user"
 	@echo "  make populate       - Populate database with dummy data"
 	@echo "  make clean          - Remove containers and volumes"
@@ -72,10 +73,13 @@ migrate-create:
 migrate-down:
 	docker-compose exec api conda run -n medbase alembic downgrade -1
 
-# Reset database
+# Reset database (drop and recreate)
 db-reset:
-	docker-compose exec api conda run -n medbase alembic downgrade base
+	docker-compose exec api conda run -n medbase python scripts/reset_db.py
 	docker-compose exec api conda run -n medbase alembic upgrade head
+
+# Fresh database: reset, migrate, seed, populate
+db-fresh: db-reset seed populate
 
 # Seed initial admin user
 seed:
