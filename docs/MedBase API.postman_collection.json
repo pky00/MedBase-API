@@ -1621,6 +1621,210 @@
 				"response": []
 			}
 		]
+	},
+	{
+		"name": "Inventory Transactions",
+		"item": [
+			{
+				"name": "Get All Inventory Transactions",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/inventory-transactions?page=1&size=10",
+						"host": ["{{base_url}}"],
+						"path": ["inventory-transactions"],
+						"query": [
+							{ "key": "page", "value": "1" },
+							{ "key": "size", "value": "10" },
+							{ "key": "transaction_type", "value": "purchase", "disabled": true },
+							{ "key": "third_party_id", "value": "1", "disabled": true },
+							{ "key": "transaction_date", "value": "2026-03-01", "disabled": true },
+							{ "key": "sort", "value": "id", "disabled": true },
+							{ "key": "order", "value": "asc", "disabled": true }
+						]
+					},
+					"description": "List all inventory transactions with pagination and filters. Filters: transaction_type (purchase/donation/prescription/loss/breakage/expiration/destruction), third_party_id, transaction_date. Sortable fields: id, transaction_type, transaction_date."
+				},
+				"response": []
+			},
+			{
+				"name": "Get Inventory Transaction by ID",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/inventory-transactions/:id",
+						"host": ["{{base_url}}"],
+						"path": ["inventory-transactions", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
+					},
+					"description": "Get inventory transaction by ID. Includes transaction items with item names."
+				},
+				"response": []
+			},
+			{
+				"name": "Create Inventory Transaction (Purchase)",
+				"request": {
+					"method": "POST",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"transaction_type\": \"purchase\",\n    \"transaction_date\": \"2026-03-01\",\n    \"notes\": \"Monthly medicine restock\",\n    \"items\": [\n        {\n            \"item_type\": \"medicine\",\n            \"item_id\": 1,\n            \"quantity\": 100\n        },\n        {\n            \"item_type\": \"equipment\",\n            \"item_id\": 1,\n            \"quantity\": 5\n        }\n    ]\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/inventory-transactions",
+						"host": ["{{base_url}}"],
+						"path": ["inventory-transactions"]
+					},
+					"description": "Create a purchase transaction. third_party_id is auto-set to the current user's third_party. Items are optional and can be added later."
+				},
+				"response": []
+			},
+			{
+				"name": "Create Inventory Transaction (Donation)",
+				"request": {
+					"method": "POST",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"transaction_type\": \"donation\",\n    \"third_party_id\": 1,\n    \"transaction_date\": \"2026-03-01\",\n    \"notes\": \"Donation from partner\",\n    \"items\": [\n        {\n            \"item_type\": \"medicine\",\n            \"item_id\": 1,\n            \"quantity\": 50\n        }\n    ]\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/inventory-transactions",
+						"host": ["{{base_url}}"],
+						"path": ["inventory-transactions"]
+					},
+					"description": "Create a donation transaction. third_party_id is required and must point to a partner with partner_type of 'donor' or 'both'."
+				},
+				"response": []
+			},
+			{
+				"name": "Create Inventory Transaction (Prescription)",
+				"request": {
+					"method": "POST",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"transaction_type\": \"prescription\",\n    \"third_party_id\": 1,\n    \"transaction_date\": \"2026-03-01\",\n    \"notes\": \"Patient prescription\",\n    \"items\": [\n        {\n            \"item_type\": \"medicine\",\n            \"item_id\": 1,\n            \"quantity\": 2\n        }\n    ]\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/inventory-transactions",
+						"host": ["{{base_url}}"],
+						"path": ["inventory-transactions"]
+					},
+					"description": "Create a prescription transaction. third_party_id is required and must point to a doctor. Decreases inventory automatically."
+				},
+				"response": []
+			},
+			{
+				"name": "Update Inventory Transaction",
+				"request": {
+					"method": "PUT",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"transaction_date\": \"2026-03-02\",\n    \"notes\": \"Updated notes\"\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/inventory-transactions/:id",
+						"host": ["{{base_url}}"],
+						"path": ["inventory-transactions", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
+					},
+					"description": "Update an inventory transaction. Only transaction_date and notes can be updated."
+				},
+				"response": []
+			},
+			{
+				"name": "Delete Inventory Transaction",
+				"request": {
+					"method": "DELETE",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/inventory-transactions/:id",
+						"host": ["{{base_url}}"],
+						"path": ["inventory-transactions", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
+					},
+					"description": "Delete an inventory transaction (soft delete). Reverses inventory changes."
+				},
+				"response": []
+			}
+		]
+	},
+	{
+		"name": "Inventory Transaction Items",
+		"item": [
+			{
+				"name": "Get Transaction Items",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/inventory-transactions/:transaction_id/items",
+						"host": ["{{base_url}}"],
+						"path": ["inventory-transactions", ":transaction_id", "items"],
+						"variable": [{ "key": "transaction_id", "value": "1" }]
+					},
+					"description": "List all items for a specific inventory transaction."
+				},
+				"response": []
+			},
+			{
+				"name": "Add Transaction Item",
+				"request": {
+					"method": "POST",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"item_type\": \"medicine\",\n    \"item_id\": 1,\n    \"quantity\": 10\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/inventory-transactions/:transaction_id/items",
+						"host": ["{{base_url}}"],
+						"path": ["inventory-transactions", ":transaction_id", "items"],
+						"variable": [{ "key": "transaction_id", "value": "1" }]
+					},
+					"description": "Add an item to an existing inventory transaction. item_type can be: medicine, equipment, medical_device. quantity must be greater than 0."
+				},
+				"response": []
+			},
+			{
+				"name": "Update Transaction Item",
+				"request": {
+					"method": "PUT",
+					"header": [{ "key": "Content-Type", "value": "application/json" }],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n    \"quantity\": 20\n}"
+					},
+					"url": {
+						"raw": "{{base_url}}/inventory-transaction-items/:id",
+						"host": ["{{base_url}}"],
+						"path": ["inventory-transaction-items", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
+					},
+					"description": "Update a transaction item. Can update item_type, item_id, and quantity. All fields are optional."
+				},
+				"response": []
+			},
+			{
+				"name": "Delete Transaction Item",
+				"request": {
+					"method": "DELETE",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/inventory-transaction-items/:id",
+						"host": ["{{base_url}}"],
+						"path": ["inventory-transaction-items", ":id"],
+						"variable": [{ "key": "id", "value": "1" }]
+					},
+					"description": "Delete a transaction item (soft delete). Reverses the inventory change for this item."
+				},
+				"response": []
+			}
+		]
 	}
 	],
 	"auth": {

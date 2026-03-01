@@ -6,7 +6,7 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 
 ---
 
-## Current Phase: Phase 5 - Appointments & Records
+## Current Phase: Phase 7 - Dashboard & Polish
 
 ---
 
@@ -29,6 +29,8 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 | 14 | Vital Signs | 2026-02-27 | One vital signs record per appointment, all fields optional, cannot edit when completed |
 | 15 | Medical Records | 2026-02-27 | One medical record per appointment, patient_id/appointment_id filters, cannot edit when completed |
 | 16 | Treatments | 2026-02-27 | Multiple treatments per appointment, referral partner validation, status flow, patient/partner names |
+| 17 | Inventory Transactions | 2026-02-28 | Transaction CRUD with items, inventory qty auto-adjust, donation/prescription/purchase/loss/breakage/expiration/destruction types, third_party validation per type |
+| 19 | Dashboard Statistics | 2026-02-28 | Summary, inventory, appointment, and transaction statistics endpoints for dashboard |
 
 ---
 
@@ -36,7 +38,7 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 
 | # | Feature | Started | Notes |
 |---|---------|---------|-------|
-|   |         |         |       |
+| 20 | Final Testing & Polish | 2026-02-28 | Pending full test run in Docker environment |
 
 ---
 
@@ -328,11 +330,69 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 
 ---
 
+## Phase 6 Details
+
+### Feature 17: Inventory Transactions
+**Status:** Complete
+
+**Endpoints:**
+- GET `/api/v1/inventory-transactions` - List all transactions (paginated, filterable by transaction_type, third_party_id, transaction_date)
+- GET `/api/v1/inventory-transactions/{id}` - Get transaction by ID (includes items with item names, third_party_name)
+- POST `/api/v1/inventory-transactions` - Create transaction with optional items (auto-adjusts inventory)
+- PUT `/api/v1/inventory-transactions/{id}` - Update transaction (date and notes only)
+- DELETE `/api/v1/inventory-transactions/{id}` - Delete transaction (soft delete, reverses inventory for all items)
+- GET `/api/v1/inventory-transactions/{transaction_id}/items` - List items for a transaction
+- POST `/api/v1/inventory-transactions/{transaction_id}/items` - Add item to transaction (adjusts inventory)
+- PUT `/api/v1/inventory-transaction-items/{id}` - Update transaction item (reverses old, applies new inventory)
+- DELETE `/api/v1/inventory-transaction-items/{id}` - Delete transaction item (reverses inventory)
+
+**Models:**
+- `inventory_transactions`: id, transaction_type, third_party_id (FK), transaction_date, notes, audit columns
+- `inventory_transaction_items`: id, transaction_id (FK), item_type, item_id, quantity, audit columns
+
+**Business Rules:**
+- Transaction types: purchase, donation, prescription, loss, breakage, expiration, destruction
+- Purchase/donation increase inventory; all others decrease inventory
+- Donation: third_party_id must belong to a donor partner (partner_type = donor or both)
+- Prescription: third_party_id must belong to a doctor
+- Purchase/loss/breakage/expiration/destruction: third_party_id auto-set to current user
+- Cannot decrease inventory below 0
+- Deleting a transaction/item reverses its inventory impact
+
+**Tests:**
+- test_inventory_transactions.py (29 tests: list, filters, pagination, third_party_name, get by ID with items, create purchase/donation/prescription/loss/without items, donation without third_party fails, donation with referral fails, prescription without third_party fails, prescription with non-doctor fails, insufficient inventory fails, invalid item fails, update success/not found, delete reverses inventory/not found/not in list, items CRUD, item inventory adjustments)
+- test_treatments.py (26 tests: list, filters by status/patient/partner, pagination, names in response, get by ID/not found, create success/with appointment/multiple per appointment/donor fails/invalid patient/partner/appointment/empty type, update success/not found/invalid partner type, status updates/not found/invalid value, delete/soft delete verification)
+- Fixed MissingGreenlet errors in test_inventory_transactions.py (captured ORM object attributes as local variables before API calls to prevent async lazy-load issues)
+
+**Dummy Data:**
+- 10 inventory transactions in dummy_data.json: 3 purchases, 2 donations (from donor partners), 3 prescriptions (from doctors), 1 loss, 1 expiration
+- Updated populate_dummy_data.py to handle inventory transactions with automatic third_party_id resolution
+- 3 treatments already in dummy_data.json (added in Phase 5)
+
+---
+
+## Phase 7 Details
+
+### Feature 19: Dashboard Statistics
+**Status:** Complete
+
+**Endpoints:**
+- GET `/api/v1/statistics/summary` - Overall counts (patients, appointments, inventory, transactions, partners, doctors, active counts)
+- GET `/api/v1/statistics/inventory` - Inventory stats (total items/qty, low stock alerts with threshold=10, items grouped by type)
+- GET `/api/v1/statistics/appointments` - Appointment stats (today's count, upcoming, by status, by month for last 6 months, total completed/cancelled)
+- GET `/api/v1/statistics/transactions` - Transaction stats (total count, grouped by type with item counts, last 10 recent transactions)
+
+**Tests:**
+- test_statistics.py (16 tests: summary with data/empty/unauth, inventory stats/low stock/unauth, appointment stats/by status/unauth, transaction stats/by type/recent/unauth)
+
+---
+
 ## Migration Notes
 
 - Initial migration: `20260226_193257_039074b781f1_initial.py` (Phase 1-3 schema)
 - Phase 4 migration: `20260227_add_patients_and_patient_documents.py` (patients and patient_documents tables)
 - Phase 5 migration: `20260227_add_phase5_appointments_records_treatments.py` (appointments, vital_signs, medical_records, treatments tables)
+- Phase 6 migration: Pending — `inventory_transactions` and `inventory_transaction_items` tables (run `make migrate-create MSG="add inventory transactions"` then `make migrate`)
 
 ---
 

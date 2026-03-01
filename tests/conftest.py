@@ -28,6 +28,8 @@ from app.model.appointment import Appointment  # noqa: F401
 from app.model.vital_sign import VitalSign  # noqa: F401
 from app.model.medical_record import MedicalRecord  # noqa: F401
 from app.model.treatment import Treatment  # noqa: F401
+from app.model.inventory_transaction import InventoryTransaction  # noqa: F401
+from app.model.inventory_transaction_item import InventoryTransactionItem  # noqa: F401
 from main import app
 
 

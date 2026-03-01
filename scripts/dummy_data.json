@@ -315,5 +315,108 @@
       "cost": 75.00,
       "notes": "Apply cream twice daily"
     }
+  ],
+  "inventory_transactions": [
+    {
+      "transaction_type": "purchase",
+      "transaction_date": "2026-02-15",
+      "notes": "Monthly medicine restock",
+      "items": [
+        { "item_type": "medicine", "item_name": "Amoxicillin 500mg", "quantity": 200 },
+        { "item_type": "medicine", "item_name": "Paracetamol 500mg", "quantity": 500 },
+        { "item_type": "medicine", "item_name": "Ibuprofen 400mg", "quantity": 300 },
+        { "item_type": "medicine", "item_name": "Cetirizine 10mg", "quantity": 150 },
+        { "item_type": "medicine", "item_name": "Diclofenac Gel", "quantity": 30 }
+      ]
+    },
+    {
+      "transaction_type": "purchase",
+      "transaction_date": "2026-02-20",
+      "notes": "Equipment and device procurement",
+      "items": [
+        { "item_type": "equipment", "item_name": "Stethoscope", "quantity": 5 },
+        { "item_type": "equipment", "item_name": "Blood Pressure Cuff", "quantity": 3 },
+        { "item_type": "medical_device", "item_name": "Pulse Oximeter", "quantity": 10 },
+        { "item_type": "medical_device", "item_name": "Nebulizer", "quantity": 4 }
+      ]
+    },
+    {
+      "transaction_type": "donation",
+      "partner_name": "Global Health Foundation",
+      "transaction_date": "2026-02-22",
+      "notes": "Quarterly donation from GHF",
+      "items": [
+        { "item_type": "medicine", "item_name": "Vitamin C 1000mg", "quantity": 1000 },
+        { "item_type": "medicine", "item_name": "Vitamin D3 5000IU", "quantity": 500 },
+        { "item_type": "medicine", "item_name": "Amoxicillin Syrup", "quantity": 100 }
+      ]
+    },
+    {
+      "transaction_type": "donation",
+      "partner_name": "MedAid International",
+      "transaction_date": "2026-02-25",
+      "notes": "Emergency medical supplies donation",
+      "items": [
+        { "item_type": "medicine", "item_name": "Azithromycin 250mg", "quantity": 150 },
+        { "item_type": "medicine", "item_name": "Fluconazole 150mg", "quantity": 80 },
+        { "item_type": "equipment", "item_name": "Scalpel Set", "quantity": 10 },
+        { "item_type": "medical_device", "item_name": "Oxygen Concentrator", "quantity": 2 }
+      ]
+    },
+    {
+      "transaction_type": "prescription",
+      "doctor_name": "Dr. Ahmad Khalil",
+      "transaction_date": "2026-03-01",
+      "notes": "Prescription for patient Ali Hassan - routine checkup",
+      "items": [
+        { "item_type": "medicine", "item_name": "Paracetamol 500mg", "quantity": 20 },
+        { "item_type": "medicine", "item_name": "Vitamin C 1000mg", "quantity": 30 }
+      ]
+    },
+    {
+      "transaction_type": "prescription",
+      "doctor_name": "Dr. Fatima Noor",
+      "transaction_date": "2026-03-02",
+      "notes": "Prescription for patient Maryam Khoury - respiratory infection",
+      "items": [
+        { "item_type": "medicine", "item_name": "Amoxicillin 500mg", "quantity": 21 },
+        { "item_type": "medicine", "item_name": "Paracetamol 500mg", "quantity": 10 },
+        { "item_type": "medicine", "item_name": "Cetirizine 10mg", "quantity": 7 }
+      ]
+    },
+    {
+      "transaction_type": "loss",
+      "transaction_date": "2026-02-28",
+      "notes": "Damaged during storage - water leak in storage room",
+      "items": [
+        { "item_type": "medicine", "item_name": "Diclofenac Gel", "quantity": 5 }
+      ]
+    },
+    {
+      "transaction_type": "expiration",
+      "transaction_date": "2026-02-28",
+      "notes": "Monthly expiration check - Feb 2026",
+      "items": [
+        { "item_type": "medicine", "item_name": "Ibuprofen 400mg", "quantity": 15 }
+      ]
+    },
+    {
+      "transaction_type": "purchase",
+      "transaction_date": "2026-03-01",
+      "notes": "Replacement purchase for expired and lost items",
+      "items": [
+        { "item_type": "medicine", "item_name": "Diclofenac Gel", "quantity": 50 },
+        { "item_type": "medicine", "item_name": "Ibuprofen 400mg", "quantity": 100 }
+      ]
+    },
+    {
+      "transaction_type": "prescription",
+      "doctor_name": "Dr. Lina Mansour",
+      "transaction_date": "2026-03-04",
+      "notes": "Prescription for patient Layla Rashid - dermatitis treatment",
+      "items": [
+        { "item_type": "medicine", "item_name": "Cetirizine 10mg", "quantity": 14 }
+      ]
+    }
   ]
 }
