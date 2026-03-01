@@ -308,6 +308,7 @@ class TestCreateTransaction:
     ):
         """Test creating a purchase transaction (auto-sets third_party_id to user)."""
         medicine, inventory = medicine_with_inventory
+        medicine_id = medicine.id
         original_qty = inventory.quantity
 
         response = await client.post(
@@ -317,7 +318,7 @@ class TestCreateTransaction:
                 "transaction_date": "2026-03-15",
                 "notes": "Monthly purchase",
                 "items": [
-                    {"item_type": "medicine", "item_id": medicine.id, "quantity": 25},
+                    {"item_type": "medicine", "item_id": medicine_id, "quantity": 25},
                 ],
             },
             headers=admin_headers,
@@ -334,7 +335,7 @@ class TestCreateTransaction:
         result = await db_session.execute(
             select(Inventory).where(
                 Inventory.item_type == "medicine",
-                Inventory.item_id == medicine.id,
+                Inventory.item_id == medicine_id,
             )
         )
         inv = result.scalar_one()
@@ -347,17 +348,19 @@ class TestCreateTransaction:
     ):
         """Test creating a donation transaction."""
         medicine, inventory = medicine_with_inventory
+        medicine_id = medicine.id
         original_qty = inventory.quantity
+        donor_tp_id = donor_partner.third_party_id
 
         response = await client.post(
             "/api/v1/inventory-transactions",
             json={
                 "transaction_type": "donation",
-                "third_party_id": donor_partner.third_party_id,
+                "third_party_id": donor_tp_id,
                 "transaction_date": "2026-03-15",
                 "notes": "Donation from NGO",
                 "items": [
-                    {"item_type": "medicine", "item_id": medicine.id, "quantity": 30},
+                    {"item_type": "medicine", "item_id": medicine_id, "quantity": 30},
                 ],
             },
             headers=admin_headers,
@@ -365,14 +368,14 @@ class TestCreateTransaction:
         assert response.status_code == 201
         data = response.json()
         assert data["transaction_type"] == "donation"
-        assert data["third_party_id"] == donor_partner.third_party_id
+        assert data["third_party_id"] == donor_tp_id
 
         # Verify inventory increased
         db_session.expire_all()
         result = await db_session.execute(
             select(Inventory).where(
                 Inventory.item_type == "medicine",
-                Inventory.item_id == medicine.id,
+                Inventory.item_id == medicine_id,
             )
         )
         inv = result.scalar_one()
@@ -385,17 +388,19 @@ class TestCreateTransaction:
     ):
         """Test creating a prescription transaction (decreases inventory)."""
         medicine, inventory = medicine_with_inventory
+        medicine_id = medicine.id
         original_qty = inventory.quantity
+        doctor_tp_id = doctor.third_party_id
 
         response = await client.post(
             "/api/v1/inventory-transactions",
             json={
                 "transaction_type": "prescription",
-                "third_party_id": doctor.third_party_id,
+                "third_party_id": doctor_tp_id,
                 "transaction_date": "2026-03-15",
                 "notes": "Prescription for patient",
                 "items": [
-                    {"item_type": "medicine", "item_id": medicine.id, "quantity": 10},
+                    {"item_type": "medicine", "item_id": medicine_id, "quantity": 10},
                 ],
             },
             headers=admin_headers,
@@ -409,7 +414,7 @@ class TestCreateTransaction:
         result = await db_session.execute(
             select(Inventory).where(
                 Inventory.item_type == "medicine",
-                Inventory.item_id == medicine.id,
+                Inventory.item_id == medicine_id,
             )
         )
         inv = result.scalar_one()
@@ -422,6 +427,7 @@ class TestCreateTransaction:
     ):
         """Test creating a loss transaction (auto third_party, decreases inventory)."""
         medicine, inventory = medicine_with_inventory
+        medicine_id = medicine.id
         original_qty = inventory.quantity
 
         response = await client.post(
@@ -431,7 +437,7 @@ class TestCreateTransaction:
                 "transaction_date": "2026-03-15",
                 "notes": "Lost items",
                 "items": [
-                    {"item_type": "medicine", "item_id": medicine.id, "quantity": 5},
+                    {"item_type": "medicine", "item_id": medicine_id, "quantity": 5},
                 ],
             },
             headers=admin_headers,
@@ -445,7 +451,7 @@ class TestCreateTransaction:
         result = await db_session.execute(
             select(Inventory).where(
                 Inventory.item_type == "medicine",
-                Inventory.item_id == medicine.id,
+                Inventory.item_id == medicine_id,
             )
         )
         inv = result.scalar_one()
@@ -616,19 +622,21 @@ class TestDeleteTransaction:
     ):
         """Test deleting transaction reverses inventory changes."""
         medicine, inventory = medicine_with_inventory
+        medicine_id = medicine.id
+        transaction_id = purchase_transaction.id
         # inventory was originally 100, purchase added 50 => 150
         db_session.expire_all()
         result = await db_session.execute(
             select(Inventory).where(
                 Inventory.item_type == "medicine",
-                Inventory.item_id == medicine.id,
+                Inventory.item_id == medicine_id,
             )
         )
         inv = result.scalar_one()
         qty_before_delete = inv.quantity
 
         response = await client.delete(
-            f"/api/v1/inventory-transactions/{purchase_transaction.id}",
+            f"/api/v1/inventory-transactions/{transaction_id}",
             headers=admin_headers,
         )
         assert response.status_code == 200
@@ -639,7 +647,7 @@ class TestDeleteTransaction:
         result = await db_session.execute(
             select(Inventory).where(
                 Inventory.item_type == "medicine",
-                Inventory.item_id == medicine.id,
+                Inventory.item_id == medicine_id,
             )
         )
         inv = result.scalar_one()
@@ -694,17 +702,19 @@ class TestTransactionItems:
     ):
         """Test adding an item to an existing transaction."""
         equip, inventory = equipment_with_inventory
+        equip_id = equip.id
         original_qty = inventory.quantity
+        transaction_id = purchase_transaction.id
 
         response = await client.post(
-            f"/api/v1/inventory-transactions/{purchase_transaction.id}/items",
-            json={"item_type": "equipment", "item_id": equip.id, "quantity": 5},
+            f"/api/v1/inventory-transactions/{transaction_id}/items",
+            json={"item_type": "equipment", "item_id": equip_id, "quantity": 5},
             headers=admin_headers,
         )
         assert response.status_code == 201
         data = response.json()
         assert data["item_type"] == "equipment"
-        assert data["item_id"] == equip.id
+        assert data["item_id"] == equip_id
         assert data["quantity"] == 5
 
         # Verify inventory was updated
@@ -712,7 +722,7 @@ class TestTransactionItems:
         result = await db_session.execute(
             select(Inventory).where(
                 Inventory.item_type == "equipment",
-                Inventory.item_id == equip.id,
+                Inventory.item_id == equip_id,
             )
         )
         inv = result.scalar_one()
@@ -739,10 +749,12 @@ class TestTransactionItems:
     ):
         """Test deleting a transaction item reverses inventory."""
         medicine, _ = medicine_with_inventory
+        medicine_id = medicine.id
+        transaction_id = purchase_transaction.id
 
         # Get the item id
         items_response = await client.get(
-            f"/api/v1/inventory-transactions/{purchase_transaction.id}/items",
+            f"/api/v1/inventory-transactions/{transaction_id}/items",
             headers=admin_headers,
         )
         items = items_response.json()
@@ -753,7 +765,7 @@ class TestTransactionItems:
         result = await db_session.execute(
             select(Inventory).where(
                 Inventory.item_type == "medicine",
-                Inventory.item_id == medicine.id,
+                Inventory.item_id == medicine_id,
             )
         )
         inv = result.scalar_one()
@@ -771,7 +783,7 @@ class TestTransactionItems:
         result = await db_session.execute(
             select(Inventory).where(
                 Inventory.item_type == "medicine",
-                Inventory.item_id == medicine.id,
+                Inventory.item_id == medicine_id,
             )
         )
         inv = result.scalar_one()
@@ -793,10 +805,12 @@ class TestTransactionItems:
     ):
         """Test updating a transaction item adjusts inventory."""
         medicine, _ = medicine_with_inventory
+        medicine_id = medicine.id
+        transaction_id = purchase_transaction.id
 
         # Get the item id
         items_response = await client.get(
-            f"/api/v1/inventory-transactions/{purchase_transaction.id}/items",
+            f"/api/v1/inventory-transactions/{transaction_id}/items",
             headers=admin_headers,
         )
         items = items_response.json()
@@ -807,7 +821,7 @@ class TestTransactionItems:
         result = await db_session.execute(
             select(Inventory).where(
                 Inventory.item_type == "medicine",
-                Inventory.item_id == medicine.id,
+                Inventory.item_id == medicine_id,
             )
         )
         inv = result.scalar_one()
@@ -828,7 +842,7 @@ class TestTransactionItems:
         result = await db_session.execute(
             select(Inventory).where(
                 Inventory.item_type == "medicine",
-                Inventory.item_id == medicine.id,
+                Inventory.item_id == medicine_id,
             )
         )
         inv = result.scalar_one()

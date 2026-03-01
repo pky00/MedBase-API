@@ -360,7 +360,14 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 - Deleting a transaction/item reverses its inventory impact
 
 **Tests:**
-- test_inventory_transactions.py (28 tests: list, filters, pagination, third_party_name, get by ID with items, create purchase/donation/prescription/loss/without items, donation without third_party fails, donation with referral fails, prescription without third_party fails, prescription with non-doctor fails, insufficient inventory fails, invalid item fails, update success/not found, delete reverses inventory/not found/not in list, items CRUD, item inventory adjustments)
+- test_inventory_transactions.py (29 tests: list, filters, pagination, third_party_name, get by ID with items, create purchase/donation/prescription/loss/without items, donation without third_party fails, donation with referral fails, prescription without third_party fails, prescription with non-doctor fails, insufficient inventory fails, invalid item fails, update success/not found, delete reverses inventory/not found/not in list, items CRUD, item inventory adjustments)
+- test_treatments.py (26 tests: list, filters by status/patient/partner, pagination, names in response, get by ID/not found, create success/with appointment/multiple per appointment/donor fails/invalid patient/partner/appointment/empty type, update success/not found/invalid partner type, status updates/not found/invalid value, delete/soft delete verification)
+- Fixed MissingGreenlet errors in test_inventory_transactions.py (captured ORM object attributes as local variables before API calls to prevent async lazy-load issues)
+
+**Dummy Data:**
+- 10 inventory transactions in dummy_data.json: 3 purchases, 2 donations (from donor partners), 3 prescriptions (from doctors), 1 loss, 1 expiration
+- Updated populate_dummy_data.py to handle inventory transactions with automatic third_party_id resolution
+- 3 treatments already in dummy_data.json (added in Phase 5)
 
 ---
 
