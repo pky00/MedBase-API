@@ -325,7 +325,8 @@
         { "item_type": "medicine", "item_name": "Amoxicillin 500mg", "quantity": 200 },
         { "item_type": "medicine", "item_name": "Paracetamol 500mg", "quantity": 500 },
         { "item_type": "medicine", "item_name": "Ibuprofen 400mg", "quantity": 300 },
-        { "item_type": "medicine", "item_name": "Cetirizine 10mg", "quantity": 150 }
+        { "item_type": "medicine", "item_name": "Cetirizine 10mg", "quantity": 150 },
+        { "item_type": "medicine", "item_name": "Diclofenac Gel", "quantity": 30 }
       ]
     },
     {

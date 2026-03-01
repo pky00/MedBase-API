@@ -345,14 +345,14 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 
 ---
 
-## Dashboard
+## Statistics
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/dashboard/summary` | Get summary statistics |
-| GET | `/dashboard/inventory` | Inventory stats |
-| GET | `/dashboard/appointments` | Appointment stats |
-| GET | `/dashboard/transactions` | Transaction stats |
+| GET | `/statistics/summary` | Get summary statistics |
+| GET | `/statistics/inventory` | Inventory stats |
+| GET | `/statistics/appointments` | Appointment stats |
+| GET | `/statistics/transactions` | Transaction stats |
 
 **Notes:**
 - Summary includes counts for: patients, appointments, inventory items, transactions, partners
