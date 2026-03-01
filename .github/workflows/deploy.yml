@@ -1,0 +1,83 @@
+name: Deploy to Lightsail
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+      - 'tests/**'
+
+env:
+  SERVICE_NAME: medbase-api-dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Install Lightsail plugin
+        run: |
+          curl "https://s3.us-west-2.amazonaws.com/lightsailctl/latest/linux-amd64/lightsailctl" -o /usr/local/bin/lightsailctl
+          chmod +x /usr/local/bin/lightsailctl
+
+      - name: Build Docker image
+        run: docker build -t medbase-api -f Dockerfile.prod .
+
+      - name: Push image to Lightsail
+        run: |
+          aws lightsail push-container-image \
+            --service-name $SERVICE_NAME \
+            --label medbase-api \
+            --image medbase-api \
+            --region eu-west-1
+
+      - name: Deploy to Lightsail
+        run: |
+          IMAGE=$(aws lightsail get-container-images \
+            --service-name $SERVICE_NAME \
+            --region eu-west-1 \
+            --query 'containerImages[0].image' \
+            --output text)
+
+          aws lightsail create-container-service-deployment \
+            --service-name $SERVICE_NAME \
+            --region eu-west-1 \
+            --containers "{
+              \"medbase-api\": {
+                \"image\": \"$IMAGE\",
+                \"ports\": {\"8000\": \"HTTP\"},
+                \"environment\": {
+                  \"DATABASE_URL\": \"${{ secrets.DATABASE_URL }}\",
+                  \"SECRET_KEY\": \"${{ secrets.SECRET_KEY }}\",
+                  \"ALGORITHM\": \"${{ secrets.ALGORITHM }}\",
+                  \"ACCESS_TOKEN_EXPIRE_MINUTES\": \"${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}\",
+                  \"DEBUG\": \"false\",
+                  \"LIGHTSAIL_BUCKET_NAME\": \"${{ secrets.LIGHTSAIL_BUCKET_NAME }}\",
+                  \"LIGHTSAIL_ACCESS_KEY\": \"${{ secrets.LIGHTSAIL_ACCESS_KEY }}\",
+                  \"LIGHTSAIL_SECRET_KEY\": \"${{ secrets.LIGHTSAIL_SECRET_KEY }}\",
+                  \"LIGHTSAIL_ENDPOINT\": \"${{ secrets.LIGHTSAIL_ENDPOINT }}\",
+                  \"LIGHTSAIL_REGION\": \"${{ secrets.LIGHTSAIL_REGION }}\"
+                }
+              }
+            }" \
+            --public-endpoint "{
+              \"containerName\": \"medbase-api\",
+              \"containerPort\": 8000,
+              \"healthCheck\": {
+                \"path\": \"/health\",
+                \"intervalSeconds\": 30,
+                \"timeoutSeconds\": 5,
+                \"healthyThreshold\": 2,
+                \"unhealthyThreshold\": 2
+              }
+            }"

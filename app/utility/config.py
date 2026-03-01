@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     
     # Application
     DEBUG: bool = False
+    CORS_ORIGINS: str = "*"
     API_V1_PREFIX: str = "/api/v1"
     PROJECT_NAME: str = "MedBase API"
 
