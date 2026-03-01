@@ -24,6 +24,7 @@ from app.service.appointment import AppointmentService
 from app.service.vital_sign import VitalSignService
 from app.service.medical_record import MedicalRecordService
 from app.service.treatment import TreatmentService
+from app.service.inventory_transaction import InventoryTransactionService
 
 from app.schema.user import UserCreate
 from app.schema.medicine_category import MedicineCategoryCreate
@@ -39,6 +40,7 @@ from app.schema.appointment import AppointmentCreate
 from app.schema.vital_sign import VitalSignCreate
 from app.schema.medical_record import MedicalRecordCreate
 from app.schema.treatment import TreatmentCreate
+from app.schema.inventory_transaction import InventoryTransactionCreate, TransactionItemCreate
 
 CREATED_BY = "admin"
 
@@ -313,6 +315,88 @@ async def populate():
                 created_by=CREATED_BY,
             )
             print(f"  [created] Treatment id={treatment.id} '{t['treatment_type']}' for patient '{t['patient_name']}'")
+
+        await db.commit()
+
+        # --- Inventory Transactions ---
+        tx_service = InventoryTransactionService(db)
+
+        # Build item name -> id maps for resolving item references
+        item_id_map = {}
+        for m in data.get("medicines", []):
+            med = await med_service.get_by_name(m["name"])
+            if med:
+                item_id_map[("medicine", m["name"])] = med.id
+        for e in data.get("equipment", []):
+            eq = await equip_service.get_by_name(e["name"])
+            if eq:
+                item_id_map[("equipment", e["name"])] = eq.id
+        for d in data.get("medical_devices", []):
+            dev = await dev_service.get_by_name(d["name"])
+            if dev:
+                item_id_map[("medical_device", d["name"])] = dev.id
+
+        # Build partner name -> third_party_id map
+        partner_tp_map = {}
+        for p in data.get("partners", []):
+            partner = await partner_service.get_by_name(p["name"])
+            if partner:
+                partner_tp_map[p["name"]] = partner.third_party_id
+
+        # Build doctor name -> third_party_id map
+        doctor_tp_map = {}
+        for d in data.get("doctors", []):
+            doctor = await doctor_service.get_by_name(d["name"])
+            if doctor:
+                doctor_tp_map[d["name"]] = doctor.third_party_id
+
+        # Get admin user's third_party_id for auto-set types
+        admin = await user_service.get_by_username("admin")
+        admin_tp_id = admin.third_party_id if admin else None
+
+        auto_tp_types = {"purchase", "loss", "breakage", "expiration", "destruction"}
+
+        for tx in data.get("inventory_transactions", []):
+            tx_type = tx["transaction_type"]
+
+            # Resolve third_party_id
+            if tx_type in auto_tp_types:
+                third_party_id = admin_tp_id
+            elif tx_type == "donation":
+                third_party_id = partner_tp_map.get(tx.get("partner_name"))
+            elif tx_type == "prescription":
+                third_party_id = doctor_tp_map.get(tx.get("doctor_name"))
+            else:
+                third_party_id = admin_tp_id
+
+            if not third_party_id:
+                print(f"  [skip] Transaction '{tx_type}' - could not resolve third_party_id")
+                continue
+
+            # Resolve items
+            items = []
+            for item in tx.get("items", []):
+                item_id = item_id_map.get((item["item_type"], item["item_name"]))
+                if not item_id:
+                    print(f"  [skip] Item '{item['item_name']}' ({item['item_type']}) not found")
+                    continue
+                items.append(TransactionItemCreate(
+                    item_type=item["item_type"],
+                    item_id=item_id,
+                    quantity=item["quantity"],
+                ))
+
+            tx_data = InventoryTransactionCreate(
+                transaction_type=tx_type,
+                third_party_id=third_party_id,
+                transaction_date=tx["transaction_date"],
+                notes=tx.get("notes"),
+                items=items if items else None,
+            )
+            transaction = await tx_service.create(tx_data, third_party_id, created_by=CREATED_BY)
+            item_count = len(items)
+            label = tx.get("partner_name") or tx.get("doctor_name") or "admin"
+            print(f"  [created] Transaction id={transaction.id} type={tx_type} ({label}) with {item_count} items")
 
         await db.commit()
 
