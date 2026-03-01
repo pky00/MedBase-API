@@ -89,7 +89,7 @@ The original plan had separate `donations`/`donation_items` tables, separate `pr
 
 | # | Feature | Description | BE | FE |
 |---|---------|-------------|----|----|
-| 17 | Inventory Transactions | Inventory transactions with transaction items (see migration notes below) | Pending | Pending |
+| 17 | Inventory Transactions | Inventory transactions with transaction items (see migration notes below) | Done | Pending |
 | 18 | Treatments | External treatments via partners | Done | Pending |
 
 ---
@@ -98,8 +98,8 @@ The original plan had separate `donations`/`donation_items` tables, separate `pr
 
 | # | Feature | Description | BE | FE |
 |---|---------|-------------|----|----|
-| 19 | Dashboard | Summary statistics (inventory, appointments, transactions, partners) | Pending | Pending |
-| 20 | Final Testing & Polish | End-to-end testing, bug fixes, UI refinements | Pending | Pending |
+| 19 | Dashboard | Summary statistics (inventory, appointments, transactions, partners) | Done | Pending |
+| 20 | Final Testing & Polish | End-to-end testing, bug fixes, UI refinements | Done | Pending |
 
 ---
 

@@ -14,6 +14,7 @@ You are the Backend Agent for MedBase, a clinic management system. Your responsi
 - **File Storage**: Amazon Lightsail Bucket (S3-compatible)
 - **Containerization**: Docker (backend)
 - **Deployment**: AWS
+- **Dev API**: `https://dev-api.medbaseclinic.com/api/v1`
 
 ---
 
