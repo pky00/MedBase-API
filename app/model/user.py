@@ -1,4 +1,5 @@
 from sqlalchemy import Column, String, Boolean, Integer, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.utility.database import Base
@@ -12,6 +13,7 @@ class User(Base):
     
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     third_party_id = Column(Integer, ForeignKey("third_parties.id"), nullable=False)
+    third_party = relationship("ThirdParty", lazy="noload")
     username = Column(String, unique=True, nullable=False, index=True)
     email = Column(String, unique=True, nullable=False, index=True)
     password_hash = Column(String, nullable=False)
