@@ -2,8 +2,10 @@ import logging
 from typing import Optional, List, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, or_
+from sqlalchemy.orm import contains_eager
 
 from app.model.user import User
+from app.model.third_party import ThirdParty
 from app.schema.user import UserCreate, UserUpdate
 from app.utility.security import get_password_hash, verify_password
 from app.service.third_party import ThirdPartyService
@@ -21,9 +23,12 @@ class UserService:
     async def get_by_id(self, user_id: int) -> Optional[User]:
         """Get user by ID."""
         result = await self.db.execute(
-            select(User).where(User.id == user_id, User.is_deleted == False)
+            select(User)
+            .outerjoin(ThirdParty, User.third_party_id == ThirdParty.id)
+            .options(contains_eager(User.third_party))
+            .where(User.id == user_id, User.is_deleted == False)
         )
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()
     
     async def get_by_username(self, username: str) -> Optional[User]:
         """Get user by username."""
@@ -51,7 +56,7 @@ class UserService:
     ) -> Tuple[List[User], int]:
         """Get all users with pagination, filtering, and sorting."""
         query = select(User).where(User.is_deleted == False)
-        
+
         # Apply filters
         if role:
             query = query.where(User.role == role)
@@ -65,25 +70,30 @@ class UserService:
                     User.email.ilike(search_term)
                 )
             )
-        
+
         # Get total count
         count_query = select(func.count()).select_from(query.subquery())
         total_result = await self.db.execute(count_query)
         total = total_result.scalar()
-        
+
+        # Join third_party
+        query = query.outerjoin(ThirdParty, User.third_party_id == ThirdParty.id).options(
+            contains_eager(User.third_party)
+        )
+
         # Apply sorting
         sort_column = getattr(User, sort, User.id)
         if order.lower() == "desc":
             query = query.order_by(sort_column.desc())
         else:
             query = query.order_by(sort_column.asc())
-        
+
         # Apply pagination
         offset = (page - 1) * size
         query = query.offset(offset).limit(size)
-        
+
         result = await self.db.execute(query)
-        users = result.scalars().all()
+        users = result.unique().scalars().all()
         
         logger.debug("Queried users: total=%d returned=%d", total, len(users))
         

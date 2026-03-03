@@ -3,6 +3,8 @@ from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
+from app.schema.third_party import ThirdPartyResponse
+
 
 class UserRole(str, Enum):
     """User role values."""
@@ -44,6 +46,7 @@ class UserResponse(UserBase):
     
     id: int
     third_party_id: int
+    third_party: Optional[ThirdPartyResponse] = None
     role: str
     is_active: bool
     is_deleted: bool
