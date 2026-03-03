@@ -238,8 +238,14 @@ class Appointment(Base):
 - `database.dbml` — database schema (Backend)
 - `endpoints.md` — API endpoints list (Backend, copied to Frontend)
 - `MedBase API.postman_collection.json` — Postman collection (originates in API, synced to Planner + Frontend)
+- `openapi.json` — OpenAPI spec (generated from the running API, synced to Frontend)
 - `pages.md` — page layouts and functionality (Frontend)
 - `README.md` — project description, setup instructions, and how to run (in each repo root)
+
+**Syncing to Frontend**
+- After any BE changes that affect endpoints, sync these files to `MedBase-WEB/docs/`:
+  1. `MedBase API.postman_collection.json` — copy from `MedBase-API/docs/`
+  2. `openapi.json` — fetch from the running dev API at `https://dev-api.medbaseclinic.com/api/v1/openapi.json` and save to `MedBase-WEB/docs/openapi.json`
 
 **PR Workflow**
 - Each phase requires a Pull Request (PR)
@@ -307,3 +313,4 @@ class Appointment(Base):
 4. **Test everything** — No feature is complete without tests
 5. **Document in Postman** — Create requests for every endpoint
 6. **Develop → Test → Postman → Dummy Data → Push** — Follow this order strictly for every feature
+7. **CLAUDE.md changes must be applied across all 3 repos** — When adding or updating any rule, setting, or section in any CLAUDE.md, apply the change to all three: `Planner/CLAUDE.md`, `MedBase-API/CLAUDE.md`, and `MedBase-WEB/CLAUDE.md`
