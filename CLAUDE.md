@@ -238,15 +238,15 @@ class Appointment(Base):
 - `database.dbml` — database schema (Backend)
 - `endpoints.md` — API endpoints list (Backend, copied to Frontend)
 - `MedBase API.postman_collection.json` — Postman collection (originates in API, synced to Planner + Frontend)
-- `openapi.json` — OpenAPI spec (generated from the running API, synced to Frontend)
 - `pages.md` — page layouts and functionality (Frontend)
 - `README.md` — project description, setup instructions, and how to run (in each repo root)
 
 **Syncing to Frontend**
-- After any BE changes that affect endpoints, sync these files to `MedBase-WEB/docs/`:
+- After any BE changes that affect endpoints, sync Postman collection to `MedBase-WEB/docs/`:
   1. `MedBase API.postman_collection.json` — copy from `MedBase-API/docs/`
-  2. `openapi.json` — fetch from `https://dev-api.medbaseclinic.com/openapi.json` and save to `MedBase-WEB/docs/openapi.json`
-- When the user says "refresh the openapi", fetch the latest `openapi.json` and sync it to all repos. This should also be done automatically whenever syncing docs across repos.
+
+**OpenAPI Spec**
+- The API's OpenAPI spec is available at `https://dev-api.medbaseclinic.com/openapi.json`. Agents should fetch it directly from the live API whenever they need request/response formats — it is not stored as a file in the repos.
 
 **PR Workflow**
 - Each phase requires a Pull Request (PR)
