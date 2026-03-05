@@ -2,6 +2,8 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, Field, ConfigDict
 
+from app.schema.medicine_category import MedicineCategoryResponse
+
 
 class MedicineBase(BaseModel):
     """Base schema for medicine."""
@@ -42,15 +44,16 @@ class MedicineResponse(MedicineBase):
 
 
 class MedicineDetailResponse(MedicineResponse):
-    """Schema for medicine response with inventory info."""
+    """Schema for medicine response with inventory and category info."""
 
     inventory_quantity: Optional[int] = 0
-    category_name: Optional[str] = None
+    category: Optional[MedicineCategoryResponse] = None
 
     @classmethod
     def from_row(cls, row) -> "MedicineDetailResponse":
-        """Build from a SQLAlchemy row of (Medicine, quantity, category_name)."""
+        """Build from a SQLAlchemy row of (Medicine, quantity, MedicineCategory|None)."""
         medicine = row[0]
+        category_obj = row[2]
         return cls.model_validate(
             {
                 "id": medicine.id,
@@ -65,6 +68,6 @@ class MedicineDetailResponse(MedicineResponse):
                 "updated_by": medicine.updated_by,
                 "updated_at": medicine.updated_at,
                 "inventory_quantity": row[1] or 0,
-                "category_name": row[2],
+                "category": MedicineCategoryResponse.model_validate(category_obj) if category_obj else None,
             }
         )

@@ -21,7 +21,7 @@ logger = logging.getLogger("medbase.router.medical_device")
 router = APIRouter(prefix="/medical-devices", tags=["Medical Devices"])
 
 
-@router.get("", response_model=PaginatedResponse[MedicalDeviceResponse])
+@router.get("", response_model=PaginatedResponse[MedicalDeviceDetailResponse])
 async def get_medical_devices(
     page: int = Query(1, ge=1, description="Page number"),
     size: int = Query(10, ge=1, le=100, description="Page size"),

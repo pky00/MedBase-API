@@ -121,7 +121,7 @@ class TestGetMedicalDevice:
         assert response.status_code == 200
         data = response.json()
         assert data["name"] == "Heart Monitor"
-        assert data["category_name"] == "Monitors"
+        assert data["category"]["name"] == "Monitors"
         assert data["inventory_quantity"] == 0
         assert data["serial_number"] == "HM-001"
 

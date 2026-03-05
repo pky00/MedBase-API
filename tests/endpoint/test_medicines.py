@@ -145,7 +145,7 @@ class TestGetMedicine:
         assert response.status_code == 200
         data = response.json()
         assert data["name"] == "Amoxicillin"
-        assert data["category_name"] == "Antibiotics"
+        assert data["category"]["name"] == "Antibiotics"
         assert data["inventory_quantity"] == 0
 
     @pytest.mark.asyncio

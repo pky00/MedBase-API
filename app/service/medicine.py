@@ -45,7 +45,7 @@ class MedicineService:
             select(
                 Medicine,
                 Inventory.quantity,
-                MedicineCategory.name.label("category_name"),
+                MedicineCategory,
             )
             .outerjoin(
                 Inventory,
@@ -78,11 +78,48 @@ class MedicineService:
         search: Optional[str] = None,
         sort: str = "id",
         order: str = "asc",
-    ) -> Tuple[List[Medicine], int]:
-        """Get all medicines with pagination, filtering, and sorting."""
-        query = select(Medicine).where(Medicine.is_deleted == False)
+    ) -> Tuple[List[MedicineDetailResponse], int]:
+        """Get all medicines with pagination, filtering, sorting, and details."""
+        # Base filter query for counting
+        base_query = select(Medicine).where(Medicine.is_deleted == False)
 
         # Apply filters
+        if category_id is not None:
+            base_query = base_query.where(Medicine.category_id == category_id)
+        if is_active is not None:
+            base_query = base_query.where(Medicine.is_active == is_active)
+        if search:
+            search_term = f"%{search}%"
+            base_query = base_query.where(
+                or_(
+                    Medicine.name.ilike(search_term),
+                    Medicine.description.ilike(search_term),
+                )
+            )
+
+        # Get total count
+        count_query = select(func.count()).select_from(base_query.subquery())
+        total_result = await self.db.execute(count_query)
+        total = total_result.scalar()
+
+        # Build detail query with joins
+        query = (
+            select(Medicine, Inventory.quantity, MedicineCategory)
+            .outerjoin(
+                Inventory,
+                (Inventory.item_type == ItemType.MEDICINE)
+                & (Inventory.item_id == Medicine.id)
+                & (Inventory.is_deleted == False),
+            )
+            .outerjoin(
+                MedicineCategory,
+                (MedicineCategory.id == Medicine.category_id)
+                & (MedicineCategory.is_deleted == False),
+            )
+            .where(Medicine.is_deleted == False)
+        )
+
+        # Re-apply filters to detail query
         if category_id is not None:
             query = query.where(Medicine.category_id == category_id)
         if is_active is not None:
@@ -96,11 +133,6 @@ class MedicineService:
                 )
             )
 
-        # Get total count
-        count_query = select(func.count()).select_from(query.subquery())
-        total_result = await self.db.execute(count_query)
-        total = total_result.scalar()
-
         # Apply sorting
         sort_column = getattr(Medicine, sort, Medicine.id)
         if order.lower() == "desc":
@@ -113,11 +145,12 @@ class MedicineService:
         query = query.offset(offset).limit(size)
 
         result = await self.db.execute(query)
-        medicines = result.scalars().all()
+        rows = result.all()
+        medicines = [MedicineDetailResponse.from_row(row) for row in rows]
 
         logger.debug("Queried medicines: total=%d returned=%d", total, len(medicines))
 
-        return list(medicines), total
+        return medicines, total
 
     async def create(
         self, data: MedicineCreate, created_by: Optional[str] = None
