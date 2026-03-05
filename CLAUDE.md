@@ -48,7 +48,7 @@ Work through features in order as defined in `docs/plan.md`. Do not skip ahead o
 ### 3. For Each Feature
 Follow this order strictly:
 1. **Endpoints** — Implement the API endpoints
-2. **Test** — Write and run tests to verify it works
+2. **Add/Update Tests** — Write and run tests to verify it works
 3. **Postman** — Create/update Postman request examples
 4. **Dummy Data** — Add seed script in `scripts/` folder
 5. **Push** — Run all tests again, push to GitHub only after all tests pass
@@ -226,7 +226,7 @@ class Appointment(Base):
 **Approach**
 - Features developed independently in sequential order
 - Frontend and Backend developed separately
-- Backend order per feature: Endpoints → Tests → Postman → Dummy Data → Push
+- Backend order per feature: Endpoints → Add/Update Tests → Postman → Dummy Data → Push
 
 **Progress Tracking**
 - `BE.PROGRESS.md` — backend progress
@@ -323,5 +323,5 @@ for name in ['MedicineDetailResponse', 'MedicineCreate']:  # replace with needed
 3. **Follow the docs** — They are your source of truth
 4. **Test everything** — No feature is complete without tests
 5. **Document in Postman** — Create requests for every endpoint
-6. **Develop → Test → Postman → Dummy Data → Push** — Follow this order strictly for every feature
+6. **Develop → Add/Update Tests → Postman → Dummy Data → Push** — Follow this order strictly for every feature
 7. **CLAUDE.md changes must be applied across all 3 repos** — When adding or updating any rule, setting, or section in any CLAUDE.md, apply the change to all three: `Planner/CLAUDE.md`, `MedBase-API/CLAUDE.md`, and `MedBase-WEB/CLAUDE.md`
