@@ -3,6 +3,8 @@ from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, Field, ConfigDict
 
+from app.schema.equipment_category import EquipmentCategoryResponse
+
 
 class EquipmentCondition(str, Enum):
     """Equipment condition values."""
@@ -52,15 +54,16 @@ class EquipmentResponse(EquipmentBase):
 
 
 class EquipmentDetailResponse(EquipmentResponse):
-    """Schema for equipment response with inventory info."""
+    """Schema for equipment response with inventory and category info."""
 
     inventory_quantity: Optional[int] = 0
-    category_name: Optional[str] = None
+    category: Optional[EquipmentCategoryResponse] = None
 
     @classmethod
     def from_row(cls, row) -> "EquipmentDetailResponse":
-        """Build from a SQLAlchemy row of (Equipment, quantity, category_name)."""
+        """Build from a SQLAlchemy row of (Equipment, quantity, EquipmentCategory|None)."""
         equipment = row[0]
+        category_obj = row[2]
         return cls.model_validate(
             {
                 "id": equipment.id,
@@ -75,6 +78,6 @@ class EquipmentDetailResponse(EquipmentResponse):
                 "updated_by": equipment.updated_by,
                 "updated_at": equipment.updated_at,
                 "inventory_quantity": row[1] or 0,
-                "category_name": row[2],
+                "category": EquipmentCategoryResponse.model_validate(category_obj) if category_obj else None,
             }
         )

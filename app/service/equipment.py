@@ -45,7 +45,7 @@ class EquipmentService:
             select(
                 Equipment,
                 Inventory.quantity,
-                EquipmentCategory.name.label("category_name"),
+                EquipmentCategory,
             )
             .outerjoin(
                 Inventory,
@@ -79,11 +79,50 @@ class EquipmentService:
         search: Optional[str] = None,
         sort: str = "id",
         order: str = "asc",
-    ) -> Tuple[List[Equipment], int]:
-        """Get all equipment with pagination, filtering, and sorting."""
-        query = select(Equipment).where(Equipment.is_deleted == False)
+    ) -> Tuple[List[EquipmentDetailResponse], int]:
+        """Get all equipment with pagination, filtering, sorting, and details."""
+        # Base filter query for counting
+        base_query = select(Equipment).where(Equipment.is_deleted == False)
 
         # Apply filters
+        if category_id is not None:
+            base_query = base_query.where(Equipment.category_id == category_id)
+        if is_active is not None:
+            base_query = base_query.where(Equipment.is_active == is_active)
+        if condition:
+            base_query = base_query.where(Equipment.condition == condition)
+        if search:
+            search_term = f"%{search}%"
+            base_query = base_query.where(
+                or_(
+                    Equipment.name.ilike(search_term),
+                    Equipment.description.ilike(search_term),
+                )
+            )
+
+        # Get total count
+        count_query = select(func.count()).select_from(base_query.subquery())
+        total_result = await self.db.execute(count_query)
+        total = total_result.scalar()
+
+        # Build detail query with joins
+        query = (
+            select(Equipment, Inventory.quantity, EquipmentCategory)
+            .outerjoin(
+                Inventory,
+                (Inventory.item_type == ItemType.EQUIPMENT)
+                & (Inventory.item_id == Equipment.id)
+                & (Inventory.is_deleted == False),
+            )
+            .outerjoin(
+                EquipmentCategory,
+                (EquipmentCategory.id == Equipment.category_id)
+                & (EquipmentCategory.is_deleted == False),
+            )
+            .where(Equipment.is_deleted == False)
+        )
+
+        # Re-apply filters to detail query
         if category_id is not None:
             query = query.where(Equipment.category_id == category_id)
         if is_active is not None:
@@ -99,11 +138,6 @@ class EquipmentService:
                 )
             )
 
-        # Get total count
-        count_query = select(func.count()).select_from(query.subquery())
-        total_result = await self.db.execute(count_query)
-        total = total_result.scalar()
-
         # Apply sorting
         sort_column = getattr(Equipment, sort, Equipment.id)
         if order.lower() == "desc":
@@ -116,11 +150,12 @@ class EquipmentService:
         query = query.offset(offset).limit(size)
 
         result = await self.db.execute(query)
-        items = result.scalars().all()
+        rows = result.all()
+        items = [EquipmentDetailResponse.from_row(row) for row in rows]
 
         logger.debug("Queried equipment: total=%d returned=%d", total, len(items))
 
-        return list(items), total
+        return items, total
 
     async def create(
         self, data: EquipmentCreate, created_by: Optional[str] = None

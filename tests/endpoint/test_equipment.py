@@ -117,7 +117,7 @@ class TestGetEquipmentById:
         assert response.status_code == 200
         data = response.json()
         assert data["name"] == "Scalpel"
-        assert data["category_name"] == "Surgical Tools"
+        assert data["category"]["name"] == "Surgical Tools"
         assert data["inventory_quantity"] == 0
 
     @pytest.mark.asyncio

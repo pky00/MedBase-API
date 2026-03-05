@@ -45,7 +45,7 @@ class MedicalDeviceService:
             select(
                 MedicalDevice,
                 Inventory.quantity,
-                MedicalDeviceCategory.name.label("category_name"),
+                MedicalDeviceCategory,
             )
             .outerjoin(
                 Inventory,
@@ -78,11 +78,48 @@ class MedicalDeviceService:
         search: Optional[str] = None,
         sort: str = "id",
         order: str = "asc",
-    ) -> Tuple[List[MedicalDevice], int]:
-        """Get all medical devices with pagination, filtering, and sorting."""
-        query = select(MedicalDevice).where(MedicalDevice.is_deleted == False)
+    ) -> Tuple[List[MedicalDeviceDetailResponse], int]:
+        """Get all medical devices with pagination, filtering, sorting, and details."""
+        # Base filter query for counting
+        base_query = select(MedicalDevice).where(MedicalDevice.is_deleted == False)
 
         # Apply filters
+        if category_id is not None:
+            base_query = base_query.where(MedicalDevice.category_id == category_id)
+        if is_active is not None:
+            base_query = base_query.where(MedicalDevice.is_active == is_active)
+        if search:
+            search_term = f"%{search}%"
+            base_query = base_query.where(
+                or_(
+                    MedicalDevice.name.ilike(search_term),
+                    MedicalDevice.description.ilike(search_term),
+                )
+            )
+
+        # Get total count
+        count_query = select(func.count()).select_from(base_query.subquery())
+        total_result = await self.db.execute(count_query)
+        total = total_result.scalar()
+
+        # Build detail query with joins
+        query = (
+            select(MedicalDevice, Inventory.quantity, MedicalDeviceCategory)
+            .outerjoin(
+                Inventory,
+                (Inventory.item_type == ItemType.MEDICAL_DEVICE)
+                & (Inventory.item_id == MedicalDevice.id)
+                & (Inventory.is_deleted == False),
+            )
+            .outerjoin(
+                MedicalDeviceCategory,
+                (MedicalDeviceCategory.id == MedicalDevice.category_id)
+                & (MedicalDeviceCategory.is_deleted == False),
+            )
+            .where(MedicalDevice.is_deleted == False)
+        )
+
+        # Re-apply filters to detail query
         if category_id is not None:
             query = query.where(MedicalDevice.category_id == category_id)
         if is_active is not None:
@@ -96,11 +133,6 @@ class MedicalDeviceService:
                 )
             )
 
-        # Get total count
-        count_query = select(func.count()).select_from(query.subquery())
-        total_result = await self.db.execute(count_query)
-        total = total_result.scalar()
-
         # Apply sorting
         sort_column = getattr(MedicalDevice, sort, MedicalDevice.id)
         if order.lower() == "desc":
@@ -113,11 +145,12 @@ class MedicalDeviceService:
         query = query.offset(offset).limit(size)
 
         result = await self.db.execute(query)
-        devices = result.scalars().all()
+        rows = result.all()
+        devices = [MedicalDeviceDetailResponse.from_row(row) for row in rows]
 
         logger.debug("Queried medical devices: total=%d returned=%d", total, len(devices))
 
-        return list(devices), total
+        return devices, total
 
     async def create(
         self, data: MedicalDeviceCreate, created_by: Optional[str] = None
