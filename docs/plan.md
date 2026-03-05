@@ -5,9 +5,9 @@
 | # | Feature | Description | BE | FE |
 |---|---------|-------------|----|----|
 | 1 | Project Setup (BE) | FastAPI structure, Docker, database connection, Alembic | Done | - |
-| 2 | Project Setup (FE) | Angular structure, routing, reusable components (buttons, inputs, tables, dropdowns), sidebar | - | Pending |
-| 3 | Third Parties | Base identity table for all persons/entities (users, doctors, patients, partners). Created automatically when any linked entity is created | Done | Pending |
-| 4 | Users & Authentication | User CRUD, JWT auth, admin role, login/logout. Each user gets a third_party record | Done | Pending |
+| 2 | Project Setup (FE) | Angular structure, routing, reusable components (buttons, inputs, tables, dropdowns), sidebar | - | Done |
+| 3 | Third Parties | Base identity table for all persons/entities (users, doctors, patients, partners). Created automatically when any linked entity is created | Done | Done |
+| 4 | Users & Authentication | User CRUD, JWT auth, admin role, login/logout. Each user gets a third_party record | Done | Done |
 
 ---
 
@@ -15,10 +15,10 @@
 
 | # | Feature | Description | BE | FE |
 |---|---------|-------------|----|----|
-| 5 | Inventory Categories | Categories for Medicines, Equipment, Medical Devices | Done | Pending |
-| 6 | Medicines | Medicine inventory items with category | Done | Pending |
-| 7 | Equipment | Equipment inventory items with category | Done | Pending |
-| 8 | Medical Devices | Medical device inventory items with category | Done | Pending |
+| 5 | Inventory Categories | Categories for Medicines, Equipment, Medical Devices | Done | Done |
+| 6 | Medicines | Medicine inventory items with category | Done | Done |
+| 7 | Equipment | Equipment inventory items with category | Done | Done |
+| 8 | Medical Devices | Medical device inventory items with category | Done | Done |
 
 ---
 
