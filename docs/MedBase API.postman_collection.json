@@ -1126,6 +1126,20 @@
 		"name": "Patient Documents",
 		"item": [
 			{
+				"name": "Get Patient Document Types",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/patient-document-types",
+						"host": ["{{base_url}}"],
+						"path": ["patient-document-types"]
+					},
+					"description": "Returns all available patient document types with value and human-readable label."
+				},
+				"response": []
+			},
+			{
 				"name": "Get Patient Documents",
 				"request": {
 					"method": "GET",
