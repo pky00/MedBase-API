@@ -14,11 +14,14 @@ from app.model.user import User
 @pytest.fixture(autouse=True)
 def mock_presigned_url():
     """Mock presigned URL generation for all tests."""
-    async def fake_presigned(key, expires_in=300):
+    async def fake_presigned(key, expires_in=300, download_filename=""):
         return f"https://fake-presigned-url/{key}?signed=true"
 
     with patch(
         "app.service.patient_document.storage.generate_presigned_url",
+        side_effect=fake_presigned,
+    ), patch(
+        "app.service.patient.storage.generate_presigned_url",
         side_effect=fake_presigned,
     ):
         yield
