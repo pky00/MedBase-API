@@ -78,6 +78,7 @@ async def get_patient_document(
 async def upload_patient_document(
     patient_id: int,
     file: UploadFile = File(...),
+    document_name: Optional[str] = Form(None, description="Custom display name for the document"),
     document_type: Optional[str] = Form(None),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -98,6 +99,7 @@ async def upload_patient_document(
     doc = await service.upload(
         patient_id=patient_id,
         file=file,
+        document_name=document_name,
         document_type=document_type,
         created_by=current_user.username,
     )

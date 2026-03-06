@@ -19,12 +19,13 @@ def _get_endpoint_url() -> str:
     return f"https://{ENDPOINT}" if not ENDPOINT.startswith("http") else ENDPOINT
 
 
-async def generate_presigned_url(key: str, expires_in: int = 300) -> str:
+async def generate_presigned_url(key: str, expires_in: int = 300, download_filename: str = "") -> str:
     """Generate a presigned URL for a file in the bucket.
 
     Args:
         key: The S3 object key.
         expires_in: URL expiry time in seconds (default 300 = 5 minutes).
+        download_filename: If provided, the browser will download the file with this name.
 
     Returns:
         A presigned URL string.
@@ -32,6 +33,10 @@ async def generate_presigned_url(key: str, expires_in: int = 300) -> str:
     endpoint_url = _get_endpoint_url()
     if not endpoint_url:
         return key
+
+    params = {"Bucket": BUCKET_NAME, "Key": key}
+    if download_filename:
+        params["ResponseContentDisposition"] = f'attachment; filename="{download_filename}"'
 
     session = aioboto3.Session()
     async with session.client(
@@ -43,7 +48,7 @@ async def generate_presigned_url(key: str, expires_in: int = 300) -> str:
     ) as s3:
         url = await s3.generate_presigned_url(
             "get_object",
-            Params={"Bucket": BUCKET_NAME, "Key": key},
+            Params=params,
             ExpiresIn=expires_in,
         )
     return url

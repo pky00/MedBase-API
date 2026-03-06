@@ -14,7 +14,7 @@ logger = logging.getLogger("medbase.service.patient_document")
 
 async def document_to_response(doc: PatientDocument) -> PatientDocumentResponse:
     """Convert a PatientDocument model to a response with presigned file_url."""
-    file_url = await storage.generate_presigned_url(doc.file_path)
+    file_url = await storage.generate_presigned_url(doc.file_path, download_filename=doc.document_name)
     return PatientDocumentResponse.from_model(doc, file_url)
 
 
@@ -75,6 +75,7 @@ class PatientDocumentService:
         self,
         patient_id: int,
         file: UploadFile,
+        document_name: Optional[str] = None,
         document_type: Optional[str] = None,
         created_by: Optional[str] = None,
     ) -> PatientDocument:
@@ -91,7 +92,7 @@ class PatientDocumentService:
         content_type = file.content_type or "application/octet-stream"
         await storage.upload_file(file_key, content, content_type)
 
-        document_name = file.filename or unique_name
+        document_name = document_name or file.filename or unique_name
 
         doc = PatientDocument(
             patient_id=patient_id,

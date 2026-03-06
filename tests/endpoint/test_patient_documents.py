@@ -241,6 +241,33 @@ class TestUploadPatientDocument:
 
     @pytest.mark.asyncio
     @patch("app.service.patient_document.storage.upload_file", new_callable=AsyncMock)
+    async def test_upload_document_with_custom_name(
+        self, mock_upload, client: AsyncClient, admin_headers: dict,
+        db_session: AsyncSession, patient: Patient,
+    ):
+        """Test uploading a document with a custom document_name."""
+        mock_upload.return_value = "1/test.pdf"
+
+        response = await client.post(
+            f"/api/v1/patients/{patient.id}/documents",
+            files={"file": ("report.pdf", b"fake pdf content", "application/pdf")},
+            data={"document_name": "Blood Test Results", "document_type": "lab_report"},
+            headers=admin_headers,
+        )
+        assert response.status_code == 201
+        data = response.json()
+        assert data["document_name"] == "Blood Test Results"
+
+        # Verify stored in database
+        result = await db_session.execute(
+            select(PatientDocument).where(PatientDocument.id == data["id"])
+        )
+        doc = result.scalar_one_or_none()
+        assert doc is not None
+        assert doc.document_name == "Blood Test Results"
+
+    @pytest.mark.asyncio
+    @patch("app.service.patient_document.storage.upload_file", new_callable=AsyncMock)
     async def test_upload_document_patient_not_found(
         self, mock_upload, client: AsyncClient, admin_headers: dict,
     ):
