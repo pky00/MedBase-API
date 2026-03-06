@@ -11,6 +11,19 @@ from app.model.third_party import ThirdParty
 from app.model.user import User
 
 
+@pytest.fixture(autouse=True)
+def mock_presigned_url():
+    """Mock presigned URL generation for all tests."""
+    async def fake_presigned(key, expires_in=300):
+        return f"https://fake-presigned-url/{key}?signed=true"
+
+    with patch(
+        "app.service.patient_document.storage.generate_presigned_url",
+        side_effect=fake_presigned,
+    ):
+        yield
+
+
 @pytest.fixture
 async def patient(db_session: AsyncSession, admin_user: User) -> Patient:
     """Create a patient for document testing."""
@@ -40,7 +53,7 @@ async def document(db_session: AsyncSession, admin_user: User, patient: Patient)
         patient_id=patient.id,
         document_name="test_report.pdf",
         document_type="lab_report",
-        file_path="patient-documents/1/abc123.pdf",
+        file_path="1/abc123.pdf",
         created_by=admin_user.username,
         updated_by=admin_user.username,
     )
@@ -57,7 +70,7 @@ async def second_document(db_session: AsyncSession, admin_user: User, patient: P
         patient_id=patient.id,
         document_name="xray_scan.jpg",
         document_type="imaging",
-        file_path="patient-documents/1/def456.jpg",
+        file_path="1/def456.jpg",
         created_by=admin_user.username,
         updated_by=admin_user.username,
     )
@@ -185,7 +198,7 @@ class TestUploadPatientDocument:
         db_session: AsyncSession, patient: Patient,
     ):
         """Test uploading a document for a patient."""
-        mock_upload.return_value = "patient-documents/1/test.pdf"
+        mock_upload.return_value = "1/test.pdf"
 
         response = await client.post(
             f"/api/v1/patients/{patient.id}/documents",
@@ -215,7 +228,7 @@ class TestUploadPatientDocument:
         self, mock_upload, client: AsyncClient, admin_headers: dict, patient: Patient,
     ):
         """Test uploading a document without document_type."""
-        mock_upload.return_value = "patient-documents/1/test.jpg"
+        mock_upload.return_value = "1/test.jpg"
 
         response = await client.post(
             f"/api/v1/patients/{patient.id}/documents",

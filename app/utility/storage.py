@@ -1,6 +1,5 @@
 import logging
 import os
-from typing import Optional
 
 import aioboto3
 
@@ -20,12 +19,34 @@ def _get_endpoint_url() -> str:
     return f"https://{ENDPOINT}" if not ENDPOINT.startswith("http") else ENDPOINT
 
 
-def get_file_url(key: str) -> str:
-    """Get the public URL for a file in the bucket."""
+async def generate_presigned_url(key: str, expires_in: int = 300) -> str:
+    """Generate a presigned URL for a file in the bucket.
+
+    Args:
+        key: The S3 object key.
+        expires_in: URL expiry time in seconds (default 300 = 5 minutes).
+
+    Returns:
+        A presigned URL string.
+    """
     endpoint_url = _get_endpoint_url()
-    if endpoint_url:
-        return f"{endpoint_url}/{key}"
-    return key
+    if not endpoint_url:
+        return key
+
+    session = aioboto3.Session()
+    async with session.client(
+        "s3",
+        region_name=REGION,
+        endpoint_url=endpoint_url,
+        aws_access_key_id=ACCESS_KEY,
+        aws_secret_access_key=SECRET_KEY,
+    ) as s3:
+        url = await s3.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": BUCKET_NAME, "Key": key},
+            ExpiresIn=expires_in,
+        )
+    return url
 
 
 async def upload_file(key: str, content: bytes, content_type: str = "application/octet-stream") -> str:
