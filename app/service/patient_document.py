@@ -12,9 +12,10 @@ from app.utility import storage
 logger = logging.getLogger("medbase.service.patient_document")
 
 
-def document_to_response(doc: PatientDocument) -> PatientDocumentResponse:
-    """Convert a PatientDocument model to a response with file_url."""
-    return PatientDocumentResponse.from_model(doc, storage.get_file_url(doc.file_path))
+async def document_to_response(doc: PatientDocument) -> PatientDocumentResponse:
+    """Convert a PatientDocument model to a response with presigned file_url."""
+    file_url = await storage.generate_presigned_url(doc.file_path, download_filename=doc.document_name)
+    return PatientDocumentResponse.from_model(doc, file_url)
 
 
 class PatientDocumentService:
@@ -74,6 +75,7 @@ class PatientDocumentService:
         self,
         patient_id: int,
         file: UploadFile,
+        document_name: Optional[str] = None,
         document_type: Optional[str] = None,
         created_by: Optional[str] = None,
     ) -> PatientDocument:
@@ -83,14 +85,14 @@ class PatientDocumentService:
         if file.filename and "." in file.filename:
             ext = file.filename.rsplit(".", 1)[-1]
         unique_name = f"{uuid.uuid4().hex}.{ext}" if ext else uuid.uuid4().hex
-        file_key = f"patient-documents/{patient_id}/{unique_name}"
+        file_key = f"{patient_id}/{unique_name}"
 
         # Read file content and upload to storage
         content = await file.read()
         content_type = file.content_type or "application/octet-stream"
         await storage.upload_file(file_key, content, content_type)
 
-        document_name = file.filename or unique_name
+        document_name = document_name or file.filename or unique_name
 
         doc = PatientDocument(
             patient_id=patient_id,

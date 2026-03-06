@@ -1142,7 +1142,7 @@
 							{ "key": "order", "value": "asc", "disabled": true }
 						]
 					},
-					"description": "List all documents for a patient. Filter by document_type."
+					"description": "List all documents for a patient. Filter by document_type. Each item includes a presigned file URL (5 min expiry)."
 				},
 				"response": []
 			},
@@ -1156,7 +1156,7 @@
 						"host": ["{{base_url}}"],
 						"path": ["patient-documents", "1"]
 					},
-					"description": "Get document by ID. Returns file URL for download."
+					"description": "Get document by ID. Returns a presigned file URL (5 min expiry) for download."
 				},
 				"response": []
 			},
@@ -1174,6 +1174,12 @@
 								"src": ""
 							},
 							{
+								"key": "document_name",
+								"value": "Blood Test Results",
+								"type": "text",
+								"description": "Optional custom display name. If omitted, uses the original filename."
+							},
+							{
 								"key": "document_type",
 								"value": "lab_report",
 								"type": "text"
@@ -1185,7 +1191,7 @@
 						"host": ["{{base_url}}"],
 						"path": ["patients", "1", "documents"]
 					},
-					"description": "Upload a document for a patient. Accepts multipart/form-data. document_type is optional."
+					"description": "Upload a document for a patient. Accepts multipart/form-data. document_name and document_type are optional. The file_url in the response is a presigned URL (5 min expiry) that uses the document_name for the download filename."
 				},
 				"response": []
 			},

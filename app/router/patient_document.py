@@ -45,7 +45,7 @@ async def get_patient_documents(
         document_type=document_type, sort=sort, order=order,
     )
 
-    items = [document_to_response(doc) for doc in documents]
+    items = [await document_to_response(doc) for doc in documents]
 
     logger.info("Returning %d documents (total=%d) for patient_id=%d", len(documents), total, patient_id)
     return PaginatedResponse(items=items, total=total, page=page, size=size)
@@ -67,7 +67,7 @@ async def get_patient_document(
         logger.warning("Document not found document_id=%d", document_id)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
-    return document_to_response(doc)
+    return await document_to_response(doc)
 
 
 @router.post(
@@ -78,6 +78,7 @@ async def get_patient_document(
 async def upload_patient_document(
     patient_id: int,
     file: UploadFile = File(...),
+    document_name: Optional[str] = Form(None, description="Custom display name for the document"),
     document_type: Optional[str] = Form(None),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -98,12 +99,13 @@ async def upload_patient_document(
     doc = await service.upload(
         patient_id=patient_id,
         file=file,
+        document_name=document_name,
         document_type=document_type,
         created_by=current_user.username,
     )
 
     logger.info("Document uploaded document_id=%d patient_id=%d", doc.id, patient_id)
-    return document_to_response(doc)
+    return await document_to_response(doc)
 
 
 @router.delete("/patient-documents/{document_id}", response_model=MessageResponse)

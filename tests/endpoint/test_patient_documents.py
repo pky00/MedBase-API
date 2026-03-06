@@ -11,6 +11,22 @@ from app.model.third_party import ThirdParty
 from app.model.user import User
 
 
+@pytest.fixture(autouse=True)
+def mock_presigned_url():
+    """Mock presigned URL generation for all tests."""
+    async def fake_presigned(key, expires_in=300, download_filename=""):
+        return f"https://fake-presigned-url/{key}?signed=true"
+
+    with patch(
+        "app.service.patient_document.storage.generate_presigned_url",
+        side_effect=fake_presigned,
+    ), patch(
+        "app.service.patient.storage.generate_presigned_url",
+        side_effect=fake_presigned,
+    ):
+        yield
+
+
 @pytest.fixture
 async def patient(db_session: AsyncSession, admin_user: User) -> Patient:
     """Create a patient for document testing."""
@@ -40,7 +56,7 @@ async def document(db_session: AsyncSession, admin_user: User, patient: Patient)
         patient_id=patient.id,
         document_name="test_report.pdf",
         document_type="lab_report",
-        file_path="patient-documents/1/abc123.pdf",
+        file_path="1/abc123.pdf",
         created_by=admin_user.username,
         updated_by=admin_user.username,
     )
@@ -57,7 +73,7 @@ async def second_document(db_session: AsyncSession, admin_user: User, patient: P
         patient_id=patient.id,
         document_name="xray_scan.jpg",
         document_type="imaging",
-        file_path="patient-documents/1/def456.jpg",
+        file_path="1/def456.jpg",
         created_by=admin_user.username,
         updated_by=admin_user.username,
     )
@@ -185,7 +201,7 @@ class TestUploadPatientDocument:
         db_session: AsyncSession, patient: Patient,
     ):
         """Test uploading a document for a patient."""
-        mock_upload.return_value = "patient-documents/1/test.pdf"
+        mock_upload.return_value = "1/test.pdf"
 
         response = await client.post(
             f"/api/v1/patients/{patient.id}/documents",
@@ -215,7 +231,7 @@ class TestUploadPatientDocument:
         self, mock_upload, client: AsyncClient, admin_headers: dict, patient: Patient,
     ):
         """Test uploading a document without document_type."""
-        mock_upload.return_value = "patient-documents/1/test.jpg"
+        mock_upload.return_value = "1/test.jpg"
 
         response = await client.post(
             f"/api/v1/patients/{patient.id}/documents",
@@ -225,6 +241,33 @@ class TestUploadPatientDocument:
         assert response.status_code == 201
         data = response.json()
         assert data["document_type"] is None
+
+    @pytest.mark.asyncio
+    @patch("app.service.patient_document.storage.upload_file", new_callable=AsyncMock)
+    async def test_upload_document_with_custom_name(
+        self, mock_upload, client: AsyncClient, admin_headers: dict,
+        db_session: AsyncSession, patient: Patient,
+    ):
+        """Test uploading a document with a custom document_name."""
+        mock_upload.return_value = "1/test.pdf"
+
+        response = await client.post(
+            f"/api/v1/patients/{patient.id}/documents",
+            files={"file": ("report.pdf", b"fake pdf content", "application/pdf")},
+            data={"document_name": "Blood Test Results", "document_type": "lab_report"},
+            headers=admin_headers,
+        )
+        assert response.status_code == 201
+        data = response.json()
+        assert data["document_name"] == "Blood Test Results"
+
+        # Verify stored in database
+        result = await db_session.execute(
+            select(PatientDocument).where(PatientDocument.id == data["id"])
+        )
+        doc = result.scalar_one_or_none()
+        assert doc is not None
+        assert doc.document_name == "Blood Test Results"
 
     @pytest.mark.asyncio
     @patch("app.service.patient_document.storage.upload_file", new_callable=AsyncMock)

@@ -59,7 +59,7 @@ class PatientService:
         )
         docs = result.scalars().all()
 
-        documents = [PatientDocumentResponse.from_model(doc, storage.get_file_url(doc.file_path)) for doc in docs]
+        documents = [PatientDocumentResponse.from_model(doc, await storage.generate_presigned_url(doc.file_path, download_filename=doc.document_name)) for doc in docs]
         return patient, documents
 
     async def get_all(
