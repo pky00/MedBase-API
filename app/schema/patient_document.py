@@ -1,6 +1,20 @@
 from datetime import datetime
+from enum import StrEnum
 from typing import Optional
 from pydantic import BaseModel, Field, ConfigDict
+
+
+class PatientDocumentType(StrEnum):
+    LAB_REPORT = "lab_report"
+    IMAGING = "imaging"
+    PRESCRIPTION = "prescription"
+    REFERRAL = "referral"
+    INSURANCE = "insurance"
+    IDENTIFICATION = "identification"
+    CONSENT_FORM = "consent_form"
+    MEDICAL_HISTORY = "medical_history"
+    DISCHARGE_SUMMARY = "discharge_summary"
+    OTHER = "other"
 
 
 class PatientDocumentResponse(BaseModel):

@@ -7,13 +7,22 @@ from app.utility.database import get_db
 from app.utility.auth import get_current_user
 from app.service.patient import PatientService
 from app.service.patient_document import PatientDocumentService, document_to_response
-from app.schema.patient_document import PatientDocumentResponse
+from app.schema.patient_document import PatientDocumentResponse, PatientDocumentType
 from app.schema.base import PaginatedResponse, MessageResponse
 from app.model.user import User
 
 logger = logging.getLogger("medbase.router.patient_document")
 
 router = APIRouter(tags=["Patient Documents"])
+
+
+@router.get("/patient-document-types", response_model=list[dict])
+async def get_patient_document_types(
+    current_user: User = Depends(get_current_user),
+):
+    """Return all available patient document types."""
+    logger.info("Listing patient document types by user_id=%d", current_user.id)
+    return [{"value": t.value, "label": t.value.replace("_", " ").title()} for t in PatientDocumentType]
 
 
 @router.get(

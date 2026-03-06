@@ -9,6 +9,7 @@ from app.model.patient import Patient
 from app.model.patient_document import PatientDocument
 from app.model.third_party import ThirdParty
 from app.model.user import User
+from app.schema.patient_document import PatientDocumentType
 
 
 @pytest.fixture(autouse=True)
@@ -81,6 +82,37 @@ async def second_document(db_session: AsyncSession, admin_user: User, patient: P
     await db_session.commit()
     await db_session.refresh(doc)
     return doc
+
+
+class TestGetPatientDocumentTypes:
+    """Tests for GET /api/v1/patient-document-types"""
+
+    @pytest.mark.asyncio
+    async def test_get_document_types_authenticated(
+        self, client: AsyncClient, admin_headers: dict,
+    ):
+        """Test getting document types returns all enum values."""
+        response = await client.get(
+            "/api/v1/patient-document-types", headers=admin_headers,
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert isinstance(data, list)
+        assert len(data) == len(PatientDocumentType)
+        values = [item["value"] for item in data]
+        for doc_type in PatientDocumentType:
+            assert doc_type.value in values
+        # Verify label format
+        for item in data:
+            assert "value" in item
+            assert "label" in item
+            assert "_" not in item["label"]
+
+    @pytest.mark.asyncio
+    async def test_get_document_types_unauthenticated(self, client: AsyncClient):
+        """Test getting document types without authentication."""
+        response = await client.get("/api/v1/patient-document-types")
+        assert response.status_code == 401
 
 
 class TestGetPatientDocuments:
