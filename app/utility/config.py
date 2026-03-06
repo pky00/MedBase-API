@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     LIGHTSAIL_ACCESS_KEY: str = ""
     LIGHTSAIL_SECRET_KEY: str = ""
     LIGHTSAIL_ENDPOINT: str = ""
-    LIGHTSAIL_REGION: str = "us-east-1"
+    LIGHTSAIL_REGION: str = ""
     
     class Config:
         env_file = ".env"

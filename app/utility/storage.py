@@ -9,27 +9,29 @@ logger = logging.getLogger("medbase.utility.storage")
 BUCKET_NAME = os.getenv("LIGHTSAIL_BUCKET_NAME", "")
 ACCESS_KEY = os.getenv("LIGHTSAIL_ACCESS_KEY", "")
 SECRET_KEY = os.getenv("LIGHTSAIL_SECRET_KEY", "")
-REGION = os.getenv("LIGHTSAIL_REGION", "us-east-1")
+ENDPOINT = os.getenv("LIGHTSAIL_ENDPOINT", "")
+REGION = os.getenv("LIGHTSAIL_REGION", "")
 
 S3_CONFIG = Config(signature_version="s3v4")
 
 
 def _s3_client():
-    """Create an async S3 client using SigV4 signing.
+    """Create an async S3 client for Lightsail object storage.
 
-    Lightsail buckets are always served via S3 in us-east-1, regardless of
-    the Lightsail region.  We rely on the default virtual-hosted-style
-    endpoint (https://BUCKET.s3.us-east-1.amazonaws.com) so no explicit
-    endpoint_url is needed.
+    Uses the LIGHTSAIL_ENDPOINT env var as the S3-compatible endpoint URL,
+    matching the configuration used by the test script.
     """
     session = aioboto3.Session()
-    return session.client(
-        "s3",
-        region_name=REGION,
-        aws_access_key_id=ACCESS_KEY,
-        aws_secret_access_key=SECRET_KEY,
-        config=S3_CONFIG,
-    )
+    endpoint_url = f"https://{ENDPOINT}" if ENDPOINT and not ENDPOINT.startswith("http") else ENDPOINT
+    kwargs = {
+        "region_name": REGION,
+        "aws_access_key_id": ACCESS_KEY,
+        "aws_secret_access_key": SECRET_KEY,
+        "config": S3_CONFIG,
+    }
+    if endpoint_url:
+        kwargs["endpoint_url"] = endpoint_url
+    return session.client("s3", **kwargs)
 
 
 async def generate_presigned_url(key: str, expires_in: int = 300, download_filename: str = "") -> str:
