@@ -2,21 +2,28 @@ import logging
 import os
 
 import aioboto3
+from botocore.config import Config
 
 logger = logging.getLogger("medbase.utility.storage")
 
 BUCKET_NAME = os.getenv("LIGHTSAIL_BUCKET_NAME", "")
 ACCESS_KEY = os.getenv("LIGHTSAIL_ACCESS_KEY", "")
 SECRET_KEY = os.getenv("LIGHTSAIL_SECRET_KEY", "")
-ENDPOINT = os.getenv("LIGHTSAIL_ENDPOINT", "")
 REGION = os.getenv("LIGHTSAIL_REGION", "")
 
+S3_CONFIG = Config(signature_version="s3v4")
 
-def _get_endpoint_url() -> str:
-    """Build the endpoint URL."""
-    if not ENDPOINT:
-        return ""
-    return f"https://{ENDPOINT}" if not ENDPOINT.startswith("http") else ENDPOINT
+
+def _s3_client():
+    """Create an async S3 client using SigV4 signing."""
+    session = aioboto3.Session()
+    return session.client(
+        "s3",
+        region_name=REGION,
+        aws_access_key_id=ACCESS_KEY,
+        aws_secret_access_key=SECRET_KEY,
+        config=S3_CONFIG,
+    )
 
 
 async def generate_presigned_url(key: str, expires_in: int = 300, download_filename: str = "") -> str:
@@ -30,22 +37,11 @@ async def generate_presigned_url(key: str, expires_in: int = 300, download_filen
     Returns:
         A presigned URL string.
     """
-    endpoint_url = _get_endpoint_url()
-    if not endpoint_url:
-        return key
-
     params = {"Bucket": BUCKET_NAME, "Key": key}
     if download_filename:
         params["ResponseContentDisposition"] = f'attachment; filename="{download_filename}"'
 
-    session = aioboto3.Session()
-    async with session.client(
-        "s3",
-        region_name=REGION,
-        endpoint_url=endpoint_url,
-        aws_access_key_id=ACCESS_KEY,
-        aws_secret_access_key=SECRET_KEY,
-    ) as s3:
+    async with _s3_client() as s3:
         url = await s3.generate_presigned_url(
             "get_object",
             Params=params,
@@ -56,16 +52,7 @@ async def generate_presigned_url(key: str, expires_in: int = 300, download_filen
 
 async def upload_file(key: str, content: bytes, content_type: str = "application/octet-stream") -> str:
     """Upload a file to the Lightsail bucket. Returns the file key."""
-    endpoint_url = _get_endpoint_url()
-
-    session = aioboto3.Session()
-    async with session.client(
-        "s3",
-        region_name=REGION,
-        endpoint_url=endpoint_url,
-        aws_access_key_id=ACCESS_KEY,
-        aws_secret_access_key=SECRET_KEY,
-    ) as s3:
+    async with _s3_client() as s3:
         await s3.put_object(
             Bucket=BUCKET_NAME,
             Key=key,
@@ -79,16 +66,7 @@ async def upload_file(key: str, content: bytes, content_type: str = "application
 
 async def delete_file(key: str) -> None:
     """Delete a file from the Lightsail bucket."""
-    endpoint_url = _get_endpoint_url()
-
-    session = aioboto3.Session()
-    async with session.client(
-        "s3",
-        region_name=REGION,
-        endpoint_url=endpoint_url,
-        aws_access_key_id=ACCESS_KEY,
-        aws_secret_access_key=SECRET_KEY,
-    ) as s3:
+    async with _s3_client() as s3:
         await s3.delete_object(
             Bucket=BUCKET_NAME,
             Key=key,
