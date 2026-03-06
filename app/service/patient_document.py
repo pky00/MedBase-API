@@ -14,7 +14,13 @@ logger = logging.getLogger("medbase.service.patient_document")
 
 async def document_to_response(doc: PatientDocument) -> PatientDocumentResponse:
     """Convert a PatientDocument model to a response with presigned file_url."""
-    file_url = await storage.generate_presigned_url(doc.file_path, download_filename=doc.document_name)
+    download_name = doc.document_name
+    # Ensure download filename has the file extension from the stored path
+    if doc.file_path and "." in doc.file_path.rsplit("/", 1)[-1]:
+        stored_ext = "." + doc.file_path.rsplit(".", 1)[-1]
+        if not download_name.lower().endswith(stored_ext.lower()):
+            download_name += stored_ext
+    file_url = await storage.generate_presigned_url(doc.file_path, download_filename=download_name)
     return PatientDocumentResponse.from_model(doc, file_url)
 
 
