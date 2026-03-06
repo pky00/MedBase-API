@@ -10,6 +10,7 @@ BUCKET_NAME = os.getenv("LIGHTSAIL_BUCKET_NAME", "")
 ACCESS_KEY = os.getenv("LIGHTSAIL_ACCESS_KEY", "")
 SECRET_KEY = os.getenv("LIGHTSAIL_SECRET_KEY", "")
 REGION = os.getenv("LIGHTSAIL_REGION", "")
+ENDPOINT_URL = os.getenv("LIGHTSAIL_ENDPOINT_URL", "")
 
 S3_CONFIG = Config(signature_version="s3v4")
 
@@ -17,13 +18,15 @@ S3_CONFIG = Config(signature_version="s3v4")
 def _s3_client():
     """Create an async S3 client using SigV4 signing."""
     session = aioboto3.Session()
-    return session.client(
-        "s3",
-        region_name=REGION,
-        aws_access_key_id=ACCESS_KEY,
-        aws_secret_access_key=SECRET_KEY,
-        config=S3_CONFIG,
-    )
+    kwargs = {
+        "region_name": REGION,
+        "aws_access_key_id": ACCESS_KEY,
+        "aws_secret_access_key": SECRET_KEY,
+        "config": S3_CONFIG,
+    }
+    if ENDPOINT_URL:
+        kwargs["endpoint_url"] = ENDPOINT_URL
+    return session.client("s3", **kwargs)
 
 
 async def generate_presigned_url(key: str, expires_in: int = 300, download_filename: str = "") -> str:
