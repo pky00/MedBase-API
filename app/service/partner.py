@@ -6,7 +6,6 @@ from sqlalchemy import select, func, or_
 from app.model.partner import Partner
 from app.schema.partner import PartnerCreate, PartnerUpdate
 from app.service.third_party import ThirdPartyService
-from app.schema.third_party import ThirdPartyType
 
 logger = logging.getLogger("medbase.service.partner")
 
@@ -103,7 +102,6 @@ class PartnerService:
             # Auto-create third_party
             tp = await tp_service.create(
                 name=data.name,
-                type=ThirdPartyType.PARTNER,
                 phone=data.phone,
                 email=data.email,
                 is_active=data.is_active,

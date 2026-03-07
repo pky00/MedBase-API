@@ -24,8 +24,8 @@ from app.model.user import User
 async def dashboard_data(db_session: AsyncSession, admin_user: User):
     """Create sample data for dashboard tests."""
     # Create patients
-    tp1 = ThirdParty(name="Patient One", type="patient", is_active=True)
-    tp2 = ThirdParty(name="Patient Two", type="patient", is_active=True)
+    tp1 = ThirdParty(name="Patient One", is_active=True)
+    tp2 = ThirdParty(name="Patient Two", is_active=True)
     db_session.add_all([tp1, tp2])
     await db_session.flush()
 
@@ -43,7 +43,7 @@ async def dashboard_data(db_session: AsyncSession, admin_user: User):
     await db_session.flush()
 
     # Create a doctor
-    tp_doc = ThirdParty(name="Dr. Stats", type="doctor", is_active=True)
+    tp_doc = ThirdParty(name="Dr. Stats", is_active=True)
     db_session.add(tp_doc)
     await db_session.flush()
     doctor = Doctor(
@@ -55,7 +55,7 @@ async def dashboard_data(db_session: AsyncSession, admin_user: User):
     await db_session.flush()
 
     # Create a partner
-    tp_partner = ThirdParty(name="Stats Hospital", type="partner", is_active=True)
+    tp_partner = ThirdParty(name="Stats Hospital", is_active=True)
     db_session.add(tp_partner)
     await db_session.flush()
     partner = Partner(

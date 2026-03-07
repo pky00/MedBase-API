@@ -17,7 +17,7 @@ from app.model.user import User
 @pytest.fixture
 async def patient(db_session: AsyncSession, admin_user: User) -> Patient:
     """Create a patient for testing."""
-    tp = ThirdParty(name="Test Patient", type="patient", is_active=True)
+    tp = ThirdParty(name="Test Patient", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)
@@ -43,7 +43,7 @@ async def patient(db_session: AsyncSession, admin_user: User) -> Patient:
 @pytest.fixture
 async def doctor(db_session: AsyncSession, admin_user: User) -> Doctor:
     """Create a doctor for testing."""
-    tp = ThirdParty(name="Dr. Test", type="doctor", is_active=True)
+    tp = ThirdParty(name="Dr. Test", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)
@@ -66,7 +66,7 @@ async def doctor(db_session: AsyncSession, admin_user: User) -> Doctor:
 @pytest.fixture
 async def partner(db_session: AsyncSession, admin_user: User) -> Partner:
     """Create a referral partner for testing."""
-    tp = ThirdParty(name="Test Partner", type="partner", is_active=True)
+    tp = ThirdParty(name="Test Partner", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)

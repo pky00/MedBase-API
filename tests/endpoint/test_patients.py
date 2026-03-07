@@ -14,7 +14,7 @@ from app.model.user import User
 @pytest.fixture
 async def patient(db_session: AsyncSession, admin_user: User) -> Patient:
     """Create a patient for testing."""
-    tp = ThirdParty(name="John Doe", type="patient", is_active=True)
+    tp = ThirdParty(name="John Doe", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)
@@ -43,7 +43,7 @@ async def patient(db_session: AsyncSession, admin_user: User) -> Patient:
 @pytest.fixture
 async def second_patient(db_session: AsyncSession, admin_user: User) -> Patient:
     """Create a second patient for testing."""
-    tp = ThirdParty(name="Jane Smith", type="patient", is_active=True)
+    tp = ThirdParty(name="Jane Smith", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)
@@ -211,7 +211,6 @@ class TestCreatePatient:
         )
         tp = result.scalar_one_or_none()
         assert tp is not None
-        assert tp.type == "patient"
         assert tp.name == "New Patient"
 
     @pytest.mark.asyncio
@@ -277,7 +276,7 @@ class TestCreatePatient:
         self, client: AsyncClient, admin_headers: dict, db_session: AsyncSession,
     ):
         """Test creating patient with name that already exists in third_parties fails."""
-        tp = ThirdParty(name="Existing TP Patient", type="doctor", is_active=True)
+        tp = ThirdParty(name="Existing TP Patient", is_active=True)
         db_session.add(tp)
         await db_session.commit()
 
@@ -318,7 +317,7 @@ class TestCreatePatient:
         self, client: AsyncClient, admin_headers: dict, db_session: AsyncSession,
     ):
         """Test creating a patient with an existing third_party_id."""
-        tp = ThirdParty(name="Pre-existing TP", type="patient", is_active=True)
+        tp = ThirdParty(name="Pre-existing TP", is_active=True)
         db_session.add(tp)
         await db_session.commit()
         await db_session.refresh(tp)

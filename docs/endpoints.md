@@ -28,9 +28,9 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 | GET | `/third-parties/{id}` | Get third party by ID |
 
 **Notes:**
-- Filters: `type`, `is_active`
-- `type` values: `user`, `doctor`, `patient`, `partner`
+- Filters: `is_active`
 - Third party records are created automatically when creating users, doctors, patients, or partners
+- A third party can be linked to multiple entities simultaneously (user, doctor, patient, partner)
 - Read-only — no direct create/update/delete (managed through linked entities)
 
 ---
@@ -48,7 +48,7 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 **Notes:**
 - Filters: `role`, `is_active`
 - Admin cannot delete themselves
-- Creating a user automatically creates a third_party record (type: `user`)
+- Creating a user automatically creates a third_party record
 
 ---
 
@@ -217,7 +217,7 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 - Filters: `partner_type`, `organization_type`, `is_active`
 - `partner_type` values: `donor`, `referral`, `both`
 - `organization_type` values: `NGO`, `organization`, `individual`, `hospital`, `medical_center`
-- If no `third_party_id` is provided, automatically creates a third_party record (type: `partner`); if provided, links to the existing one
+- If no `third_party_id` is provided, automatically creates a third_party record; if provided, links to the existing one
 - GET by ID returns donation transactions (if donor) and treatments (if referral)
 
 ---
@@ -236,7 +236,7 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 - Filters: `type`, `is_active`, `partner_id`
 - `type` values: `internal`, `external`, `partner_provided`
 - If `partner_provided`, must include `partner_id`
-- If no `third_party_id` is provided, automatically creates a third_party record (type: `doctor`); if provided, links to the existing one
+- If no `third_party_id` is provided, automatically creates a third_party record; if provided, links to the existing one
 
 ---
 
@@ -253,7 +253,7 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 **Notes:**
 - Filters: `is_active`, `gender`
 - Search searches: `first_name`, `last_name`, `phone`, `email`
-- If no `third_party_id` is provided, automatically creates a third_party record (type: `patient`); if provided, links to the existing one
+- If no `third_party_id` is provided, automatically creates a third_party record; if provided, links to the existing one
 
 ---
 

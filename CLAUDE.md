@@ -181,9 +181,11 @@ class Appointment(Base):
 ### Database Migrations
 - **Always create a new migration** when database changes are needed — never modify existing migrations
 - **Autogenerate first, then manually edit** — use `make migrate-create` to autogenerate as much as possible, then manually adjust the migration if custom logic is needed
+- If no `DATABASE_URL` is provided in `.env`, start a local PostgreSQL server (e.g. Docker container), apply all existing migrations, then run autogenerate against it
 
 ### Testing
-- Separate test database on Amazon RDS (`TEST_DATABASE_URL` from `.env`)
+- Use `TEST_DATABASE_URL` from `.env` if provided
+- If no `TEST_DATABASE_URL` is provided, start a local PostgreSQL server (e.g. Docker container), apply all migrations, then run tests against it
 - Clean/empty before each test run
 - Endpoint tests: validate API responses AND query the database directly to verify data
 

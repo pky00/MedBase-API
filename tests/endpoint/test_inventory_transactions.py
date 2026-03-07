@@ -107,7 +107,7 @@ async def equipment_with_inventory(
 @pytest.fixture
 async def donor_partner(db_session: AsyncSession, admin_user: User) -> Partner:
     """Create a donor partner for testing."""
-    tp = ThirdParty(name="Donor Org", type="partner", is_active=True)
+    tp = ThirdParty(name="Donor Org", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)
@@ -130,7 +130,7 @@ async def donor_partner(db_session: AsyncSession, admin_user: User) -> Partner:
 @pytest.fixture
 async def referral_partner(db_session: AsyncSession, admin_user: User) -> Partner:
     """Create a referral-only partner for testing."""
-    tp = ThirdParty(name="Referral Only", type="partner", is_active=True)
+    tp = ThirdParty(name="Referral Only", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)
@@ -153,7 +153,7 @@ async def referral_partner(db_session: AsyncSession, admin_user: User) -> Partne
 @pytest.fixture
 async def doctor(db_session: AsyncSession, admin_user: User) -> Doctor:
     """Create a doctor for testing."""
-    tp = ThirdParty(name="Dr. Test", type="doctor", is_active=True)
+    tp = ThirdParty(name="Dr. Test", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)

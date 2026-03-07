@@ -51,7 +51,6 @@ class TestAuthLogin:
 
         tp = ThirdParty(
             name="inactiveuser",
-            type="user",
             email="inactive@test.com",
             is_active=False,
         )

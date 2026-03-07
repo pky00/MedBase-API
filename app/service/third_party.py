@@ -43,7 +43,6 @@ class ThirdPartyService:
         self,
         page: int = 1,
         size: int = 10,
-        type: Optional[str] = None,
         is_active: Optional[bool] = None,
         search: Optional[str] = None,
         sort: str = "id",
@@ -52,8 +51,6 @@ class ThirdPartyService:
         """Get all third parties with pagination and filtering."""
         query = select(ThirdParty).where(ThirdParty.is_deleted == False)
 
-        if type is not None:
-            query = query.where(ThirdParty.type == type)
         if is_active is not None:
             query = query.where(ThirdParty.is_active == is_active)
         if search:
@@ -89,7 +86,6 @@ class ThirdPartyService:
     async def create(
         self,
         name: str,
-        type: str,
         phone: Optional[str] = None,
         email: Optional[str] = None,
         is_active: bool = True,
@@ -98,7 +94,6 @@ class ThirdPartyService:
         """Create a third party record. Used internally by other services."""
         tp = ThirdParty(
             name=name,
-            type=type,
             phone=phone,
             email=email,
             is_active=is_active,
@@ -108,7 +103,7 @@ class ThirdPartyService:
         self.db.add(tp)
         await self.db.flush()
         await self.db.refresh(tp)
-        logger.info("Created third party id=%d type='%s' name='%s'", tp.id, type, name)
+        logger.info("Created third party id=%d name='%s'", tp.id, name)
         return tp
 
     async def update(
