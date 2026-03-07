@@ -14,7 +14,7 @@ from app.model.user import User
 @pytest.fixture
 async def patient(db_session: AsyncSession, admin_user: User) -> Patient:
     """Create a patient for testing."""
-    tp = ThirdParty(name="John Doe", is_active=True)
+    tp = ThirdParty(name="John Doe", phone="1234567890", email="john.doe@test.com", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)
@@ -25,8 +25,6 @@ async def patient(db_session: AsyncSession, admin_user: User) -> Patient:
         last_name="Doe",
         date_of_birth=date(1990, 5, 15),
         gender="male",
-        phone="1234567890",
-        email="john.doe@test.com",
         address="123 Main St",
         emergency_contact="Jane Doe",
         emergency_phone="0987654321",
@@ -37,13 +35,14 @@ async def patient(db_session: AsyncSession, admin_user: User) -> Patient:
     db_session.add(patient)
     await db_session.commit()
     await db_session.refresh(patient)
+    patient.third_party = tp
     return patient
 
 
 @pytest.fixture
 async def second_patient(db_session: AsyncSession, admin_user: User) -> Patient:
     """Create a second patient for testing."""
-    tp = ThirdParty(name="Jane Smith", is_active=True)
+    tp = ThirdParty(name="Jane Smith", phone="5555555555", email="jane.smith@test.com", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)
@@ -54,8 +53,6 @@ async def second_patient(db_session: AsyncSession, admin_user: User) -> Patient:
         last_name="Smith",
         date_of_birth=date(1985, 3, 20),
         gender="female",
-        phone="5555555555",
-        email="jane.smith@test.com",
         is_active=True,
         created_by=admin_user.username,
         updated_by=admin_user.username,
@@ -63,6 +60,7 @@ async def second_patient(db_session: AsyncSession, admin_user: User) -> Patient:
     db_session.add(patient)
     await db_session.commit()
     await db_session.refresh(patient)
+    patient.third_party = tp
     return patient
 
 
@@ -170,6 +168,7 @@ class TestGetPatient:
         assert data["last_name"] == "Doe"
         assert data["gender"] == "male"
         assert "third_party_id" in data
+        assert data["third_party"]["phone"] == "1234567890"
 
     @pytest.mark.asyncio
     async def test_get_patient_not_found(self, client: AsyncClient, admin_headers: dict):
@@ -204,6 +203,7 @@ class TestCreatePatient:
         assert data["last_name"] == "Patient"
         assert data["gender"] == "female"
         assert "third_party_id" in data
+        assert data["third_party"]["phone"] == "111222333"
 
         # Verify third_party was created
         result = await db_session.execute(
@@ -256,7 +256,6 @@ class TestCreatePatient:
         assert data["first_name"] == "Minimal"
         assert data["last_name"] == "Patient"
         assert data["gender"] is None
-        assert data["phone"] is None
 
     @pytest.mark.asyncio
     async def test_create_patient_duplicate_name(
@@ -386,7 +385,7 @@ class TestUpdatePatient:
         assert response.status_code == 200
         data = response.json()
         assert data["first_name"] == "Johnny"
-        assert data["phone"] == "9999999999"
+        assert data["third_party"]["phone"] == "9999999999"
         # last_name should be unchanged
         assert data["last_name"] == "Doe"
 

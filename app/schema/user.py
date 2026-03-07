@@ -13,41 +13,38 @@ class UserRole(str, Enum):
     USER = "user"
 
 
-class UserBase(BaseModel):
-    """Base schema for user data."""
-    
-    username: str = Field(..., min_length=3, max_length=50)
-    email: EmailStr
-
-
-class UserCreate(UserBase):
+class UserCreate(BaseModel):
     """Schema for creating a new user."""
 
-    name: str = Field(..., min_length=1, max_length=255, description="Full name for third party record")
+    third_party_id: Optional[int] = Field(None, description="Link to existing third party record")
+    username: str = Field(..., min_length=3, max_length=50)
+    name: Optional[str] = Field(None, min_length=1, max_length=255, description="Full name for third party record")
+    email: Optional[EmailStr] = Field(None, description="Email for third party record")
     password: str = Field(..., min_length=6, max_length=100)
     role: UserRole = UserRole.USER
     is_active: bool = True
-    third_party_id: Optional[int] = Field(None, description="Link to existing third party record")
 
 
 class UserUpdate(BaseModel):
     """Schema for updating a user."""
-    
+
     username: Optional[str] = Field(None, min_length=3, max_length=50)
+    name: Optional[str] = Field(None, min_length=1, max_length=255)
     email: Optional[EmailStr] = None
     password: Optional[str] = Field(None, min_length=6, max_length=100)
     role: Optional[UserRole] = None
     is_active: Optional[bool] = None
 
 
-class UserResponse(UserBase):
+class UserResponse(BaseModel):
     """Schema for user response (without password)."""
-    
+
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: int
     third_party_id: int
     third_party: Optional[ThirdPartyResponse] = None
+    username: str
     role: str
     is_active: bool
     is_deleted: bool
@@ -59,5 +56,5 @@ class UserResponse(UserBase):
 
 class UserInDB(UserResponse):
     """Schema for user stored in database."""
-    
+
     password_hash: str

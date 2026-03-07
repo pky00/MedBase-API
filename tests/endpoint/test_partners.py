@@ -12,19 +12,16 @@ from app.model.user import User
 @pytest.fixture
 async def donor_partner(db_session: AsyncSession, admin_user: User) -> Partner:
     """Create a donor partner for testing."""
-    tp = ThirdParty(name="Test Donor NGO", is_active=True)
+    tp = ThirdParty(name="Test Donor NGO", phone="1234567890", email="donor@test.com", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)
 
     partner = Partner(
         third_party_id=tp.id,
-        name="Test Donor NGO",
         partner_type="donor",
         organization_type="NGO",
         contact_person="John Doe",
-        phone="1234567890",
-        email="donor@test.com",
         address="123 Donor St",
         is_active=True,
         created_by=admin_user.username,
@@ -33,25 +30,23 @@ async def donor_partner(db_session: AsyncSession, admin_user: User) -> Partner:
     db_session.add(partner)
     await db_session.commit()
     await db_session.refresh(partner)
+    partner.third_party = tp
     return partner
 
 
 @pytest.fixture
 async def referral_partner(db_session: AsyncSession, admin_user: User) -> Partner:
     """Create a referral partner for testing."""
-    tp = ThirdParty(name="Test Referral Hospital", is_active=True)
+    tp = ThirdParty(name="Test Referral Hospital", phone="9876543210", email="referral@test.com", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)
 
     partner = Partner(
         third_party_id=tp.id,
-        name="Test Referral Hospital",
         partner_type="referral",
         organization_type="hospital",
         contact_person="Jane Smith",
-        phone="9876543210",
-        email="referral@test.com",
         address="456 Hospital Ave",
         is_active=True,
         created_by=admin_user.username,
@@ -60,6 +55,7 @@ async def referral_partner(db_session: AsyncSession, admin_user: User) -> Partne
     db_session.add(partner)
     await db_session.commit()
     await db_session.refresh(partner)
+    partner.third_party = tp
     return partner
 
 
@@ -136,7 +132,7 @@ class TestGetPartners:
             db_session.add(tp)
             await db_session.flush()
             p = Partner(
-                third_party_id=tp.id, name=f"Partner {i}", partner_type="donor",
+                third_party_id=tp.id, partner_type="donor",
                 created_by=admin_user.username, updated_by=admin_user.username,
             )
             db_session.add(p)
@@ -164,7 +160,7 @@ class TestGetPartner:
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["name"] == "Test Donor NGO"
+        assert data["third_party"]["name"] == "Test Donor NGO"
         assert data["partner_type"] == "donor"
         assert "third_party_id" in data
 
@@ -197,7 +193,7 @@ class TestCreatePartner:
         )
         assert response.status_code == 201
         data = response.json()
-        assert data["name"] == "New Auto TP Partner"
+        assert data["third_party"]["name"] == "New Auto TP Partner"
         assert "third_party_id" in data
 
         # Verify third_party was created
@@ -222,7 +218,6 @@ class TestCreatePartner:
         response = await client.post(
             "/api/v1/partners",
             json={
-                "name": "Linked Partner",
                 "partner_type": "referral",
                 "third_party_id": tp.id,
             },
@@ -256,7 +251,7 @@ class TestCreatePartner:
         """Test creating partner with duplicate name fails."""
         response = await client.post(
             "/api/v1/partners",
-            json={"name": donor_partner.name, "partner_type": "donor"},
+            json={"name": donor_partner.third_party.name, "partner_type": "donor"},
             headers=admin_headers,
         )
         assert response.status_code == 400
@@ -299,7 +294,7 @@ class TestUpdatePartner:
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["name"] == "Updated Donor Name"
+        assert data["third_party"]["name"] == "Updated Donor Name"
         assert data["contact_person"] == "New Contact"
 
     @pytest.mark.asyncio
@@ -318,7 +313,7 @@ class TestUpdatePartner:
         """Test updating partner with duplicate name fails."""
         response = await client.put(
             f"/api/v1/partners/{donor_partner.id}",
-            json={"name": referral_partner.name},
+            json={"name": referral_partner.third_party.name},
             headers=admin_headers,
         )
         assert response.status_code == 400

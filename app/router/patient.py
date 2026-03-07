@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.utility.database import get_db
 from app.utility.auth import get_current_user
 from app.service.patient import PatientService
+from app.service.third_party import ThirdPartyService
 from app.schema.patient import (
     PatientCreate,
     PatientUpdate,
@@ -100,7 +101,6 @@ async def create_patient(
         )
 
     # Check for duplicate name in third_parties table (skip if linking to existing third party)
-    from app.service.third_party import ThirdPartyService
     tp_service = ThirdPartyService(db)
     if not data.third_party_id:
         existing_tp = await tp_service.get_by_name(full_name)
@@ -110,9 +110,8 @@ async def create_patient(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Name already exists in third parties",
             )
-
-    # Validate third_party_id if provided
-    if data.third_party_id:
+    else:
+        # Validate third_party_id if provided
         tp = await tp_service.get_by_id(data.third_party_id)
         if not tp:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Third party not found")

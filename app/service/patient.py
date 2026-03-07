@@ -2,15 +2,19 @@ import logging
 from typing import Optional, List, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, or_
+from sqlalchemy.orm import contains_eager
 
 from app.model.patient import Patient
 from app.model.patient_document import PatientDocument
+from app.model.third_party import ThirdParty
 from app.schema.patient import PatientCreate, PatientUpdate
 from app.schema.patient_document import PatientDocumentResponse
 from app.service.third_party import ThirdPartyService
 from app.utility import storage
 
 logger = logging.getLogger("medbase.service.patient")
+
+TP_FIELDS = {"phone", "email"}
 
 
 class PatientService:
@@ -22,23 +26,29 @@ class PatientService:
     async def get_by_name(self, first_name: str, last_name: str) -> Optional[Patient]:
         """Get patient by first_name and last_name."""
         result = await self.db.execute(
-            select(Patient).where(
+            select(Patient)
+            .outerjoin(ThirdParty, Patient.third_party_id == ThirdParty.id)
+            .options(contains_eager(Patient.third_party))
+            .where(
                 Patient.first_name == first_name,
                 Patient.last_name == last_name,
                 Patient.is_deleted == False,
             )
         )
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()
 
     async def get_by_id(self, patient_id: int) -> Optional[Patient]:
         """Get patient by ID."""
         result = await self.db.execute(
-            select(Patient).where(
+            select(Patient)
+            .outerjoin(ThirdParty, Patient.third_party_id == ThirdParty.id)
+            .options(contains_eager(Patient.third_party))
+            .where(
                 Patient.id == patient_id,
                 Patient.is_deleted == False,
             )
         )
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()
 
     async def get_by_id_with_documents(self, patient_id: int) -> Optional[Tuple[Patient, List[PatientDocumentResponse]]]:
         """Get patient by ID with documents.
@@ -72,7 +82,12 @@ class PatientService:
         order: str = "asc",
     ) -> Tuple[List[Patient], int]:
         """Get all patients with pagination, filtering, and sorting."""
-        query = select(Patient).where(Patient.is_deleted == False)
+        query = (
+            select(Patient)
+            .outerjoin(ThirdParty, Patient.third_party_id == ThirdParty.id)
+            .options(contains_eager(Patient.third_party))
+            .where(Patient.is_deleted == False)
+        )
 
         if is_active is not None:
             query = query.where(Patient.is_active == is_active)
@@ -84,8 +99,8 @@ class PatientService:
                 or_(
                     Patient.first_name.ilike(search_term),
                     Patient.last_name.ilike(search_term),
-                    Patient.phone.ilike(search_term),
-                    Patient.email.ilike(search_term),
+                    ThirdParty.phone.ilike(search_term),
+                    ThirdParty.email.ilike(search_term),
                 )
             )
 
@@ -93,7 +108,8 @@ class PatientService:
         total_result = await self.db.execute(count_query)
         total = total_result.scalar()
 
-        sort_column = getattr(Patient, sort, Patient.id)
+        tp_sort_map = {"phone": ThirdParty.phone, "email": ThirdParty.email}
+        sort_column = tp_sort_map.get(sort, getattr(Patient, sort, Patient.id))
         if order.lower() == "desc":
             query = query.order_by(sort_column.desc())
         else:
@@ -103,7 +119,7 @@ class PatientService:
         query = query.offset(offset).limit(size)
 
         result = await self.db.execute(query)
-        patients = list(result.scalars().all())
+        patients = list(result.unique().scalars().all())
 
         logger.debug("Queried patients: total=%d returned=%d", total, len(patients))
         return patients, total
@@ -134,8 +150,6 @@ class PatientService:
             last_name=data.last_name,
             date_of_birth=data.date_of_birth,
             gender=data.gender,
-            phone=data.phone,
-            email=data.email,
             address=data.address,
             emergency_contact=data.emergency_contact,
             emergency_phone=data.emergency_phone,
@@ -146,6 +160,7 @@ class PatientService:
         self.db.add(patient)
         await self.db.flush()
         await self.db.refresh(patient)
+        patient.third_party = tp
 
         logger.info("Created patient id=%d name='%s' third_party_id=%d", patient.id, full_name, third_party_id)
         return patient
@@ -157,30 +172,27 @@ class PatientService:
             return None
 
         update_data = data.model_dump(exclude_unset=True)
+
+        # Separate third_party fields
+        tp_fields = {k: update_data.pop(k) for k in list(update_data) if k in TP_FIELDS}
+
+        # Update entity fields
         for field, value in update_data.items():
             setattr(patient, field, value)
-
         patient.updated_by = updated_by
-        await self.db.flush()
-        await self.db.refresh(patient)
 
-        # Sync third_party record
-        tp_service = ThirdPartyService(self.db)
-        tp_name = None
+        # Build third_party name if first/last name changed
         if "first_name" in update_data or "last_name" in update_data:
-            tp_name = f"{patient.first_name} {patient.last_name}"
+            tp_fields["name"] = f"{patient.first_name} {patient.last_name}"
 
-        await tp_service.update(
-            patient.third_party_id,
-            name=tp_name,
-            phone=update_data.get("phone"),
-            email=update_data.get("email"),
-            is_active=update_data.get("is_active"),
-            updated_by=updated_by,
-        )
+        # Update third_party fields
+        if tp_fields:
+            tp_service = ThirdPartyService(self.db)
+            await tp_service.update(patient.third_party_id, **tp_fields, updated_by=updated_by)
 
-        logger.info("Updated patient id=%d fields=%s", patient_id, list(update_data.keys()))
-        return patient
+        await self.db.flush()
+        logger.info("Updated patient id=%d fields=%s", patient_id, list(data.model_dump(exclude_unset=True).keys()))
+        return await self.get_by_id(patient_id)
 
     async def delete(self, patient_id: int, deleted_by: Optional[str] = None) -> bool:
         """Soft delete a patient."""
