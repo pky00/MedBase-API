@@ -332,35 +332,21 @@ class TestUpdateDoctor:
         """Test updating a doctor."""
         response = await client.put(
             f"/api/v1/doctors/{internal_doctor.id}",
-            json={"name": "Dr. Updated", "specialization": "Cardiology"},
+            json={"specialization": "Cardiology"},
             headers=admin_headers,
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["third_party"]["name"] == "Dr. Updated"
         assert data["specialization"] == "Cardiology"
+        assert data["third_party"]["name"] == "Dr. Internal"
 
     @pytest.mark.asyncio
     async def test_update_doctor_not_found(self, client: AsyncClient, admin_headers: dict):
         """Test updating non-existent doctor."""
         response = await client.put(
-            "/api/v1/doctors/99999", json={"name": "Test"}, headers=admin_headers,
+            "/api/v1/doctors/99999", json={"specialization": "Test"}, headers=admin_headers,
         )
         assert response.status_code == 404
-
-    @pytest.mark.asyncio
-    async def test_update_doctor_duplicate_name(
-        self, client: AsyncClient, admin_headers: dict,
-        internal_doctor: Doctor, partner_doctor: Doctor,
-    ):
-        """Test updating doctor with duplicate name fails."""
-        response = await client.put(
-            f"/api/v1/doctors/{internal_doctor.id}",
-            json={"name": partner_doctor.third_party.name},
-            headers=admin_headers,
-        )
-        assert response.status_code == 400
-        assert "already exists" in response.json()["detail"]
 
 
 class TestDeleteDoctor:

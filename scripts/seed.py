@@ -38,7 +38,7 @@ async def seed_admin():
         
         print(f"Admin user created successfully!")
         print(f"  Username: {admin.username}")
-        print(f"  Email: {admin.email}")
+        print(f"  Email: {admin.third_party.email if admin.third_party else 'N/A'}")
         print(f"  Role: {admin.role}")
         print("\nIMPORTANT: Change the default password in production!")
 

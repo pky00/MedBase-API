@@ -37,9 +37,6 @@ class PartnerCreate(BaseModel):
 class PartnerUpdate(BaseModel):
     """Schema for updating a partner."""
 
-    name: Optional[str] = Field(None, min_length=1, max_length=255)
-    phone: Optional[str] = Field(None, max_length=50)
-    email: Optional[str] = Field(None, max_length=255)
     partner_type: Optional[PartnerType] = None
     organization_type: Optional[OrganizationType] = None
     contact_person: Optional[str] = Field(None, max_length=255)

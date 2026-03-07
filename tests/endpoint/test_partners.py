@@ -289,35 +289,21 @@ class TestUpdatePartner:
         """Test updating a partner."""
         response = await client.put(
             f"/api/v1/partners/{donor_partner.id}",
-            json={"name": "Updated Donor Name", "contact_person": "New Contact"},
+            json={"contact_person": "New Contact"},
             headers=admin_headers,
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["third_party"]["name"] == "Updated Donor Name"
         assert data["contact_person"] == "New Contact"
+        assert data["third_party"]["name"] == "Test Donor NGO"
 
     @pytest.mark.asyncio
     async def test_update_partner_not_found(self, client: AsyncClient, admin_headers: dict):
         """Test updating non-existent partner."""
         response = await client.put(
-            "/api/v1/partners/99999", json={"name": "Test"}, headers=admin_headers,
+            "/api/v1/partners/99999", json={"contact_person": "Test"}, headers=admin_headers,
         )
         assert response.status_code == 404
-
-    @pytest.mark.asyncio
-    async def test_update_partner_duplicate_name(
-        self, client: AsyncClient, admin_headers: dict,
-        donor_partner: Partner, referral_partner: Partner,
-    ):
-        """Test updating partner with duplicate name fails."""
-        response = await client.put(
-            f"/api/v1/partners/{donor_partner.id}",
-            json={"name": referral_partner.third_party.name},
-            headers=admin_headers,
-        )
-        assert response.status_code == 400
-        assert "already exists" in response.json()["detail"]
 
 
 class TestDeletePartner:

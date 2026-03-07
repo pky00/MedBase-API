@@ -379,14 +379,12 @@ class TestUpdatePatient:
         """Test updating a patient."""
         response = await client.put(
             f"/api/v1/patients/{patient.id}",
-            json={"first_name": "Johnny", "phone": "9999999999"},
+            json={"first_name": "Johnny"},
             headers=admin_headers,
         )
         assert response.status_code == 200
         data = response.json()
         assert data["first_name"] == "Johnny"
-        assert data["third_party"]["phone"] == "9999999999"
-        # last_name should be unchanged
         assert data["last_name"] == "Doe"
 
     @pytest.mark.asyncio

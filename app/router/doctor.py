@@ -94,22 +94,27 @@ async def create_doctor(
 
     service = DoctorService(db)
 
-    # Check for duplicate name in doctors (via third_party)
-    if data.name:
+    # Validate third_party_id if provided, otherwise check name uniqueness
+    if data.third_party_id:
+        tp_service = ThirdPartyService(db)
+        tp = await tp_service.get_by_id(data.third_party_id)
+        if not tp:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Third party not found",
+            )
+    else:
+        if not data.name:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Name is required when not providing a third_party_id",
+            )
         existing = await service.get_by_name(data.name)
         if existing:
             logger.warning("Doctor name already exists name='%s'", data.name)
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Doctor name already exists",
-            )
-
-    # Check for duplicate name in third_parties table (skip if linking to existing third party)
-    if not data.third_party_id:
-        if not data.name:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Name is required when not providing a third_party_id",
             )
         tp_service = ThirdPartyService(db)
         existing_tp = await tp_service.get_by_name(data.name)
@@ -164,16 +169,6 @@ async def update_doctor(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Doctor not found",
         )
-
-    # Check for duplicate name if being updated
-    if data.name and data.name != doctor.third_party.name:
-        existing = await service.get_by_name(data.name)
-        if existing:
-            logger.warning("Doctor name already exists name='%s'", data.name)
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Doctor name already exists",
-            )
 
     # Determine effective type after update
     effective_type = data.type if data.type is not None else doctor.type

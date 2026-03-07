@@ -28,9 +28,6 @@ class DoctorCreate(BaseModel):
 class DoctorUpdate(BaseModel):
     """Schema for updating a doctor."""
 
-    name: Optional[str] = Field(None, min_length=1, max_length=255)
-    phone: Optional[str] = Field(None, max_length=50)
-    email: Optional[str] = Field(None, max_length=255)
     specialization: Optional[str] = Field(None, max_length=255)
     type: Optional[DoctorType] = None
     partner_id: Optional[int] = None

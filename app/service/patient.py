@@ -14,9 +14,6 @@ from app.utility import storage
 
 logger = logging.getLogger("medbase.service.patient")
 
-TP_FIELDS = {"phone", "email"}
-
-
 class PatientService:
     """Service layer for patient operations."""
 
@@ -173,25 +170,21 @@ class PatientService:
 
         update_data = data.model_dump(exclude_unset=True)
 
-        # Separate third_party fields
-        tp_fields = {k: update_data.pop(k) for k in list(update_data) if k in TP_FIELDS}
-
-        # Update entity fields
         for field, value in update_data.items():
             setattr(patient, field, value)
         patient.updated_by = updated_by
 
-        # Build third_party name if first/last name changed
+        # Sync third_party name if first/last name changed
         if "first_name" in update_data or "last_name" in update_data:
-            tp_fields["name"] = f"{patient.first_name} {patient.last_name}"
-
-        # Update third_party fields
-        if tp_fields:
             tp_service = ThirdPartyService(self.db)
-            await tp_service.update(patient.third_party_id, **tp_fields, updated_by=updated_by)
+            await tp_service.update(
+                patient.third_party_id,
+                name=f"{patient.first_name} {patient.last_name}",
+                updated_by=updated_by,
+            )
 
         await self.db.flush()
-        logger.info("Updated patient id=%d fields=%s", patient_id, list(data.model_dump(exclude_unset=True).keys()))
+        logger.info("Updated patient id=%d fields=%s", patient_id, list(update_data.keys()))
         return await self.get_by_id(patient_id)
 
     async def delete(self, patient_id: int, deleted_by: Optional[str] = None) -> bool:

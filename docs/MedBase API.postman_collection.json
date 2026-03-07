@@ -262,7 +262,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"updateduser\",\n    \"email\": \"updated@example.com\",\n    \"is_active\": true\n}"
+							"raw": "{\n    \"username\": \"updateduser\",\n    \"password\": \"newpassword123\",\n    \"role\": \"user\",\n    \"is_active\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/users/2",
@@ -1582,7 +1582,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Updated Partner Name\",\n    \"contact_person\": \"Jane Smith\",\n    \"phone\": \"+9876543210\",\n    \"is_active\": true\n}"
+							"raw": "{\n    \"partner_type\": \"donor\",\n    \"organization_type\": \"NGO\",\n    \"contact_person\": \"Jane Smith\",\n    \"address\": \"456 Updated Ave\",\n    \"is_active\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/partners/1",
@@ -1855,7 +1855,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"specialization\": \"Cardiology\",\n    \"is_active\": true\n}"
+							"raw": "{\n    \"specialization\": \"Cardiology\",\n    \"type\": \"internal\",\n    \"partner_id\": null,\n    \"is_active\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/doctors/1",
@@ -2088,7 +2088,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"first_name\": \"Ahmad\",\n    \"last_name\": \"Hassan Updated\",\n    \"phone\": \"+9876543210\",\n    \"emergency_contact\": \"Ali Hassan\",\n    \"is_active\": true\n}"
+							"raw": "{\n    \"first_name\": \"Ahmad\",\n    \"last_name\": \"Hassan Updated\",\n    \"emergency_contact\": \"Ali Hassan\",\n    \"is_active\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/patients/1",

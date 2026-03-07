@@ -33,8 +33,6 @@ class PatientUpdate(BaseModel):
 
     first_name: Optional[str] = Field(None, min_length=1, max_length=255)
     last_name: Optional[str] = Field(None, min_length=1, max_length=255)
-    phone: Optional[str] = Field(None, max_length=50)
-    email: Optional[str] = Field(None, max_length=255)
     date_of_birth: Optional[date] = None
     gender: Optional[Gender] = None
     address: Optional[str] = None

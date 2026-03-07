@@ -149,28 +149,15 @@ class UserService:
 
         update_data = user_data.model_dump(exclude_unset=True)
 
-        # Separate third_party fields
-        tp_fields = {}
-        for field in ("name", "email"):
-            if field in update_data:
-                tp_fields[field] = update_data.pop(field)
-
-        # Hash password if provided
         if "password" in update_data:
             update_data["password_hash"] = get_password_hash(update_data.pop("password"))
 
-        # Update user fields
         for field, value in update_data.items():
             setattr(user, field, value)
         user.updated_by = updated_by
 
-        # Update third_party if needed
-        if tp_fields:
-            tp_service = ThirdPartyService(self.db)
-            await tp_service.update(user.third_party_id, **tp_fields, updated_by=updated_by)
-
         await self.db.flush()
-        logger.info("Updated user id=%d fields=%s", user_id, list(user_data.model_dump(exclude_unset=True).keys()))
+        logger.info("Updated user id=%d fields=%s", user_id, list(update_data.keys()))
         return await self.get_by_id(user_id)
 
     async def delete(self, user_id: int, deleted_by: Optional[str] = None) -> bool:

@@ -304,8 +304,7 @@ class TestUpdateUser:
         user_id = user.id
 
         update_data = {
-            "username": "updated",
-            "email": "updated@test.com"
+            "username": "updated"
         }
 
         response = await client.put(
@@ -318,7 +317,6 @@ class TestUpdateUser:
         assert response.status_code == 200
         data = response.json()
         assert data["username"] == "updated"
-        assert data["third_party"]["email"] == "updated@test.com"
 
         # Verify database state
         db_session.expire_all()
@@ -330,13 +328,6 @@ class TestUpdateUser:
         assert db_user is not None
         assert db_user.username == "updated"
         assert db_user.updated_by == admin_username
-
-        # Verify third_party email updated
-        tp_result = await db_session.execute(
-            select(ThirdParty).where(ThirdParty.id == db_user.third_party_id)
-        )
-        db_tp = tp_result.scalar_one_or_none()
-        assert db_tp.email == "updated@test.com"
 
     @pytest.mark.asyncio
     async def test_update_user_password(

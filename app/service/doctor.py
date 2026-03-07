@@ -12,9 +12,6 @@ from app.service.third_party import ThirdPartyService
 
 logger = logging.getLogger("medbase.service.doctor")
 
-TP_FIELDS = {"name", "phone", "email"}
-
-
 class DoctorService:
     """Service layer for doctor operations."""
 
@@ -157,21 +154,12 @@ class DoctorService:
 
         update_data = data.model_dump(exclude_unset=True)
 
-        # Separate third_party fields
-        tp_fields = {k: update_data.pop(k) for k in list(update_data) if k in TP_FIELDS}
-
-        # Update entity fields
         for field, value in update_data.items():
             setattr(doctor, field, value)
         doctor.updated_by = updated_by
 
-        # Update third_party fields
-        if tp_fields:
-            tp_service = ThirdPartyService(self.db)
-            await tp_service.update(doctor.third_party_id, **tp_fields, updated_by=updated_by)
-
         await self.db.flush()
-        logger.info("Updated doctor id=%d fields=%s", doctor_id, list(data.model_dump(exclude_unset=True).keys()))
+        logger.info("Updated doctor id=%d fields=%s", doctor_id, list(update_data.keys()))
         return await self.get_by_id(doctor_id)
 
     async def delete(self, doctor_id: int, deleted_by: Optional[str] = None) -> bool:

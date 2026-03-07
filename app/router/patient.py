@@ -89,20 +89,23 @@ async def create_patient(
     )
 
     service = PatientService(db)
-
-    # Check for duplicate name in patients table
     full_name = f"{data.first_name} {data.last_name}"
-    existing = await service.get_by_name(data.first_name, data.last_name)
-    if existing:
-        logger.warning("Patient name already exists name='%s'", full_name)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Patient name already exists",
-        )
 
-    # Check for duplicate name in third_parties table (skip if linking to existing third party)
-    tp_service = ThirdPartyService(db)
-    if not data.third_party_id:
+    # Validate third_party_id if provided, otherwise check name uniqueness
+    if data.third_party_id:
+        tp_service = ThirdPartyService(db)
+        tp = await tp_service.get_by_id(data.third_party_id)
+        if not tp:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Third party not found")
+    else:
+        existing = await service.get_by_name(data.first_name, data.last_name)
+        if existing:
+            logger.warning("Patient name already exists name='%s'", full_name)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Patient name already exists",
+            )
+        tp_service = ThirdPartyService(db)
         existing_tp = await tp_service.get_by_name(full_name)
         if existing_tp:
             logger.warning("Name already exists in third parties name='%s'", full_name)
@@ -110,11 +113,6 @@ async def create_patient(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Name already exists in third parties",
             )
-    else:
-        # Validate third_party_id if provided
-        tp = await tp_service.get_by_id(data.third_party_id)
-        if not tp:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Third party not found")
 
     patient = await service.create(data, created_by=current_user.username)
     logger.info("Patient created patient_id=%d", patient.id)
