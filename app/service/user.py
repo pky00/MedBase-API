@@ -99,18 +99,27 @@ class UserService:
         return list(users), total
     
     async def create(self, user_data: UserCreate, created_by: Optional[str] = None) -> User:
-        """Create a new user. Automatically creates a third_party record."""
-        # Auto-create third_party record
+        """Create a new user. Auto-creates a third_party record if third_party_id not provided."""
         tp_service = ThirdPartyService(self.db)
-        third_party = await tp_service.create(
-            name=user_data.name,
-            email=user_data.email,
-            is_active=user_data.is_active,
-            created_by=created_by,
-        )
+
+        if user_data.third_party_id:
+            # Link to existing third_party
+            tp = await tp_service.get_by_id(user_data.third_party_id)
+            if not tp:
+                raise ValueError("Third party not found")
+            third_party_id = user_data.third_party_id
+        else:
+            # Auto-create third_party record
+            third_party = await tp_service.create(
+                name=user_data.name,
+                email=user_data.email,
+                is_active=user_data.is_active,
+                created_by=created_by,
+            )
+            third_party_id = third_party.id
 
         user = User(
-            third_party_id=third_party.id,
+            third_party_id=third_party_id,
             username=user_data.username,
             email=user_data.email,
             password_hash=get_password_hash(user_data.password),
@@ -122,7 +131,7 @@ class UserService:
         self.db.add(user)
         await self.db.flush()
         await self.db.refresh(user)
-        logger.info("Created user id=%d username='%s' third_party_id=%d", user.id, user.username, third_party.id)
+        logger.info("Created user id=%d username='%s' third_party_id=%d", user.id, user.username, third_party_id)
         return user
     
     async def update(

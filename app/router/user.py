@@ -133,15 +133,25 @@ async def create_user(
             detail="Email already registered"
         )
 
-    # Check for duplicate name in third_parties table
-    tp_service = ThirdPartyService(db)
-    existing_tp = await tp_service.get_by_name(user_data.name)
-    if existing_tp:
-        logger.warning("Name already exists in third parties name='%s'", user_data.name)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Name already exists in third parties"
-        )
+    # Check for duplicate name in third_parties table (skip if linking to existing third party)
+    if not user_data.third_party_id:
+        tp_service = ThirdPartyService(db)
+        existing_tp = await tp_service.get_by_name(user_data.name)
+        if existing_tp:
+            logger.warning("Name already exists in third parties name='%s'", user_data.name)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Name already exists in third parties"
+            )
+    else:
+        # Validate third_party_id exists
+        tp_service = ThirdPartyService(db)
+        tp = await tp_service.get_by_id(user_data.third_party_id)
+        if not tp:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Third party not found"
+            )
 
     user = await user_service.create(user_data, created_by=current_user.username)
     logger.info("User created user_id=%d username='%s'", user.id, user.username)

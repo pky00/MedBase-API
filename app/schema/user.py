@@ -27,6 +27,7 @@ class UserCreate(UserBase):
     password: str = Field(..., min_length=6, max_length=100)
     role: UserRole = UserRole.USER
     is_active: bool = True
+    third_party_id: Optional[int] = Field(None, description="Link to existing third party record")
 
 
 class UserUpdate(BaseModel):

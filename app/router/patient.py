@@ -99,16 +99,17 @@ async def create_patient(
             detail="Patient name already exists",
         )
 
-    # Check for duplicate name in third_parties table
+    # Check for duplicate name in third_parties table (skip if linking to existing third party)
     from app.service.third_party import ThirdPartyService
     tp_service = ThirdPartyService(db)
-    existing_tp = await tp_service.get_by_name(full_name)
-    if existing_tp:
-        logger.warning("Name already exists in third parties name='%s'", full_name)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Name already exists in third parties",
-        )
+    if not data.third_party_id:
+        existing_tp = await tp_service.get_by_name(full_name)
+        if existing_tp:
+            logger.warning("Name already exists in third parties name='%s'", full_name)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Name already exists in third parties",
+            )
 
     # Validate third_party_id if provided
     if data.third_party_id:
