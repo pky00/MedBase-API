@@ -31,9 +31,9 @@ async def get_users(
 ):
     """
     Get all users with pagination, filtering, and sorting.
-    
+
     **Admin only.**
-    
+
     - **page**: Page number (starts at 1)
     - **size**: Number of items per page (max 100)
     - **role**: Filter by role (admin/user)
@@ -43,7 +43,7 @@ async def get_users(
     - **order**: Sort order (asc/desc)
     """
     logger.info("Listing users page=%d size=%d by user_id=%d", page, size, current_user.id)
-    
+
     user_service = UserService(db)
     users, total = await user_service.get_all(
         page=page,
@@ -54,9 +54,9 @@ async def get_users(
         sort=sort,
         order=order
     )
-    
+
     logger.info("Returning %d users (total=%d)", len(users), total)
-    
+
     return PaginatedResponse(
         items=users,
         total=total,
@@ -73,21 +73,21 @@ async def get_user(
 ):
     """
     Get user by ID.
-    
+
     **Admin only.**
     """
     logger.info("Fetching user_id=%d by admin_id=%d", user_id, current_user.id)
-    
+
     user_service = UserService(db)
     user = await user_service.get_by_id(user_id)
-    
+
     if not user:
         logger.warning("User not found user_id=%d", user_id)
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
-    
+
     return user
 
 
@@ -99,9 +99,9 @@ async def create_user(
 ):
     """
     Create a new user.
-    
+
     **Admin only.**
-    
+
     - **username**: Unique username (3-50 characters)
     - **email**: Unique email address
     - **password**: Password (minimum 6 characters)
@@ -112,9 +112,9 @@ async def create_user(
         "Creating user username='%s' email='%s' role='%s' by admin_id=%d",
         user_data.username, user_data.email, user_data.role, current_user.id
     )
-    
+
     user_service = UserService(db)
-    
+
     # Check if username already exists
     existing = await user_service.get_by_username(user_data.username)
     if existing:
@@ -123,25 +123,41 @@ async def create_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username already registered"
         )
-    
-    # Check if email already exists
-    existing = await user_service.get_by_email(user_data.email)
-    if existing:
-        logger.warning("Email already exists email='%s'", user_data.email)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
-        )
 
-    # Check for duplicate name in third_parties table
-    tp_service = ThirdPartyService(db)
-    existing_tp = await tp_service.get_by_name(user_data.name)
-    if existing_tp:
-        logger.warning("Name already exists in third parties name='%s'", user_data.name)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Name already exists in third parties"
-        )
+    # Check if email already exists (via third_party)
+    if user_data.email:
+        existing = await user_service.get_by_email(user_data.email)
+        if existing:
+            logger.warning("Email already exists email='%s'", user_data.email)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered"
+            )
+
+    # Check for duplicate name in third_parties table (skip if linking to existing third party)
+    if not user_data.third_party_id:
+        if not user_data.name:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Name is required when not providing a third_party_id"
+            )
+        tp_service = ThirdPartyService(db)
+        existing_tp = await tp_service.get_by_name(user_data.name)
+        if existing_tp:
+            logger.warning("Name already exists in third parties name='%s'", user_data.name)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Name already exists in third parties"
+            )
+    else:
+        # Validate third_party_id exists
+        tp_service = ThirdPartyService(db)
+        tp = await tp_service.get_by_id(user_data.third_party_id)
+        if not tp:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Third party not found"
+            )
 
     user = await user_service.create(user_data, created_by=current_user.username)
     logger.info("User created user_id=%d username='%s'", user.id, user.username)
@@ -157,15 +173,15 @@ async def update_user(
 ):
     """
     Update an existing user.
-    
+
     **Admin only.**
-    
+
     All fields are optional. Only provided fields will be updated.
     """
     logger.info("Updating user_id=%d by admin_id=%d", user_id, current_user.id)
-    
+
     user_service = UserService(db)
-    
+
     # Check if user exists
     user = await user_service.get_by_id(user_id)
     if not user:
@@ -174,7 +190,7 @@ async def update_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
-    
+
     # Check username uniqueness if being updated
     if user_data.username and user_data.username != user.username:
         existing = await user_service.get_by_username(user_data.username)
@@ -184,17 +200,7 @@ async def update_user(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Username already registered"
             )
-    
-    # Check email uniqueness if being updated
-    if user_data.email and user_data.email != user.email:
-        existing = await user_service.get_by_email(user_data.email)
-        if existing:
-            logger.warning("Email already exists email='%s'", user_data.email)
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already registered"
-            )
-    
+
     updated_user = await user_service.update(
         user_id, user_data, updated_by=current_user.username
     )
@@ -210,13 +216,13 @@ async def delete_user(
 ):
     """
     Delete a user (soft delete).
-    
+
     **Admin only.**
-    
+
     Admin cannot delete themselves.
     """
     logger.info("Deleting user_id=%d by admin_id=%d", user_id, current_user.id)
-    
+
     # Admin cannot delete themselves
     if user_id == current_user.id:
         logger.warning("Admin tried to delete themselves admin_id=%d", current_user.id)
@@ -224,9 +230,9 @@ async def delete_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Admin cannot delete themselves"
         )
-    
+
     user_service = UserService(db)
-    
+
     # Check if user exists
     user = await user_service.get_by_id(user_id)
     if not user:
@@ -235,7 +241,7 @@ async def delete_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
-    
+
     await user_service.delete(user_id, deleted_by=current_user.username)
     logger.info("User deleted user_id=%d", user_id)
     return MessageResponse(message="User deleted successfully")

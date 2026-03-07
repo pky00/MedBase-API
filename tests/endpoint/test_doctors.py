@@ -20,7 +20,6 @@ async def partner(db_session: AsyncSession, admin_user: User) -> Partner:
 
     partner = Partner(
         third_party_id=tp.id,
-        name="Doctor Test Partner",
         partner_type="both",
         organization_type="hospital",
         is_active=True,
@@ -30,23 +29,21 @@ async def partner(db_session: AsyncSession, admin_user: User) -> Partner:
     db_session.add(partner)
     await db_session.commit()
     await db_session.refresh(partner)
+    partner.third_party = tp
     return partner
 
 
 @pytest.fixture
 async def internal_doctor(db_session: AsyncSession, admin_user: User) -> Doctor:
     """Create an internal doctor for testing."""
-    tp = ThirdParty(name="Dr. Internal", is_active=True)
+    tp = ThirdParty(name="Dr. Internal", phone="1111111111", email="internal@clinic.com", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)
 
     doctor = Doctor(
         third_party_id=tp.id,
-        name="Dr. Internal",
         specialization="General Practice",
-        phone="1111111111",
-        email="internal@clinic.com",
         type="internal",
         is_active=True,
         created_by=admin_user.username,
@@ -55,6 +52,7 @@ async def internal_doctor(db_session: AsyncSession, admin_user: User) -> Doctor:
     db_session.add(doctor)
     await db_session.commit()
     await db_session.refresh(doctor)
+    doctor.third_party = tp
     return doctor
 
 
@@ -68,7 +66,6 @@ async def partner_doctor(db_session: AsyncSession, admin_user: User, partner: Pa
 
     doctor = Doctor(
         third_party_id=tp.id,
-        name="Dr. Partner Provided",
         specialization="Surgery",
         type="partner_provided",
         partner_id=partner.id,
@@ -79,6 +76,7 @@ async def partner_doctor(db_session: AsyncSession, admin_user: User, partner: Pa
     db_session.add(doctor)
     await db_session.commit()
     await db_session.refresh(doctor)
+    doctor.third_party = tp
     return doctor
 
 
@@ -157,7 +155,7 @@ class TestGetDoctor:
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["name"] == "Dr. Internal"
+        assert data["third_party"]["name"] == "Dr. Internal"
         assert data["type"] == "internal"
         assert data["partner_name"] is None
         assert "third_party_id" in data
@@ -173,7 +171,7 @@ class TestGetDoctor:
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["partner_name"] == partner.name
+        assert data["partner_name"] == partner.third_party.name
 
     @pytest.mark.asyncio
     async def test_get_doctor_not_found(self, client: AsyncClient, admin_headers: dict):
@@ -204,7 +202,7 @@ class TestCreateDoctor:
         )
         assert response.status_code == 201
         data = response.json()
-        assert data["name"] == "Dr. New Internal"
+        assert data["third_party"]["name"] == "Dr. New Internal"
         assert data["type"] == "internal"
         assert "third_party_id" in data
 
@@ -267,7 +265,7 @@ class TestCreateDoctor:
         """Test creating doctor with duplicate name fails."""
         response = await client.post(
             "/api/v1/doctors",
-            json={"name": internal_doctor.name, "type": "internal"},
+            json={"name": internal_doctor.third_party.name, "type": "internal"},
             headers=admin_headers,
         )
         assert response.status_code == 400
@@ -313,7 +311,6 @@ class TestCreateDoctor:
         response = await client.post(
             "/api/v1/doctors",
             json={
-                "name": "Dr. Linked",
                 "type": "external",
                 "third_party_id": tp.id,
             },
@@ -335,35 +332,21 @@ class TestUpdateDoctor:
         """Test updating a doctor."""
         response = await client.put(
             f"/api/v1/doctors/{internal_doctor.id}",
-            json={"name": "Dr. Updated", "specialization": "Cardiology"},
+            json={"specialization": "Cardiology"},
             headers=admin_headers,
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["name"] == "Dr. Updated"
         assert data["specialization"] == "Cardiology"
+        assert data["third_party"]["name"] == "Dr. Internal"
 
     @pytest.mark.asyncio
     async def test_update_doctor_not_found(self, client: AsyncClient, admin_headers: dict):
         """Test updating non-existent doctor."""
         response = await client.put(
-            "/api/v1/doctors/99999", json={"name": "Test"}, headers=admin_headers,
+            "/api/v1/doctors/99999", json={"specialization": "Test"}, headers=admin_headers,
         )
         assert response.status_code == 404
-
-    @pytest.mark.asyncio
-    async def test_update_doctor_duplicate_name(
-        self, client: AsyncClient, admin_headers: dict,
-        internal_doctor: Doctor, partner_doctor: Doctor,
-    ):
-        """Test updating doctor with duplicate name fails."""
-        response = await client.put(
-            f"/api/v1/doctors/{internal_doctor.id}",
-            json={"name": partner_doctor.name},
-            headers=admin_headers,
-        )
-        assert response.status_code == 400
-        assert "already exists" in response.json()["detail"]
 
 
 class TestDeleteDoctor:

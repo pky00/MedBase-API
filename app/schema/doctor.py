@@ -3,6 +3,8 @@ from enum import StrEnum
 from typing import Optional
 from pydantic import BaseModel, Field, ConfigDict
 
+from app.schema.third_party import ThirdPartyResponse
+
 
 class DoctorType(StrEnum):
     INTERNAL = "internal"
@@ -10,42 +12,40 @@ class DoctorType(StrEnum):
     PARTNER_PROVIDED = "partner_provided"
 
 
-class DoctorBase(BaseModel):
-    """Base schema for doctor."""
+class DoctorCreate(BaseModel):
+    """Schema for creating a doctor."""
 
-    name: str = Field(..., min_length=1, max_length=255)
-    specialization: Optional[str] = Field(None, max_length=255)
+    third_party_id: Optional[int] = None
+    name: Optional[str] = Field(None, min_length=1, max_length=255)
     phone: Optional[str] = Field(None, max_length=50)
     email: Optional[str] = Field(None, max_length=255)
+    specialization: Optional[str] = Field(None, max_length=255)
     type: DoctorType
     partner_id: Optional[int] = None
     is_active: bool = True
 
 
-class DoctorCreate(DoctorBase):
-    """Schema for creating a doctor."""
-    third_party_id: Optional[int] = None
-
-
 class DoctorUpdate(BaseModel):
     """Schema for updating a doctor."""
 
-    name: Optional[str] = Field(None, min_length=1, max_length=255)
     specialization: Optional[str] = Field(None, max_length=255)
-    phone: Optional[str] = Field(None, max_length=50)
-    email: Optional[str] = Field(None, max_length=255)
     type: Optional[DoctorType] = None
     partner_id: Optional[int] = None
     is_active: Optional[bool] = None
 
 
-class DoctorResponse(DoctorBase):
+class DoctorResponse(BaseModel):
     """Schema for doctor response."""
 
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     third_party_id: int
+    third_party: Optional[ThirdPartyResponse] = None
+    specialization: Optional[str] = None
+    type: str
+    partner_id: Optional[int] = None
+    is_active: bool
     is_deleted: bool
     created_by: Optional[str] = None
     created_at: datetime
@@ -66,10 +66,8 @@ class DoctorDetailResponse(DoctorResponse):
             {
                 "id": doctor.id,
                 "third_party_id": doctor.third_party_id,
-                "name": doctor.name,
+                "third_party": ThirdPartyResponse.model_validate(doctor.third_party) if doctor.third_party else None,
                 "specialization": doctor.specialization,
-                "phone": doctor.phone,
-                "email": doctor.email,
                 "type": doctor.type,
                 "partner_id": doctor.partner_id,
                 "is_active": doctor.is_active,

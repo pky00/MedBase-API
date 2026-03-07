@@ -2,10 +2,12 @@ import logging
 from typing import Optional, List, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
+from sqlalchemy.orm import aliased
 
 from app.model.treatment import Treatment
 from app.model.patient import Patient
 from app.model.partner import Partner
+from app.model.third_party import ThirdParty
 from app.schema.treatment import TreatmentCreate, TreatmentUpdate, TreatmentResponse
 
 logger = logging.getLogger("medbase.service.treatment")
@@ -29,14 +31,16 @@ class TreatmentService:
 
     async def get_by_id_with_names(self, treatment_id: int) -> Optional[TreatmentResponse]:
         """Get treatment by ID with patient and partner names."""
+        PartnerTP = aliased(ThirdParty)
         result = await self.db.execute(
             select(
                 Treatment,
                 func.concat(Patient.first_name, ' ', Patient.last_name).label("patient_name"),
-                Partner.name.label("partner_name"),
+                PartnerTP.name.label("partner_name"),
             )
             .outerjoin(Patient, Treatment.patient_id == Patient.id)
             .outerjoin(Partner, Treatment.partner_id == Partner.id)
+            .outerjoin(PartnerTP, Partner.third_party_id == PartnerTP.id)
             .where(
                 Treatment.id == treatment_id,
                 Treatment.is_deleted == False,
@@ -60,14 +64,16 @@ class TreatmentService:
         order: str = "asc",
     ) -> Tuple[List[dict], int]:
         """Get all treatments with pagination and filtering."""
+        PartnerTP = aliased(ThirdParty)
         query = (
             select(
                 Treatment,
                 func.concat(Patient.first_name, ' ', Patient.last_name).label("patient_name"),
-                Partner.name.label("partner_name"),
+                PartnerTP.name.label("partner_name"),
             )
             .outerjoin(Patient, Treatment.patient_id == Patient.id)
             .outerjoin(Partner, Treatment.partner_id == Partner.id)
+            .outerjoin(PartnerTP, Partner.third_party_id == PartnerTP.id)
             .where(Treatment.is_deleted == False)
         )
 

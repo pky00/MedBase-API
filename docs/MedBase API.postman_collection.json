@@ -51,8 +51,13 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/auth/login",
-							"host": ["{{base_url}}"],
-							"path": ["auth", "login"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
 						},
 						"description": "Login with username and password. Returns JWT token."
 					},
@@ -65,8 +70,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/auth/logout",
-							"host": ["{{base_url}}"],
-							"path": ["auth", "logout"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
 						},
 						"description": "Logout current user. Client should discard token."
 					},
@@ -79,8 +89,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/auth/me",
-							"host": ["{{base_url}}"],
-							"path": ["auth", "me"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
 						},
 						"description": "Get current authenticated user info."
 					},
@@ -98,21 +113,66 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/users?page=1&size=10",
-							"host": ["{{base_url}}"],
-							"path": ["users"],
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							],
 							"query": [
-								{ "key": "page", "value": "1" },
-								{ "key": "size", "value": "10" },
-								{ "key": "role", "value": "admin", "disabled": true },
-								{ "key": "is_active", "value": "true", "disabled": true },
-								{ "key": "search", "value": "", "disabled": true },
-								{ "key": "sort", "value": "id", "disabled": true },
-								{ "key": "order", "value": "asc", "disabled": true }
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "role",
+									"value": "admin",
+									"disabled": true
+								},
+								{
+									"key": "is_active",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								}
 							]
 						},
 						"description": "Get all users with pagination and filters. Admin only."
 					},
-					"response": []
+					"response": [
+						{
+							"name": "Get All Users",
+							"originalRequest": {},
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"items\": [\n        {\n            \"id\": 1,\n            \"username\": \"admin\",\n            \"role\": \"admin\",\n            \"third_party_id\": 4,\n            \"third_party\": {\n                \"id\": 4,\n                \"name\": \"Admin User\",\n                \"phone\": \"+1234567890\",\n                \"email\": \"admin@example.com\",\n                \"is_active\": true,\n                \"is_deleted\": false,\n                \"created_by\": 1,\n                \"created_at\": \"2026-03-01T10:00:00\",\n                \"updated_by\": 1,\n                \"updated_at\": \"2026-03-01T10:00:00\"\n            },\n            \"is_active\": true,\n            \"is_deleted\": false,\n            \"created_by\": 1,\n            \"created_at\": \"2026-03-01T10:00:00\",\n            \"updated_by\": 1,\n            \"updated_at\": \"2026-03-01T10:00:00\"\n        }\n    ],\n    \"total\": 1,\n    \"page\": 1,\n    \"size\": 10,\n    \"pages\": 1\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
 				},
 				{
 					"name": "Get User by ID",
@@ -121,48 +181,117 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/users/1",
-							"host": ["{{base_url}}"],
-							"path": ["users", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"1"
+							]
 						},
 						"description": "Get user by ID. Admin only."
 					},
-					"response": []
+					"response": [
+						{
+							"name": "Get User by ID",
+							"originalRequest": {},
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"id\": 1,\n    \"username\": \"admin\",\n    \"role\": \"admin\",\n    \"third_party_id\": 4,\n    \"third_party\": {\n        \"id\": 4,\n        \"name\": \"Admin User\",\n        \"phone\": \"+1234567890\",\n        \"email\": \"admin@example.com\",\n        \"is_active\": true,\n        \"is_deleted\": false,\n        \"created_by\": 1,\n        \"created_at\": \"2026-03-01T10:00:00\",\n        \"updated_by\": 1,\n        \"updated_at\": \"2026-03-01T10:00:00\"\n    },\n    \"is_active\": true,\n    \"is_deleted\": false,\n    \"created_by\": 1,\n    \"created_at\": \"2026-03-01T10:00:00\",\n    \"updated_by\": 1,\n    \"updated_at\": \"2026-03-01T10:00:00\"\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
 				},
 				{
 					"name": "Create User",
 					"request": {
 						"method": "POST",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"username\": \"newuser\",\n    \"name\": \"New User\",\n    \"email\": \"newuser@example.com\",\n    \"password\": \"password123\",\n    \"role\": \"user\",\n    \"is_active\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/users",
-							"host": ["{{base_url}}"],
-							"path": ["users"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							]
 						},
 						"description": "Create a new user. Admin only."
 					},
-					"response": []
+					"response": [
+						{
+							"name": "Create User",
+							"originalRequest": {},
+							"status": "Created",
+							"code": 201,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"id\": 1,\n    \"username\": \"newuser\",\n    \"role\": \"user\",\n    \"third_party_id\": 4,\n    \"third_party\": {\n        \"id\": 5,\n        \"name\": \"New User\",\n        \"phone\": null,\n        \"email\": \"newuser@example.com\",\n        \"is_active\": true,\n        \"is_deleted\": false,\n        \"created_by\": 1,\n        \"created_at\": \"2026-03-01T10:00:00\",\n        \"updated_by\": 1,\n        \"updated_at\": \"2026-03-01T10:00:00\"\n    },\n    \"is_active\": true,\n    \"is_deleted\": false,\n    \"created_by\": 1,\n    \"created_at\": \"2026-03-01T10:00:00\",\n    \"updated_by\": 1,\n    \"updated_at\": \"2026-03-01T10:00:00\"\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
 				},
 				{
 					"name": "Update User",
 					"request": {
 						"method": "PUT",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"updateduser\",\n    \"email\": \"updated@example.com\",\n    \"is_active\": true\n}"
+							"raw": "{\n    \"username\": \"updateduser\",\n    \"password\": \"newpassword123\",\n    \"role\": \"user\",\n    \"is_active\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/users/2",
-							"host": ["{{base_url}}"],
-							"path": ["users", "2"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"2"
+							]
 						},
 						"description": "Update an existing user. Admin only."
 					},
-					"response": []
+					"response": [
+						{
+							"name": "Update User",
+							"originalRequest": {},
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"id\": 1,\n    \"username\": \"updateduser\",\n    \"role\": \"admin\",\n    \"third_party_id\": 4,\n    \"third_party\": {\n        \"id\": 4,\n        \"name\": \"Admin User\",\n        \"phone\": \"+1234567890\",\n        \"email\": \"updated@example.com\",\n        \"is_active\": true,\n        \"is_deleted\": false,\n        \"created_by\": 1,\n        \"created_at\": \"2026-03-01T10:00:00\",\n        \"updated_by\": 1,\n        \"updated_at\": \"2026-03-01T10:00:00\"\n    },\n    \"is_active\": true,\n    \"is_deleted\": false,\n    \"created_by\": 1,\n    \"created_at\": \"2026-03-01T10:00:00\",\n    \"updated_by\": 1,\n    \"updated_at\": \"2026-03-01T10:00:00\"\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
 				},
 				{
 					"name": "Delete User",
@@ -171,12 +300,32 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/users/2",
-							"host": ["{{base_url}}"],
-							"path": ["users", "2"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"2"
+							]
 						},
 						"description": "Delete a user (soft delete). Admin only. Cannot delete self."
 					},
-					"response": []
+					"response": [
+						{
+							"name": "Delete User",
+							"originalRequest": {},
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"message\": \"User deleted successfully\"\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
 				}
 			]
 		},
@@ -190,14 +339,36 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/medicine-categories?page=1&size=10",
-							"host": ["{{base_url}}"],
-							"path": ["medicine-categories"],
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medicine-categories"
+							],
 							"query": [
-								{ "key": "page", "value": "1" },
-								{ "key": "size", "value": "10" },
-								{ "key": "search", "value": "", "disabled": true },
-								{ "key": "sort", "value": "id", "disabled": true },
-								{ "key": "order", "value": "asc", "disabled": true }
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								}
 							]
 						},
 						"description": "Get all medicine categories with pagination and search."
@@ -211,8 +382,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/medicine-categories/1",
-							"host": ["{{base_url}}"],
-							"path": ["medicine-categories", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medicine-categories",
+								"1"
+							]
 						},
 						"description": "Get medicine category by ID."
 					},
@@ -222,15 +398,24 @@
 					"name": "Create Medicine Category",
 					"request": {
 						"method": "POST",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"name\": \"Antibiotics\",\n    \"description\": \"Anti-bacterial medicines\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/medicine-categories",
-							"host": ["{{base_url}}"],
-							"path": ["medicine-categories"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medicine-categories"
+							]
 						},
 						"description": "Create a new medicine category."
 					},
@@ -240,15 +425,25 @@
 					"name": "Update Medicine Category",
 					"request": {
 						"method": "PUT",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"name\": \"Updated Category\",\n    \"description\": \"Updated description\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/medicine-categories/1",
-							"host": ["{{base_url}}"],
-							"path": ["medicine-categories", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medicine-categories",
+								"1"
+							]
 						},
 						"description": "Update a medicine category."
 					},
@@ -261,8 +456,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/medicine-categories/1",
-							"host": ["{{base_url}}"],
-							"path": ["medicine-categories", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medicine-categories",
+								"1"
+							]
 						},
 						"description": "Delete a medicine category (soft delete). Cannot delete if medicines are linked."
 					},
@@ -280,14 +480,36 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/equipment-categories?page=1&size=10",
-							"host": ["{{base_url}}"],
-							"path": ["equipment-categories"],
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"equipment-categories"
+							],
 							"query": [
-								{ "key": "page", "value": "1" },
-								{ "key": "size", "value": "10" },
-								{ "key": "search", "value": "", "disabled": true },
-								{ "key": "sort", "value": "id", "disabled": true },
-								{ "key": "order", "value": "asc", "disabled": true }
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								}
 							]
 						},
 						"description": "Get all equipment categories with pagination and search."
@@ -301,8 +523,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/equipment-categories/1",
-							"host": ["{{base_url}}"],
-							"path": ["equipment-categories", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"equipment-categories",
+								"1"
+							]
 						},
 						"description": "Get equipment category by ID."
 					},
@@ -312,15 +539,24 @@
 					"name": "Create Equipment Category",
 					"request": {
 						"method": "POST",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"name\": \"Surgical Tools\",\n    \"description\": \"Tools used in surgery\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/equipment-categories",
-							"host": ["{{base_url}}"],
-							"path": ["equipment-categories"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"equipment-categories"
+							]
 						},
 						"description": "Create a new equipment category."
 					},
@@ -330,15 +566,25 @@
 					"name": "Update Equipment Category",
 					"request": {
 						"method": "PUT",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"name\": \"Updated Category\",\n    \"description\": \"Updated description\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/equipment-categories/1",
-							"host": ["{{base_url}}"],
-							"path": ["equipment-categories", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"equipment-categories",
+								"1"
+							]
 						},
 						"description": "Update an equipment category."
 					},
@@ -351,8 +597,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/equipment-categories/1",
-							"host": ["{{base_url}}"],
-							"path": ["equipment-categories", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"equipment-categories",
+								"1"
+							]
 						},
 						"description": "Delete an equipment category (soft delete). Cannot delete if equipment items are linked."
 					},
@@ -370,14 +621,36 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/medical-device-categories?page=1&size=10",
-							"host": ["{{base_url}}"],
-							"path": ["medical-device-categories"],
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medical-device-categories"
+							],
 							"query": [
-								{ "key": "page", "value": "1" },
-								{ "key": "size", "value": "10" },
-								{ "key": "search", "value": "", "disabled": true },
-								{ "key": "sort", "value": "id", "disabled": true },
-								{ "key": "order", "value": "asc", "disabled": true }
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								}
 							]
 						},
 						"description": "Get all medical device categories with pagination and search."
@@ -391,8 +664,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/medical-device-categories/1",
-							"host": ["{{base_url}}"],
-							"path": ["medical-device-categories", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medical-device-categories",
+								"1"
+							]
 						},
 						"description": "Get medical device category by ID."
 					},
@@ -402,15 +680,24 @@
 					"name": "Create Medical Device Category",
 					"request": {
 						"method": "POST",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"name\": \"Monitors\",\n    \"description\": \"Patient monitoring devices\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/medical-device-categories",
-							"host": ["{{base_url}}"],
-							"path": ["medical-device-categories"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medical-device-categories"
+							]
 						},
 						"description": "Create a new medical device category."
 					},
@@ -420,15 +707,25 @@
 					"name": "Update Medical Device Category",
 					"request": {
 						"method": "PUT",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"name\": \"Updated Category\",\n    \"description\": \"Updated description\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/medical-device-categories/1",
-							"host": ["{{base_url}}"],
-							"path": ["medical-device-categories", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medical-device-categories",
+								"1"
+							]
 						},
 						"description": "Update a medical device category."
 					},
@@ -441,8 +738,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/medical-device-categories/1",
-							"host": ["{{base_url}}"],
-							"path": ["medical-device-categories", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medical-device-categories",
+								"1"
+							]
 						},
 						"description": "Delete a medical device category (soft delete). Cannot delete if medical devices are linked."
 					},
@@ -460,16 +762,46 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/medicines?page=1&size=10",
-							"host": ["{{base_url}}"],
-							"path": ["medicines"],
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medicines"
+							],
 							"query": [
-								{ "key": "page", "value": "1" },
-								{ "key": "size", "value": "10" },
-								{ "key": "category_id", "value": "1", "disabled": true },
-								{ "key": "is_active", "value": "true", "disabled": true },
-								{ "key": "search", "value": "", "disabled": true },
-								{ "key": "sort", "value": "id", "disabled": true },
-								{ "key": "order", "value": "asc", "disabled": true }
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "category_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "is_active",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								}
 							]
 						},
 						"description": "Get all medicines with pagination, filters, and search."
@@ -483,8 +815,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/medicines/1",
-							"host": ["{{base_url}}"],
-							"path": ["medicines", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medicines",
+								"1"
+							]
 						},
 						"description": "Get medicine by ID. Includes inventory quantity and category name."
 					},
@@ -494,15 +831,24 @@
 					"name": "Create Medicine",
 					"request": {
 						"method": "POST",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"name\": \"Amoxicillin\",\n    \"category_id\": 1,\n    \"description\": \"Broad-spectrum antibiotic\",\n    \"unit\": \"tablets\",\n    \"is_active\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/medicines",
-							"host": ["{{base_url}}"],
-							"path": ["medicines"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medicines"
+							]
 						},
 						"description": "Create a new medicine. Auto-creates inventory record with quantity 0."
 					},
@@ -512,15 +858,25 @@
 					"name": "Update Medicine",
 					"request": {
 						"method": "PUT",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"name\": \"Updated Medicine\",\n    \"unit\": \"ml\",\n    \"is_active\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/medicines/1",
-							"host": ["{{base_url}}"],
-							"path": ["medicines", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medicines",
+								"1"
+							]
 						},
 						"description": "Update a medicine."
 					},
@@ -533,8 +889,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/medicines/1",
-							"host": ["{{base_url}}"],
-							"path": ["medicines", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medicines",
+								"1"
+							]
 						},
 						"description": "Delete a medicine (soft delete). Only allowed if inventory quantity is 0."
 					},
@@ -552,17 +913,51 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/equipment?page=1&size=10",
-							"host": ["{{base_url}}"],
-							"path": ["equipment"],
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"equipment"
+							],
 							"query": [
-								{ "key": "page", "value": "1" },
-								{ "key": "size", "value": "10" },
-								{ "key": "category_id", "value": "1", "disabled": true },
-								{ "key": "is_active", "value": "true", "disabled": true },
-								{ "key": "condition", "value": "new", "disabled": true },
-								{ "key": "search", "value": "", "disabled": true },
-								{ "key": "sort", "value": "id", "disabled": true },
-								{ "key": "order", "value": "asc", "disabled": true }
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "category_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "is_active",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "condition",
+									"value": "new",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								}
 							]
 						},
 						"description": "Get all equipment with pagination, filters, and search."
@@ -576,8 +971,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/equipment/1",
-							"host": ["{{base_url}}"],
-							"path": ["equipment", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"equipment",
+								"1"
+							]
 						},
 						"description": "Get equipment by ID. Includes inventory quantity and category name."
 					},
@@ -587,15 +987,24 @@
 					"name": "Create Equipment",
 					"request": {
 						"method": "POST",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"name\": \"Surgical Scalpel\",\n    \"category_id\": 1,\n    \"description\": \"Precision surgical scalpel\",\n    \"condition\": \"new\",\n    \"is_active\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/equipment",
-							"host": ["{{base_url}}"],
-							"path": ["equipment"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"equipment"
+							]
 						},
 						"description": "Create new equipment. Auto-creates inventory record with quantity 0."
 					},
@@ -605,15 +1014,25 @@
 					"name": "Update Equipment",
 					"request": {
 						"method": "PUT",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"name\": \"Updated Equipment\",\n    \"condition\": \"good\",\n    \"is_active\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/equipment/1",
-							"host": ["{{base_url}}"],
-							"path": ["equipment", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"equipment",
+								"1"
+							]
 						},
 						"description": "Update equipment."
 					},
@@ -626,8 +1045,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/equipment/1",
-							"host": ["{{base_url}}"],
-							"path": ["equipment", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"equipment",
+								"1"
+							]
 						},
 						"description": "Delete equipment (soft delete). Only allowed if inventory quantity is 0."
 					},
@@ -645,16 +1069,46 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/medical-devices?page=1&size=10",
-							"host": ["{{base_url}}"],
-							"path": ["medical-devices"],
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medical-devices"
+							],
 							"query": [
-								{ "key": "page", "value": "1" },
-								{ "key": "size", "value": "10" },
-								{ "key": "category_id", "value": "1", "disabled": true },
-								{ "key": "is_active", "value": "true", "disabled": true },
-								{ "key": "search", "value": "", "disabled": true },
-								{ "key": "sort", "value": "id", "disabled": true },
-								{ "key": "order", "value": "asc", "disabled": true }
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "category_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "is_active",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								}
 							]
 						},
 						"description": "Get all medical devices with pagination, filters, and search."
@@ -668,8 +1122,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/medical-devices/1",
-							"host": ["{{base_url}}"],
-							"path": ["medical-devices", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medical-devices",
+								"1"
+							]
 						},
 						"description": "Get medical device by ID. Includes inventory quantity and category name."
 					},
@@ -679,15 +1138,24 @@
 					"name": "Create Medical Device",
 					"request": {
 						"method": "POST",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"name\": \"ECG Machine\",\n    \"category_id\": 1,\n    \"description\": \"12-lead ECG machine\",\n    \"serial_number\": \"ECG-001\",\n    \"is_active\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/medical-devices",
-							"host": ["{{base_url}}"],
-							"path": ["medical-devices"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medical-devices"
+							]
 						},
 						"description": "Create a new medical device. Auto-creates inventory record with quantity 0."
 					},
@@ -697,15 +1165,25 @@
 					"name": "Update Medical Device",
 					"request": {
 						"method": "PUT",
-						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"name\": \"Updated Device\",\n    \"serial_number\": \"DEV-002\",\n    \"is_active\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/medical-devices/1",
-							"host": ["{{base_url}}"],
-							"path": ["medical-devices", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medical-devices",
+								"1"
+							]
 						},
 						"description": "Update a medical device."
 					},
@@ -718,8 +1196,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/medical-devices/1",
-							"host": ["{{base_url}}"],
-							"path": ["medical-devices", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medical-devices",
+								"1"
+							]
 						},
 						"description": "Delete a medical device (soft delete). Only allowed if inventory quantity is 0."
 					},
@@ -737,14 +1220,36 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/inventory?page=1&size=10",
-							"host": ["{{base_url}}"],
-							"path": ["inventory"],
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"inventory"
+							],
 							"query": [
-								{ "key": "page", "value": "1" },
-								{ "key": "size", "value": "10" },
-								{ "key": "item_type", "value": "medicine", "disabled": true },
-								{ "key": "sort", "value": "id", "disabled": true },
-								{ "key": "order", "value": "asc", "disabled": true }
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "item_type",
+									"value": "medicine",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								}
 							]
 						},
 						"description": "Get all inventory records with pagination and filtering."
@@ -758,1097 +1263,2154 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/inventory/1",
-							"host": ["{{base_url}}"],
-							"path": ["inventory", "1"]
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"inventory",
+								"1"
+							]
 						},
 						"description": "Get inventory record by ID."
 					},
 					"response": []
 				},
-			{
-				"name": "Get Inventory by Item",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/inventory/item/medicine/1",
-						"host": ["{{base_url}}"],
-						"path": ["inventory", "item", "medicine", "1"]
+				{
+					"name": "Get Inventory by Item",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/inventory/item/medicine/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"inventory",
+								"item",
+								"medicine",
+								"1"
+							]
+						},
+						"description": "Get inventory record by item type and item ID. item_type: medicine, equipment, medical_device."
 					},
-					"description": "Get inventory record by item type and item ID. item_type: medicine, equipment, medical_device."
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Third Parties",
+			"item": [
+				{
+					"name": "Get All Third Parties",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/third-parties?page=1&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"third-parties"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "is_active",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								},
+								{
+									"key": "exclude_patients",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "exclude_doctors",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "exclude_partners",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "exclude_users",
+									"value": "true",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get all third parties. Read-only. Filters: is_active. Exclusion flags: exclude_patients, exclude_doctors, exclude_partners, exclude_users (set to true to remove third parties linked to respective entities). Records created automatically when creating users, doctors, patients, or partners."
+					},
+					"response": []
 				},
-				"response": []
-			}
-		]
-	},
-	{
-		"name": "Third Parties",
-		"item": [
-			{
-				"name": "Get All Third Parties",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/third-parties?page=1&size=10",
-						"host": ["{{base_url}}"],
-						"path": ["third-parties"],
-						"query": [
-							{ "key": "page", "value": "1" },
-							{ "key": "size", "value": "10" },
-							{ "key": "is_active", "value": "true", "disabled": true },
-							{ "key": "search", "value": "", "disabled": true },
-							{ "key": "sort", "value": "id", "disabled": true },
-							{ "key": "order", "value": "asc", "disabled": true },
-							{ "key": "exclude_patients", "value": "true", "disabled": true },
-							{ "key": "exclude_doctors", "value": "true", "disabled": true },
-							{ "key": "exclude_partners", "value": "true", "disabled": true },
-							{ "key": "exclude_users", "value": "true", "disabled": true }
-						]
+				{
+					"name": "Get Third Party by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/third-parties/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"third-parties",
+								"1"
+							]
+						},
+						"description": "Get third party by ID."
 					},
-					"description": "Get all third parties. Read-only. Filters: is_active. Exclusion flags: exclude_patients, exclude_doctors, exclude_partners, exclude_users (set to true to remove third parties linked to respective entities). Records created automatically when creating users, doctors, patients, or partners."
+					"response": []
 				},
-				"response": []
-			},
-			{
-				"name": "Get Third Party by ID",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/third-parties/1",
-						"host": ["{{base_url}}"],
-						"path": ["third-parties", "1"]
-					},
-					"description": "Get third party by ID."
-				},
-				"response": []
-			}
-		]
-	},
-	{
-		"name": "Partners",
-		"item": [
-			{
-				"name": "Get All Partners",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/partners?page=1&size=10",
-						"host": ["{{base_url}}"],
-						"path": ["partners"],
-						"query": [
-							{ "key": "page", "value": "1" },
-							{ "key": "size", "value": "10" },
-							{ "key": "partner_type", "value": "donor", "disabled": true },
-							{ "key": "organization_type", "value": "NGO", "disabled": true },
-							{ "key": "is_active", "value": "true", "disabled": true },
-							{ "key": "search", "value": "", "disabled": true },
-							{ "key": "sort", "value": "id", "disabled": true },
-							{ "key": "order", "value": "asc", "disabled": true }
-						]
-					},
-					"description": "Get all partners with pagination, filters, and search. Filters: partner_type (donor/referral/both), organization_type (NGO/organization/individual/hospital/medical_center), is_active."
-				},
-				"response": []
-			},
-			{
-				"name": "Get Partner by ID",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/partners/1",
-						"host": ["{{base_url}}"],
-						"path": ["partners", "1"]
-					},
-					"description": "Get partner by ID. Includes donations summary (if donor) and treatments (if referral)."
-				},
-				"response": []
-			},
-			{
-				"name": "Create Partner",
-				"request": {
-					"method": "POST",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"name\": \"Red Cross\",\n    \"partner_type\": \"donor\",\n    \"organization_type\": \"NGO\",\n    \"contact_person\": \"John Doe\",\n    \"phone\": \"+1234567890\",\n    \"email\": \"contact@redcross.org\",\n    \"address\": \"123 Charity Ave\",\n    \"is_active\": true\n}"
-					},
-					"url": {
-						"raw": "{{base_url}}/partners",
-						"host": ["{{base_url}}"],
-						"path": ["partners"]
-					},
-					"description": "Create a new partner. partner_type: donor, referral, both. organization_type: NGO, organization, individual, hospital, medical_center."
-				},
-				"response": []
-			},
-			{
-				"name": "Update Partner",
-				"request": {
-					"method": "PUT",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"name\": \"Updated Partner Name\",\n    \"contact_person\": \"Jane Smith\",\n    \"phone\": \"+9876543210\",\n    \"is_active\": true\n}"
-					},
-					"url": {
-						"raw": "{{base_url}}/partners/1",
-						"host": ["{{base_url}}"],
-						"path": ["partners", "1"]
-					},
-					"description": "Update a partner."
-				},
-				"response": []
-			},
-			{
-				"name": "Delete Partner",
-				"request": {
-					"method": "DELETE",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/partners/1",
-						"host": ["{{base_url}}"],
-						"path": ["partners", "1"]
-					},
-					"description": "Delete a partner (soft delete)."
-				},
-				"response": []
-			}
-		]
-	},
-	{
-		"name": "Doctors",
-		"item": [
-			{
-				"name": "Get All Doctors",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/doctors?page=1&size=10",
-						"host": ["{{base_url}}"],
-						"path": ["doctors"],
-						"query": [
-							{ "key": "page", "value": "1" },
-							{ "key": "size", "value": "10" },
-							{ "key": "type", "value": "internal", "disabled": true },
-							{ "key": "is_active", "value": "true", "disabled": true },
-							{ "key": "partner_id", "value": "1", "disabled": true },
-							{ "key": "search", "value": "", "disabled": true },
-							{ "key": "sort", "value": "id", "disabled": true },
-							{ "key": "order", "value": "asc", "disabled": true }
-						]
-					},
-					"description": "Get all doctors with pagination, filters, and search. Filters: type (internal/external/partner_provided), is_active, partner_id."
-				},
-				"response": []
-			},
-			{
-				"name": "Get Doctor by ID",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/doctors/1",
-						"host": ["{{base_url}}"],
-						"path": ["doctors", "1"]
-					},
-					"description": "Get doctor by ID. Includes partner name if partner_provided."
-				},
-				"response": []
-			},
-			{
-				"name": "Create Doctor (Internal)",
-				"request": {
-					"method": "POST",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"name\": \"Dr. Ahmed Ali\",\n    \"specialization\": \"General Practice\",\n    \"phone\": \"+1234567890\",\n    \"email\": \"dr.ahmed@clinic.com\",\n    \"type\": \"internal\",\n    \"is_active\": true\n}"
-					},
-					"url": {
-						"raw": "{{base_url}}/doctors",
-						"host": ["{{base_url}}"],
-						"path": ["doctors"]
-					},
-					"description": "Create an internal doctor (clinic staff)."
-				},
-				"response": []
-			},
-			{
-				"name": "Create Doctor (Partner Provided)",
-				"request": {
-					"method": "POST",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"name\": \"Dr. Sara Hassan\",\n    \"specialization\": \"Surgery\",\n    \"phone\": \"+9876543210\",\n    \"email\": \"dr.sara@hospital.com\",\n    \"type\": \"partner_provided\",\n    \"partner_id\": 1,\n    \"is_active\": true\n}"
-					},
-					"url": {
-						"raw": "{{base_url}}/doctors",
-						"host": ["{{base_url}}"],
-						"path": ["doctors"]
-					},
-					"description": "Create a partner-provided doctor. Requires partner_id."
-				},
-				"response": []
-			},
-			{
-				"name": "Update Doctor",
-				"request": {
-					"method": "PUT",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"specialization\": \"Cardiology\",\n    \"is_active\": true\n}"
-					},
-					"url": {
-						"raw": "{{base_url}}/doctors/1",
-						"host": ["{{base_url}}"],
-						"path": ["doctors", "1"]
-					},
-					"description": "Update a doctor."
-				},
-				"response": []
-			},
-			{
-				"name": "Delete Doctor",
-				"request": {
-					"method": "DELETE",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/doctors/1",
-						"host": ["{{base_url}}"],
-						"path": ["doctors", "1"]
-					},
-					"description": "Delete a doctor (soft delete)."
-				},
-				"response": []
-			}
-		]
-	},
-	{
-		"name": "Patients",
-		"item": [
-			{
-				"name": "Get All Patients",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/patients?page=1&size=10",
-						"host": ["{{base_url}}"],
-						"path": ["patients"],
-						"query": [
-							{ "key": "page", "value": "1" },
-							{ "key": "size", "value": "10" },
-							{ "key": "is_active", "value": "true", "disabled": true },
-							{ "key": "gender", "value": "male", "disabled": true },
-							{ "key": "search", "value": "", "disabled": true },
-							{ "key": "sort", "value": "id", "disabled": true },
-							{ "key": "order", "value": "asc", "disabled": true }
-						]
-					},
-					"description": "Get all patients with pagination, filters, and search. Filters: is_active, gender (male/female). Search: first_name, last_name, phone, email."
-				},
-				"response": []
-			},
-			{
-				"name": "Get Patient by ID",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/patients/1",
-						"host": ["{{base_url}}"],
-						"path": ["patients", "1"],
-						"query": [
-							{ "key": "with_documents", "value": "true", "disabled": true }
-						]
-					},
-					"description": "Get patient by ID. Use with_documents=true to include documents."
-				},
-				"response": []
-			},
-			{
-				"name": "Create Patient",
-				"request": {
-					"method": "POST",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"first_name\": \"Ahmad\",\n    \"last_name\": \"Hassan\",\n    \"date_of_birth\": \"1990-05-15\",\n    \"gender\": \"male\",\n    \"phone\": \"+1234567890\",\n    \"email\": \"ahmad.hassan@example.com\",\n    \"address\": \"123 Main Street\",\n    \"emergency_contact\": \"Sara Hassan\",\n    \"emergency_phone\": \"+0987654321\",\n    \"is_active\": true\n}"
-					},
-					"url": {
-						"raw": "{{base_url}}/patients",
-						"host": ["{{base_url}}"],
-						"path": ["patients"]
-					},
-					"description": "Create a new patient. Auto-creates a third_party record (type: patient) if third_party_id not provided."
-				},
-				"response": []
-			},
-			{
-				"name": "Update Patient",
-				"request": {
-					"method": "PUT",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"first_name\": \"Ahmad\",\n    \"last_name\": \"Hassan Updated\",\n    \"phone\": \"+9876543210\",\n    \"emergency_contact\": \"Ali Hassan\",\n    \"is_active\": true\n}"
-					},
-					"url": {
-						"raw": "{{base_url}}/patients/1",
-						"host": ["{{base_url}}"],
-						"path": ["patients", "1"]
-					},
-					"description": "Update a patient."
-				},
-				"response": []
-			},
-			{
-				"name": "Delete Patient",
-				"request": {
-					"method": "DELETE",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/patients/1",
-						"host": ["{{base_url}}"],
-						"path": ["patients", "1"]
-					},
-					"description": "Delete a patient (soft delete)."
-				},
-				"response": []
-			}
-		]
-	},
-	{
-		"name": "Patient Documents",
-		"item": [
-			{
-				"name": "Get Patient Document Types",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/patient-document-types",
-						"host": ["{{base_url}}"],
-						"path": ["patient-document-types"]
-					},
-					"description": "Returns all available patient document types with value and human-readable label."
-				},
-				"response": []
-			},
-			{
-				"name": "Get Patient Documents",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/patients/1/documents?page=1&size=10",
-						"host": ["{{base_url}}"],
-						"path": ["patients", "1", "documents"],
-						"query": [
-							{ "key": "page", "value": "1" },
-							{ "key": "size", "value": "10" },
-							{ "key": "document_type", "value": "lab_report", "disabled": true },
-							{ "key": "sort", "value": "id", "disabled": true },
-							{ "key": "order", "value": "asc", "disabled": true }
-						]
-					},
-					"description": "List all documents for a patient. Filter by document_type. Each item includes a presigned file URL (5 min expiry)."
-				},
-				"response": []
-			},
-			{
-				"name": "Get Document by ID",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/patient-documents/1",
-						"host": ["{{base_url}}"],
-						"path": ["patient-documents", "1"]
-					},
-					"description": "Get document by ID. Returns a presigned file URL (5 min expiry) for download."
-				},
-				"response": []
-			},
-			{
-				"name": "Upload Document",
-				"request": {
-					"method": "POST",
-					"header": [],
-					"body": {
-						"mode": "formdata",
-						"formdata": [
+				{
+					"name": "Update Third Party",
+					"request": {
+						"method": "PUT",
+						"header": [
 							{
-								"key": "file",
-								"type": "file",
-								"src": ""
-							},
-							{
-								"key": "document_name",
-								"value": "Blood Test Results",
-								"type": "text",
-								"description": "Optional custom display name. If omitted, uses the original filename."
-							},
-							{
-								"key": "document_type",
-								"value": "lab_report",
-								"type": "text"
+								"key": "Content-Type",
+								"value": "application/json"
 							}
-						]
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Name\",\n    \"phone\": \"1234567890\",\n    \"email\": \"updated@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/third-parties/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"third-parties",
+								"1"
+							]
+						},
+						"description": "Update a third party's name, phone, or email."
 					},
-					"url": {
-						"raw": "{{base_url}}/patients/1/documents",
-						"host": ["{{base_url}}"],
-						"path": ["patients", "1", "documents"]
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Partners",
+			"item": [
+				{
+					"name": "Get All Partners",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/partners?page=1&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"partners"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "partner_type",
+									"value": "donor",
+									"disabled": true
+								},
+								{
+									"key": "organization_type",
+									"value": "NGO",
+									"disabled": true
+								},
+								{
+									"key": "is_active",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get all partners with pagination, filters, and search. Filters: partner_type (donor/referral/both), organization_type (NGO/organization/individual/hospital/medical_center), is_active."
 					},
-					"description": "Upload a document for a patient. Accepts multipart/form-data. document_name and document_type are optional. The file_url in the response is a presigned URL (5 min expiry) that uses the document_name for the download filename."
+					"response": [
+						{
+							"name": "Get All Partners",
+							"originalRequest": {},
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"items\": [\n        {\n            \"id\": 1,\n            \"partner_type\": \"donor\",\n            \"organization_type\": \"NGO\",\n            \"contact_person\": \"John Doe\",\n            \"address\": \"123 Charity Ave\",\n            \"third_party_id\": 2,\n            \"third_party\": {\n                \"id\": 2,\n                \"name\": \"Red Cross\",\n                \"phone\": \"+1234567890\",\n                \"email\": \"contact@redcross.org\",\n                \"is_active\": true,\n                \"is_deleted\": false,\n                \"created_by\": 1,\n                \"created_at\": \"2026-03-01T10:00:00\",\n                \"updated_by\": 1,\n                \"updated_at\": \"2026-03-01T10:00:00\"\n            },\n            \"is_active\": true,\n            \"is_deleted\": false,\n            \"created_by\": 1,\n            \"created_at\": \"2026-03-01T10:00:00\",\n            \"updated_by\": 1,\n            \"updated_at\": \"2026-03-01T10:00:00\"\n        }\n    ],\n    \"total\": 1,\n    \"page\": 1,\n    \"size\": 10,\n    \"pages\": 1\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
 				},
-				"response": []
-			},
-			{
-				"name": "Delete Document",
-				"request": {
-					"method": "DELETE",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/patient-documents/1",
-						"host": ["{{base_url}}"],
-						"path": ["patient-documents", "1"]
+				{
+					"name": "Get Partner by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/partners/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"partners",
+								"1"
+							]
+						},
+						"description": "Get partner by ID. Includes donations summary (if donor) and treatments (if referral)."
 					},
-					"description": "Delete a patient document (soft delete). Also removes file from storage."
+					"response": [
+						{
+							"name": "Get Partner by ID",
+							"originalRequest": {},
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"id\": 1,\n    \"partner_type\": \"donor\",\n    \"organization_type\": \"NGO\",\n    \"contact_person\": \"John Doe\",\n    \"address\": \"123 Charity Ave\",\n    \"third_party_id\": 2,\n    \"third_party\": {\n        \"id\": 2,\n        \"name\": \"Red Cross\",\n        \"phone\": \"+1234567890\",\n        \"email\": \"contact@redcross.org\",\n        \"is_active\": true,\n        \"is_deleted\": false,\n        \"created_by\": 1,\n        \"created_at\": \"2026-03-01T10:00:00\",\n        \"updated_by\": 1,\n        \"updated_at\": \"2026-03-01T10:00:00\"\n    },\n    \"is_active\": true,\n    \"is_deleted\": false,\n    \"created_by\": 1,\n    \"created_at\": \"2026-03-01T10:00:00\",\n    \"updated_by\": 1,\n    \"updated_at\": \"2026-03-01T10:00:00\"\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
 				},
-				"response": []
-			}
-		]
-	},
-	{
-		"name": "Appointments",
-		"item": [
-			{
-				"name": "Get All Appointments",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/appointments?page=1&size=10",
-						"host": ["{{base_url}}"],
-						"path": ["appointments"],
-						"query": [
-							{ "key": "page", "value": "1" },
-							{ "key": "size", "value": "10" },
-							{ "key": "patient_id", "value": "1", "disabled": true },
-							{ "key": "doctor_id", "value": "1", "disabled": true },
-							{ "key": "partner_id", "value": "1", "disabled": true },
-							{ "key": "status", "value": "scheduled", "disabled": true },
-							{ "key": "type", "value": "scheduled", "disabled": true },
-							{ "key": "location", "value": "internal", "disabled": true },
-							{ "key": "appointment_date", "value": "2026-03-01", "disabled": true },
-							{ "key": "search", "value": "", "disabled": true },
-							{ "key": "sort", "value": "id", "disabled": true },
-							{ "key": "order", "value": "asc", "disabled": true }
-						]
+				{
+					"name": "Create Partner",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Red Cross\",\n    \"partner_type\": \"donor\",\n    \"organization_type\": \"NGO\",\n    \"contact_person\": \"John Doe\",\n    \"phone\": \"+1234567890\",\n    \"email\": \"contact@redcross.org\",\n    \"address\": \"123 Charity Ave\",\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/partners",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"partners"
+							]
+						},
+						"description": "Create a new partner. partner_type: donor, referral, both. organization_type: NGO, organization, individual, hospital, medical_center."
 					},
-					"description": "Get all appointments with pagination, filters, and search. Filters: patient_id, doctor_id, partner_id, status (scheduled/in_progress/completed/cancelled), type (scheduled/walk_in), location (internal/external), appointment_date."
+					"response": [
+						{
+							"name": "Create Partner",
+							"originalRequest": {},
+							"status": "Created",
+							"code": 201,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"id\": 1,\n    \"partner_type\": \"donor\",\n    \"organization_type\": \"NGO\",\n    \"contact_person\": \"John Doe\",\n    \"address\": \"123 Charity Ave\",\n    \"third_party_id\": 2,\n    \"third_party\": {\n        \"id\": 2,\n        \"name\": \"Red Cross\",\n        \"phone\": \"+1234567890\",\n        \"email\": \"contact@redcross.org\",\n        \"is_active\": true,\n        \"is_deleted\": false,\n        \"created_by\": 1,\n        \"created_at\": \"2026-03-01T10:00:00\",\n        \"updated_by\": 1,\n        \"updated_at\": \"2026-03-01T10:00:00\"\n    },\n    \"is_active\": true,\n    \"is_deleted\": false,\n    \"created_by\": 1,\n    \"created_at\": \"2026-03-01T10:00:00\",\n    \"updated_by\": 1,\n    \"updated_at\": \"2026-03-01T10:00:00\"\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
 				},
-				"response": []
-			},
-			{
-				"name": "Get Appointment by ID",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/appointments/:id",
-						"host": ["{{base_url}}"],
-						"path": ["appointments", ":id"],
-						"variable": [{ "key": "id", "value": "1" }]
+				{
+					"name": "Update Partner",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"partner_type\": \"donor\",\n    \"organization_type\": \"NGO\",\n    \"contact_person\": \"Jane Smith\",\n    \"address\": \"456 Updated Ave\",\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/partners/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"partners",
+								"1"
+							]
+						},
+						"description": "Update a partner."
 					},
-					"description": "Get appointment by ID. Includes vital signs and medical record."
+					"response": [
+						{
+							"name": "Update Partner",
+							"originalRequest": {},
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"id\": 1,\n    \"partner_type\": \"donor\",\n    \"organization_type\": \"NGO\",\n    \"contact_person\": \"Jane Smith\",\n    \"address\": \"123 Charity Ave\",\n    \"third_party_id\": 2,\n    \"third_party\": {\n        \"id\": 2,\n        \"name\": \"Red Cross\",\n        \"phone\": \"+1234567890\",\n        \"email\": \"contact@redcross.org\",\n        \"is_active\": true,\n        \"is_deleted\": false,\n        \"created_by\": 1,\n        \"created_at\": \"2026-03-01T10:00:00\",\n        \"updated_by\": 1,\n        \"updated_at\": \"2026-03-01T10:00:00\"\n    },\n    \"is_active\": true,\n    \"is_deleted\": false,\n    \"created_by\": 1,\n    \"created_at\": \"2026-03-01T10:00:00\",\n    \"updated_by\": 1,\n    \"updated_at\": \"2026-03-01T10:00:00\"\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
 				},
-				"response": []
-			},
-			{
-				"name": "Create Appointment",
-				"request": {
-					"method": "POST",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"patient_id\": 1,\n    \"doctor_id\": 1,\n    \"appointment_date\": \"2026-03-15T09:00:00\",\n    \"type\": \"scheduled\",\n    \"location\": \"internal\",\n    \"notes\": \"Follow-up visit\"\n}"
+				{
+					"name": "Delete Partner",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/partners/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"partners",
+								"1"
+							]
+						},
+						"description": "Delete a partner (soft delete)."
 					},
-					"url": {
-						"raw": "{{base_url}}/appointments",
-						"host": ["{{base_url}}"],
-						"path": ["appointments"]
+					"response": [
+						{
+							"name": "Delete Partner",
+							"originalRequest": {},
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"message\": \"Partner deleted successfully\"\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Doctors",
+			"item": [
+				{
+					"name": "Get All Doctors",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/doctors?page=1&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"doctors"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "type",
+									"value": "internal",
+									"disabled": true
+								},
+								{
+									"key": "is_active",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "partner_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get all doctors with pagination, filters, and search. Filters: type (internal/external/partner_provided), is_active, partner_id."
 					},
-					"description": "Create a new appointment. External appointments require partner_id."
+					"response": [
+						{
+							"name": "Get All Doctors",
+							"originalRequest": {},
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"items\": [\n        {\n            \"id\": 1,\n            \"specialization\": \"General Practice\",\n            \"type\": \"internal\",\n            \"partner_id\": null,\n            \"partner_name\": null,\n            \"third_party_id\": 1,\n            \"third_party\": {\n                \"id\": 1,\n                \"name\": \"Dr. Ahmed Ali\",\n                \"phone\": \"+1234567890\",\n                \"email\": \"dr.ahmed@clinic.com\",\n                \"is_active\": true,\n                \"is_deleted\": false,\n                \"created_by\": 1,\n                \"created_at\": \"2026-03-01T10:00:00\",\n                \"updated_by\": 1,\n                \"updated_at\": \"2026-03-01T10:00:00\"\n            },\n            \"is_active\": true,\n            \"is_deleted\": false,\n            \"created_by\": 1,\n            \"created_at\": \"2026-03-01T10:00:00\",\n            \"updated_by\": 1,\n            \"updated_at\": \"2026-03-01T10:00:00\"\n        }\n    ],\n    \"total\": 1,\n    \"page\": 1,\n    \"size\": 10,\n    \"pages\": 1\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
 				},
-				"response": []
-			},
-			{
-				"name": "Update Appointment",
-				"request": {
-					"method": "PUT",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"notes\": \"Updated appointment notes\",\n    \"appointment_date\": \"2026-03-16T10:00:00\"\n}"
+				{
+					"name": "Get Doctor by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/doctors/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"doctors",
+								"1"
+							]
+						},
+						"description": "Get doctor by ID. Includes partner name if partner_provided."
 					},
-					"url": {
-						"raw": "{{base_url}}/appointments/:id",
-						"host": ["{{base_url}}"],
-						"path": ["appointments", ":id"],
-						"variable": [{ "key": "id", "value": "1" }]
-					},
-					"description": "Update an appointment. Cannot update completed appointments."
+					"response": [
+						{
+							"name": "Get Doctor by ID",
+							"originalRequest": {},
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"id\": 1,\n    \"specialization\": \"General Practice\",\n    \"type\": \"internal\",\n    \"partner_id\": null,\n    \"partner_name\": null,\n    \"third_party_id\": 1,\n    \"third_party\": {\n        \"id\": 1,\n        \"name\": \"Dr. Ahmed Ali\",\n        \"phone\": \"+1234567890\",\n        \"email\": \"dr.ahmed@clinic.com\",\n        \"is_active\": true,\n        \"is_deleted\": false,\n        \"created_by\": 1,\n        \"created_at\": \"2026-03-01T10:00:00\",\n        \"updated_by\": 1,\n        \"updated_at\": \"2026-03-01T10:00:00\"\n    },\n    \"is_active\": true,\n    \"is_deleted\": false,\n    \"created_by\": 1,\n    \"created_at\": \"2026-03-01T10:00:00\",\n    \"updated_by\": 1,\n    \"updated_at\": \"2026-03-01T10:00:00\"\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
 				},
-				"response": []
-			},
-			{
-				"name": "Update Appointment Status",
-				"request": {
-					"method": "PUT",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"status\": \"in_progress\"\n}"
+				{
+					"name": "Create Doctor (Internal)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Dr. Ahmed Ali\",\n    \"specialization\": \"General Practice\",\n    \"phone\": \"+1234567890\",\n    \"email\": \"dr.ahmed@clinic.com\",\n    \"type\": \"internal\",\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/doctors",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"doctors"
+							]
+						},
+						"description": "Create an internal doctor (clinic staff)."
 					},
-					"url": {
-						"raw": "{{base_url}}/appointments/:id/status",
-						"host": ["{{base_url}}"],
-						"path": ["appointments", ":id", "status"],
-						"variable": [{ "key": "id", "value": "1" }]
-					},
-					"description": "Update appointment status. Values: scheduled, in_progress, completed, cancelled."
+					"response": [
+						{
+							"name": "Create Doctor (Internal)",
+							"originalRequest": {},
+							"status": "Created",
+							"code": 201,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"id\": 1,\n    \"specialization\": \"General Practice\",\n    \"type\": \"internal\",\n    \"partner_id\": null,\n    \"partner_name\": null,\n    \"third_party_id\": 1,\n    \"third_party\": {\n        \"id\": 1,\n        \"name\": \"Dr. Ahmed Ali\",\n        \"phone\": \"+1234567890\",\n        \"email\": \"dr.ahmed@clinic.com\",\n        \"is_active\": true,\n        \"is_deleted\": false,\n        \"created_by\": 1,\n        \"created_at\": \"2026-03-01T10:00:00\",\n        \"updated_by\": 1,\n        \"updated_at\": \"2026-03-01T10:00:00\"\n    },\n    \"is_active\": true,\n    \"is_deleted\": false,\n    \"created_by\": 1,\n    \"created_at\": \"2026-03-01T10:00:00\",\n    \"updated_by\": 1,\n    \"updated_at\": \"2026-03-01T10:00:00\"\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
 				},
-				"response": []
-			},
-			{
-				"name": "Delete Appointment",
-				"request": {
-					"method": "DELETE",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/appointments/:id",
-						"host": ["{{base_url}}"],
-						"path": ["appointments", ":id"],
-						"variable": [{ "key": "id", "value": "1" }]
+				{
+					"name": "Create Doctor (Partner Provided)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Dr. Sara Hassan\",\n    \"specialization\": \"Surgery\",\n    \"phone\": \"+9876543210\",\n    \"email\": \"dr.sara@hospital.com\",\n    \"type\": \"partner_provided\",\n    \"partner_id\": 1,\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/doctors",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"doctors"
+							]
+						},
+						"description": "Create a partner-provided doctor. Requires partner_id."
 					},
-					"description": "Delete an appointment (soft delete)."
+					"response": [
+						{
+							"name": "Create Doctor (Partner Provided)",
+							"originalRequest": {},
+							"status": "Created",
+							"code": 201,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"id\": 1,\n    \"specialization\": \"General Practice\",\n    \"type\": \"partner_provided\",\n    \"partner_id\": 1,\n    \"partner_name\": \"Red Cross\",\n    \"third_party_id\": 1,\n    \"third_party\": {\n        \"id\": 5,\n        \"name\": \"Dr. Sara Hassan\",\n        \"phone\": \"+9876543210\",\n        \"email\": \"dr.sara@hospital.com\",\n        \"is_active\": true,\n        \"is_deleted\": false,\n        \"created_by\": 1,\n        \"created_at\": \"2026-03-01T10:00:00\",\n        \"updated_by\": 1,\n        \"updated_at\": \"2026-03-01T10:00:00\"\n    },\n    \"is_active\": true,\n    \"is_deleted\": false,\n    \"created_by\": 1,\n    \"created_at\": \"2026-03-01T10:00:00\",\n    \"updated_by\": 1,\n    \"updated_at\": \"2026-03-01T10:00:00\"\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
 				},
-				"response": []
-			}
-		]
-	},
-	{
-		"name": "Vital Signs",
-		"item": [
-			{
-				"name": "Get Vitals for Appointment",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/appointments/:appointment_id/vitals",
-						"host": ["{{base_url}}"],
-						"path": ["appointments", ":appointment_id", "vitals"],
-						"variable": [{ "key": "appointment_id", "value": "1" }]
+				{
+					"name": "Update Doctor",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"specialization\": \"Cardiology\",\n    \"type\": \"internal\",\n    \"partner_id\": null,\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/doctors/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"doctors",
+								"1"
+							]
+						},
+						"description": "Update a doctor."
 					},
-					"description": "Get vital signs for an appointment. One vital signs record per appointment."
+					"response": [
+						{
+							"name": "Update Doctor",
+							"originalRequest": {},
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"id\": 1,\n    \"specialization\": \"Cardiology\",\n    \"type\": \"internal\",\n    \"partner_id\": null,\n    \"partner_name\": null,\n    \"third_party_id\": 1,\n    \"third_party\": {\n        \"id\": 1,\n        \"name\": \"Dr. Ahmed Ali\",\n        \"phone\": \"+1234567890\",\n        \"email\": \"dr.ahmed@clinic.com\",\n        \"is_active\": true,\n        \"is_deleted\": false,\n        \"created_by\": 1,\n        \"created_at\": \"2026-03-01T10:00:00\",\n        \"updated_by\": 1,\n        \"updated_at\": \"2026-03-01T10:00:00\"\n    },\n    \"is_active\": true,\n    \"is_deleted\": false,\n    \"created_by\": 1,\n    \"created_at\": \"2026-03-01T10:00:00\",\n    \"updated_by\": 1,\n    \"updated_at\": \"2026-03-01T10:00:00\"\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
 				},
-				"response": []
-			},
-			{
-				"name": "Add Vitals to Appointment",
-				"request": {
-					"method": "POST",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"blood_pressure_systolic\": 120,\n    \"blood_pressure_diastolic\": 80,\n    \"heart_rate\": 72,\n    \"temperature\": 36.6,\n    \"respiratory_rate\": 16,\n    \"weight\": 70.5,\n    \"height\": 175.0,\n    \"notes\": \"Normal vitals\"\n}"
+				{
+					"name": "Delete Doctor",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/doctors/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"doctors",
+								"1"
+							]
+						},
+						"description": "Delete a doctor (soft delete)."
 					},
-					"url": {
-						"raw": "{{base_url}}/appointments/:appointment_id/vitals",
-						"host": ["{{base_url}}"],
-						"path": ["appointments", ":appointment_id", "vitals"],
-						"variable": [{ "key": "appointment_id", "value": "1" }]
+					"response": [
+						{
+							"name": "Delete Doctor",
+							"originalRequest": {},
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"message\": \"Doctor deleted successfully\"\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Patients",
+			"item": [
+				{
+					"name": "Get All Patients",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/patients?page=1&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"patients"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "is_active",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "gender",
+									"value": "male",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get all patients with pagination, filters, and search. Filters: is_active, gender (male/female). Search: first_name, last_name, phone, email."
 					},
-					"description": "Add vital signs to an appointment. One record per appointment. All fields optional. Cannot add to completed appointments."
+					"response": [
+						{
+							"name": "Get All Patients",
+							"originalRequest": {},
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"items\": [\n        {\n            \"id\": 1,\n            \"first_name\": \"Ahmad\",\n            \"last_name\": \"Hassan\",\n            \"date_of_birth\": \"1990-05-15\",\n            \"gender\": \"male\",\n            \"address\": \"123 Main Street\",\n            \"emergency_contact\": \"Sara Hassan\",\n            \"emergency_phone\": \"+0987654321\",\n            \"third_party_id\": 3,\n            \"third_party\": {\n                \"id\": 3,\n                \"name\": \"Ahmad Hassan\",\n                \"phone\": \"+1234567890\",\n                \"email\": \"ahmad.hassan@example.com\",\n                \"is_active\": true,\n                \"is_deleted\": false,\n                \"created_by\": 1,\n                \"created_at\": \"2026-03-01T10:00:00\",\n                \"updated_by\": 1,\n                \"updated_at\": \"2026-03-01T10:00:00\"\n            },\n            \"is_active\": true,\n            \"is_deleted\": false,\n            \"created_by\": 1,\n            \"created_at\": \"2026-03-01T10:00:00\",\n            \"updated_by\": 1,\n            \"updated_at\": \"2026-03-01T10:00:00\"\n        }\n    ],\n    \"total\": 1,\n    \"page\": 1,\n    \"size\": 10,\n    \"pages\": 1\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
 				},
-				"response": []
-			},
-			{
-				"name": "Update Vital Signs",
-				"request": {
-					"method": "PUT",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"heart_rate\": 85,\n    \"notes\": \"After exercise\"\n}"
+				{
+					"name": "Get Patient by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/patients/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"patients",
+								"1"
+							],
+							"query": [
+								{
+									"key": "with_documents",
+									"value": "true",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get patient by ID. Use with_documents=true to include documents."
 					},
-					"url": {
-						"raw": "{{base_url}}/vital-signs/:id",
-						"host": ["{{base_url}}"],
-						"path": ["vital-signs", ":id"],
-						"variable": [{ "key": "id", "value": "1" }]
-					},
-					"description": "Update vital signs. Cannot edit if appointment is completed."
+					"response": [
+						{
+							"name": "Get Patient by ID",
+							"originalRequest": {},
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"id\": 1,\n    \"first_name\": \"Ahmad\",\n    \"last_name\": \"Hassan\",\n    \"date_of_birth\": \"1990-05-15\",\n    \"gender\": \"male\",\n    \"address\": \"123 Main Street\",\n    \"emergency_contact\": \"Sara Hassan\",\n    \"emergency_phone\": \"+0987654321\",\n    \"third_party_id\": 3,\n    \"third_party\": {\n        \"id\": 3,\n        \"name\": \"Ahmad Hassan\",\n        \"phone\": \"+1234567890\",\n        \"email\": \"ahmad.hassan@example.com\",\n        \"is_active\": true,\n        \"is_deleted\": false,\n        \"created_by\": 1,\n        \"created_at\": \"2026-03-01T10:00:00\",\n        \"updated_by\": 1,\n        \"updated_at\": \"2026-03-01T10:00:00\"\n    },\n    \"is_active\": true,\n    \"is_deleted\": false,\n    \"created_by\": 1,\n    \"created_at\": \"2026-03-01T10:00:00\",\n    \"updated_by\": 1,\n    \"updated_at\": \"2026-03-01T10:00:00\"\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
 				},
-				"response": []
-			},
-			{
-				"name": "Delete Vital Signs",
-				"request": {
-					"method": "DELETE",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/vital-signs/:id",
-						"host": ["{{base_url}}"],
-						"path": ["vital-signs", ":id"],
-						"variable": [{ "key": "id", "value": "1" }]
+				{
+					"name": "Create Patient",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\": \"Ahmad\",\n    \"last_name\": \"Hassan\",\n    \"date_of_birth\": \"1990-05-15\",\n    \"gender\": \"male\",\n    \"phone\": \"+1234567890\",\n    \"email\": \"ahmad.hassan@example.com\",\n    \"address\": \"123 Main Street\",\n    \"emergency_contact\": \"Sara Hassan\",\n    \"emergency_phone\": \"+0987654321\",\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/patients",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"patients"
+							]
+						},
+						"description": "Create a new patient. Auto-creates a third_party record (type: patient) if third_party_id not provided."
 					},
-					"description": "Delete vital signs (soft delete)."
+					"response": [
+						{
+							"name": "Create Patient",
+							"originalRequest": {},
+							"status": "Created",
+							"code": 201,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"id\": 1,\n    \"first_name\": \"Ahmad\",\n    \"last_name\": \"Hassan\",\n    \"date_of_birth\": \"1990-05-15\",\n    \"gender\": \"male\",\n    \"address\": \"123 Main Street\",\n    \"emergency_contact\": \"Sara Hassan\",\n    \"emergency_phone\": \"+0987654321\",\n    \"third_party_id\": 3,\n    \"third_party\": {\n        \"id\": 3,\n        \"name\": \"Ahmad Hassan\",\n        \"phone\": \"+1234567890\",\n        \"email\": \"ahmad.hassan@example.com\",\n        \"is_active\": true,\n        \"is_deleted\": false,\n        \"created_by\": 1,\n        \"created_at\": \"2026-03-01T10:00:00\",\n        \"updated_by\": 1,\n        \"updated_at\": \"2026-03-01T10:00:00\"\n    },\n    \"is_active\": true,\n    \"is_deleted\": false,\n    \"created_by\": 1,\n    \"created_at\": \"2026-03-01T10:00:00\",\n    \"updated_by\": 1,\n    \"updated_at\": \"2026-03-01T10:00:00\"\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
 				},
-				"response": []
-			}
-		]
-	},
-	{
-		"name": "Medical Records",
-		"item": [
-			{
-				"name": "Get All Medical Records",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/medical-records?page=1&size=10",
-						"host": ["{{base_url}}"],
-						"path": ["medical-records"],
-						"query": [
-							{ "key": "page", "value": "1" },
-							{ "key": "size", "value": "10" },
-							{ "key": "patient_id", "value": "1", "disabled": true },
-							{ "key": "appointment_id", "value": "1", "disabled": true },
-							{ "key": "sort", "value": "id", "disabled": true },
-							{ "key": "order", "value": "asc", "disabled": true }
-						]
+				{
+					"name": "Update Patient",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\": \"Ahmad\",\n    \"last_name\": \"Hassan Updated\",\n    \"emergency_contact\": \"Ali Hassan\",\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/patients/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"patients",
+								"1"
+							]
+						},
+						"description": "Update a patient."
 					},
-					"description": "List all medical records with pagination and filters. Filters: patient_id, appointment_id."
+					"response": [
+						{
+							"name": "Update Patient",
+							"originalRequest": {},
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"id\": 1,\n    \"first_name\": \"Ahmad\",\n    \"last_name\": \"Hassan Updated\",\n    \"date_of_birth\": \"1990-05-15\",\n    \"gender\": \"male\",\n    \"address\": \"123 Main Street\",\n    \"emergency_contact\": \"Sara Hassan\",\n    \"emergency_phone\": \"+0987654321\",\n    \"third_party_id\": 3,\n    \"third_party\": {\n        \"id\": 3,\n        \"name\": \"Ahmad Hassan\",\n        \"phone\": \"+1234567890\",\n        \"email\": \"ahmad.hassan@example.com\",\n        \"is_active\": true,\n        \"is_deleted\": false,\n        \"created_by\": 1,\n        \"created_at\": \"2026-03-01T10:00:00\",\n        \"updated_by\": 1,\n        \"updated_at\": \"2026-03-01T10:00:00\"\n    },\n    \"is_active\": true,\n    \"is_deleted\": false,\n    \"created_by\": 1,\n    \"created_at\": \"2026-03-01T10:00:00\",\n    \"updated_by\": 1,\n    \"updated_at\": \"2026-03-01T10:00:00\"\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
 				},
-				"response": []
-			},
-			{
-				"name": "Get Medical Record by ID",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/medical-records/:id",
-						"host": ["{{base_url}}"],
-						"path": ["medical-records", ":id"],
-						"variable": [{ "key": "id", "value": "1" }]
+				{
+					"name": "Delete Patient",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/patients/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"patients",
+								"1"
+							]
+						},
+						"description": "Delete a patient (soft delete)."
 					},
-					"description": "Get medical record by ID. Includes patient name."
+					"response": [
+						{
+							"name": "Delete Patient",
+							"originalRequest": {},
+							"status": "OK",
+							"code": 200,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n    \"message\": \"Patient deleted successfully\"\n}",
+							"_postman_previewlanguage": "json"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Patient Documents",
+			"item": [
+				{
+					"name": "Get Patient Document Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/patient-document-types",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"patient-document-types"
+							]
+						},
+						"description": "Returns all available patient document types with value and human-readable label."
+					},
+					"response": []
 				},
-				"response": []
-			},
-			{
-				"name": "Get Record for Appointment",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/appointments/:appointment_id/medical-record",
-						"host": ["{{base_url}}"],
-						"path": ["appointments", ":appointment_id", "medical-record"],
-						"variable": [{ "key": "appointment_id", "value": "1" }]
+				{
+					"name": "Get Patient Documents",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/patients/1/documents?page=1&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"patients",
+								"1",
+								"documents"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "document_type",
+									"value": "lab_report",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								}
+							]
+						},
+						"description": "List all documents for a patient. Filter by document_type. Each item includes a presigned file URL (5 min expiry)."
 					},
-					"description": "Get the medical record for a specific appointment."
+					"response": []
 				},
-				"response": []
-			},
-			{
-				"name": "Create Record for Appointment",
-				"request": {
-					"method": "POST",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"chief_complaint\": \"Headache and dizziness\",\n    \"diagnosis\": \"Tension headache\",\n    \"treatment_notes\": \"Prescribed rest and analgesics\",\n    \"follow_up_date\": \"2026-04-01\"\n}"
+				{
+					"name": "Get Document by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/patient-documents/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"patient-documents",
+								"1"
+							]
+						},
+						"description": "Get document by ID. Returns a presigned file URL (5 min expiry) for download."
 					},
-					"url": {
-						"raw": "{{base_url}}/appointments/:appointment_id/medical-record",
-						"host": ["{{base_url}}"],
-						"path": ["appointments", ":appointment_id", "medical-record"],
-						"variable": [{ "key": "appointment_id", "value": "1" }]
-					},
-					"description": "Create a medical record for an appointment. One record per appointment. Cannot add to completed appointments."
+					"response": []
 				},
-				"response": []
-			},
-			{
-				"name": "Update Medical Record",
-				"request": {
-					"method": "PUT",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"diagnosis\": \"Migraine\",\n    \"treatment_notes\": \"Updated treatment plan\"\n}"
+				{
+					"name": "Upload Document",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": ""
+								},
+								{
+									"key": "document_name",
+									"value": "Blood Test Results",
+									"type": "text",
+									"description": "Optional custom display name. If omitted, uses the original filename."
+								},
+								{
+									"key": "document_type",
+									"value": "lab_report",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/patients/1/documents",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"patients",
+								"1",
+								"documents"
+							]
+						},
+						"description": "Upload a document for a patient. Accepts multipart/form-data. document_name and document_type are optional. The file_url in the response is a presigned URL (5 min expiry) that uses the document_name for the download filename."
 					},
-					"url": {
-						"raw": "{{base_url}}/medical-records/:id",
-						"host": ["{{base_url}}"],
-						"path": ["medical-records", ":id"],
-						"variable": [{ "key": "id", "value": "1" }]
-					},
-					"description": "Update a medical record. Cannot edit if appointment is completed."
+					"response": []
 				},
-				"response": []
-			},
-			{
-				"name": "Delete Medical Record",
-				"request": {
-					"method": "DELETE",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/medical-records/:id",
-						"host": ["{{base_url}}"],
-						"path": ["medical-records", ":id"],
-						"variable": [{ "key": "id", "value": "1" }]
+				{
+					"name": "Delete Document",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/patient-documents/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"patient-documents",
+								"1"
+							]
+						},
+						"description": "Delete a patient document (soft delete). Also removes file from storage."
 					},
-					"description": "Delete a medical record (soft delete)."
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Appointments",
+			"item": [
+				{
+					"name": "Get All Appointments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/appointments?page=1&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"appointments"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "patient_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "doctor_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "partner_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "scheduled",
+									"disabled": true
+								},
+								{
+									"key": "type",
+									"value": "scheduled",
+									"disabled": true
+								},
+								{
+									"key": "location",
+									"value": "internal",
+									"disabled": true
+								},
+								{
+									"key": "appointment_date",
+									"value": "2026-03-01",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get all appointments with pagination, filters, and search. Filters: patient_id, doctor_id, partner_id, status (scheduled/in_progress/completed/cancelled), type (scheduled/walk_in), location (internal/external), appointment_date."
+					},
+					"response": []
 				},
-				"response": []
-			}
-		]
-	},
-	{
-		"name": "Treatments",
-		"item": [
-			{
-				"name": "Get All Treatments",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/treatments?page=1&size=10",
-						"host": ["{{base_url}}"],
-						"path": ["treatments"],
-						"query": [
-							{ "key": "page", "value": "1" },
-							{ "key": "size", "value": "10" },
-							{ "key": "patient_id", "value": "1", "disabled": true },
-							{ "key": "partner_id", "value": "1", "disabled": true },
-							{ "key": "appointment_id", "value": "1", "disabled": true },
-							{ "key": "status", "value": "pending", "disabled": true },
-							{ "key": "sort", "value": "id", "disabled": true },
-							{ "key": "order", "value": "asc", "disabled": true }
-						]
+				{
+					"name": "Get Appointment by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/appointments/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"appointments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Get appointment by ID. Includes vital signs and medical record."
 					},
-					"description": "List all treatments with pagination and filters. Filters: patient_id, partner_id, appointment_id, status (pending/completed)."
+					"response": []
 				},
-				"response": []
-			},
-			{
-				"name": "Get Treatment by ID",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/treatments/:id",
-						"host": ["{{base_url}}"],
-						"path": ["treatments", ":id"],
-						"variable": [{ "key": "id", "value": "1" }]
+				{
+					"name": "Create Appointment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"patient_id\": 1,\n    \"doctor_id\": 1,\n    \"appointment_date\": \"2026-03-15T09:00:00\",\n    \"type\": \"scheduled\",\n    \"location\": \"internal\",\n    \"notes\": \"Follow-up visit\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/appointments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"appointments"
+							]
+						},
+						"description": "Create a new appointment. External appointments require partner_id."
 					},
-					"description": "Get treatment by ID. Includes patient and partner names."
+					"response": []
 				},
-				"response": []
-			},
-			{
-				"name": "Create Treatment",
-				"request": {
-					"method": "POST",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"patient_id\": 1,\n    \"partner_id\": 1,\n    \"appointment_id\": 1,\n    \"treatment_type\": \"Surgery\",\n    \"description\": \"Minor surgery procedure\",\n    \"treatment_date\": \"2026-03-20\",\n    \"cost\": 500.00,\n    \"notes\": \"Requires local anesthesia\"\n}"
+				{
+					"name": "Update Appointment",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"notes\": \"Updated appointment notes\",\n    \"appointment_date\": \"2026-03-16T10:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/appointments/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"appointments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Update an appointment. Cannot update completed appointments."
 					},
-					"url": {
-						"raw": "{{base_url}}/treatments",
-						"host": ["{{base_url}}"],
-						"path": ["treatments"]
-					},
-					"description": "Create a new treatment. Partner must have partner_type of 'referral' or 'both'. appointment_id is optional. Multiple treatments can be linked to one appointment."
+					"response": []
 				},
-				"response": []
-			},
-			{
-				"name": "Update Treatment",
-				"request": {
-					"method": "PUT",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"description\": \"Updated treatment description\",\n    \"cost\": 750.00,\n    \"notes\": \"Updated notes\"\n}"
+				{
+					"name": "Update Appointment Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"in_progress\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/appointments/:id/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"appointments",
+								":id",
+								"status"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Update appointment status. Values: scheduled, in_progress, completed, cancelled."
 					},
-					"url": {
-						"raw": "{{base_url}}/treatments/:id",
-						"host": ["{{base_url}}"],
-						"path": ["treatments", ":id"],
-						"variable": [{ "key": "id", "value": "1" }]
-					},
-					"description": "Update a treatment."
+					"response": []
 				},
-				"response": []
-			},
-			{
-				"name": "Update Treatment Status",
-				"request": {
-					"method": "PUT",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"status\": \"completed\"\n}"
+				{
+					"name": "Delete Appointment",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/appointments/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"appointments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Delete an appointment (soft delete)."
 					},
-					"url": {
-						"raw": "{{base_url}}/treatments/:id/status",
-						"host": ["{{base_url}}"],
-						"path": ["treatments", ":id", "status"],
-						"variable": [{ "key": "id", "value": "1" }]
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Vital Signs",
+			"item": [
+				{
+					"name": "Get Vitals for Appointment",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/appointments/:appointment_id/vitals",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"appointments",
+								":appointment_id",
+								"vitals"
+							],
+							"variable": [
+								{
+									"key": "appointment_id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Get vital signs for an appointment. One vital signs record per appointment."
 					},
-					"description": "Update treatment status. Values: pending, completed."
+					"response": []
 				},
-				"response": []
-			},
-			{
-				"name": "Delete Treatment",
-				"request": {
-					"method": "DELETE",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/treatments/:id",
-						"host": ["{{base_url}}"],
-						"path": ["treatments", ":id"],
-						"variable": [{ "key": "id", "value": "1" }]
+				{
+					"name": "Add Vitals to Appointment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"blood_pressure_systolic\": 120,\n    \"blood_pressure_diastolic\": 80,\n    \"heart_rate\": 72,\n    \"temperature\": 36.6,\n    \"respiratory_rate\": 16,\n    \"weight\": 70.5,\n    \"height\": 175.0,\n    \"notes\": \"Normal vitals\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/appointments/:appointment_id/vitals",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"appointments",
+								":appointment_id",
+								"vitals"
+							],
+							"variable": [
+								{
+									"key": "appointment_id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Add vital signs to an appointment. One record per appointment. All fields optional. Cannot add to completed appointments."
 					},
-					"description": "Delete a treatment (soft delete)."
+					"response": []
 				},
-				"response": []
-			}
-		]
-	},
-	{
-		"name": "Inventory Transactions",
-		"item": [
-			{
-				"name": "Get All Inventory Transactions",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/inventory-transactions?page=1&size=10",
-						"host": ["{{base_url}}"],
-						"path": ["inventory-transactions"],
-						"query": [
-							{ "key": "page", "value": "1" },
-							{ "key": "size", "value": "10" },
-							{ "key": "transaction_type", "value": "purchase", "disabled": true },
-							{ "key": "third_party_id", "value": "1", "disabled": true },
-							{ "key": "transaction_date", "value": "2026-03-01", "disabled": true },
-							{ "key": "sort", "value": "id", "disabled": true },
-							{ "key": "order", "value": "asc", "disabled": true }
-						]
+				{
+					"name": "Update Vital Signs",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"heart_rate\": 85,\n    \"notes\": \"After exercise\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/vital-signs/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"vital-signs",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Update vital signs. Cannot edit if appointment is completed."
 					},
-					"description": "List all inventory transactions with pagination and filters. Filters: transaction_type (purchase/donation/prescription/loss/breakage/expiration/destruction), third_party_id, transaction_date. Sortable fields: id, transaction_type, transaction_date."
+					"response": []
 				},
-				"response": []
-			},
-			{
-				"name": "Get Inventory Transaction by ID",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/inventory-transactions/:id",
-						"host": ["{{base_url}}"],
-						"path": ["inventory-transactions", ":id"],
-						"variable": [{ "key": "id", "value": "1" }]
+				{
+					"name": "Delete Vital Signs",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/vital-signs/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"vital-signs",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Delete vital signs (soft delete)."
 					},
-					"description": "Get inventory transaction by ID. Includes transaction items with item names."
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Medical Records",
+			"item": [
+				{
+					"name": "Get All Medical Records",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/medical-records?page=1&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medical-records"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "patient_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "appointment_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								}
+							]
+						},
+						"description": "List all medical records with pagination and filters. Filters: patient_id, appointment_id."
+					},
+					"response": []
 				},
-				"response": []
-			},
-			{
-				"name": "Create Inventory Transaction (Purchase)",
-				"request": {
-					"method": "POST",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"transaction_type\": \"purchase\",\n    \"transaction_date\": \"2026-03-01\",\n    \"notes\": \"Monthly medicine restock\",\n    \"items\": [\n        {\n            \"item_type\": \"medicine\",\n            \"item_id\": 1,\n            \"quantity\": 100\n        },\n        {\n            \"item_type\": \"equipment\",\n            \"item_id\": 1,\n            \"quantity\": 5\n        }\n    ]\n}"
+				{
+					"name": "Get Medical Record by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/medical-records/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medical-records",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Get medical record by ID. Includes patient name."
 					},
-					"url": {
-						"raw": "{{base_url}}/inventory-transactions",
-						"host": ["{{base_url}}"],
-						"path": ["inventory-transactions"]
-					},
-					"description": "Create a purchase transaction. third_party_id is auto-set to the current user's third_party. Items are optional and can be added later."
+					"response": []
 				},
-				"response": []
-			},
-			{
-				"name": "Create Inventory Transaction (Donation)",
-				"request": {
-					"method": "POST",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"transaction_type\": \"donation\",\n    \"third_party_id\": 1,\n    \"transaction_date\": \"2026-03-01\",\n    \"notes\": \"Donation from partner\",\n    \"items\": [\n        {\n            \"item_type\": \"medicine\",\n            \"item_id\": 1,\n            \"quantity\": 50\n        }\n    ]\n}"
+				{
+					"name": "Get Record for Appointment",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/appointments/:appointment_id/medical-record",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"appointments",
+								":appointment_id",
+								"medical-record"
+							],
+							"variable": [
+								{
+									"key": "appointment_id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Get the medical record for a specific appointment."
 					},
-					"url": {
-						"raw": "{{base_url}}/inventory-transactions",
-						"host": ["{{base_url}}"],
-						"path": ["inventory-transactions"]
-					},
-					"description": "Create a donation transaction. third_party_id is required and must point to a partner with partner_type of 'donor' or 'both'."
+					"response": []
 				},
-				"response": []
-			},
-			{
-				"name": "Create Inventory Transaction (Prescription)",
-				"request": {
-					"method": "POST",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"transaction_type\": \"prescription\",\n    \"third_party_id\": 1,\n    \"transaction_date\": \"2026-03-01\",\n    \"notes\": \"Patient prescription\",\n    \"items\": [\n        {\n            \"item_type\": \"medicine\",\n            \"item_id\": 1,\n            \"quantity\": 2\n        }\n    ]\n}"
+				{
+					"name": "Create Record for Appointment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"chief_complaint\": \"Headache and dizziness\",\n    \"diagnosis\": \"Tension headache\",\n    \"treatment_notes\": \"Prescribed rest and analgesics\",\n    \"follow_up_date\": \"2026-04-01\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/appointments/:appointment_id/medical-record",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"appointments",
+								":appointment_id",
+								"medical-record"
+							],
+							"variable": [
+								{
+									"key": "appointment_id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Create a medical record for an appointment. One record per appointment. Cannot add to completed appointments."
 					},
-					"url": {
-						"raw": "{{base_url}}/inventory-transactions",
-						"host": ["{{base_url}}"],
-						"path": ["inventory-transactions"]
-					},
-					"description": "Create a prescription transaction. third_party_id is required and must point to a doctor. Decreases inventory automatically."
+					"response": []
 				},
-				"response": []
-			},
-			{
-				"name": "Update Inventory Transaction",
-				"request": {
-					"method": "PUT",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"transaction_date\": \"2026-03-02\",\n    \"notes\": \"Updated notes\"\n}"
+				{
+					"name": "Update Medical Record",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"diagnosis\": \"Migraine\",\n    \"treatment_notes\": \"Updated treatment plan\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/medical-records/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medical-records",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Update a medical record. Cannot edit if appointment is completed."
 					},
-					"url": {
-						"raw": "{{base_url}}/inventory-transactions/:id",
-						"host": ["{{base_url}}"],
-						"path": ["inventory-transactions", ":id"],
-						"variable": [{ "key": "id", "value": "1" }]
-					},
-					"description": "Update an inventory transaction. Only transaction_date and notes can be updated."
+					"response": []
 				},
-				"response": []
-			},
-			{
-				"name": "Delete Inventory Transaction",
-				"request": {
-					"method": "DELETE",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/inventory-transactions/:id",
-						"host": ["{{base_url}}"],
-						"path": ["inventory-transactions", ":id"],
-						"variable": [{ "key": "id", "value": "1" }]
+				{
+					"name": "Delete Medical Record",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/medical-records/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medical-records",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Delete a medical record (soft delete)."
 					},
-					"description": "Delete an inventory transaction (soft delete). Reverses inventory changes."
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Treatments",
+			"item": [
+				{
+					"name": "Get All Treatments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/treatments?page=1&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"treatments"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "patient_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "partner_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "appointment_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "pending",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								}
+							]
+						},
+						"description": "List all treatments with pagination and filters. Filters: patient_id, partner_id, appointment_id, status (pending/completed)."
+					},
+					"response": []
 				},
-				"response": []
-			}
-		]
-	},
-	{
-		"name": "Inventory Transaction Items",
-		"item": [
-			{
-				"name": "Get Transaction Items",
-				"request": {
-					"method": "GET",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/inventory-transactions/:transaction_id/items",
-						"host": ["{{base_url}}"],
-						"path": ["inventory-transactions", ":transaction_id", "items"],
-						"variable": [{ "key": "transaction_id", "value": "1" }]
+				{
+					"name": "Get Treatment by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/treatments/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"treatments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Get treatment by ID. Includes patient and partner names."
 					},
-					"description": "List all items for a specific inventory transaction."
+					"response": []
 				},
-				"response": []
-			},
-			{
-				"name": "Add Transaction Item",
-				"request": {
-					"method": "POST",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"item_type\": \"medicine\",\n    \"item_id\": 1,\n    \"quantity\": 10\n}"
+				{
+					"name": "Create Treatment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"patient_id\": 1,\n    \"partner_id\": 1,\n    \"appointment_id\": 1,\n    \"treatment_type\": \"Surgery\",\n    \"description\": \"Minor surgery procedure\",\n    \"treatment_date\": \"2026-03-20\",\n    \"cost\": 500.00,\n    \"notes\": \"Requires local anesthesia\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/treatments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"treatments"
+							]
+						},
+						"description": "Create a new treatment. Partner must have partner_type of 'referral' or 'both'. appointment_id is optional. Multiple treatments can be linked to one appointment."
 					},
-					"url": {
-						"raw": "{{base_url}}/inventory-transactions/:transaction_id/items",
-						"host": ["{{base_url}}"],
-						"path": ["inventory-transactions", ":transaction_id", "items"],
-						"variable": [{ "key": "transaction_id", "value": "1" }]
-					},
-					"description": "Add an item to an existing inventory transaction. item_type can be: medicine, equipment, medical_device. quantity must be greater than 0."
+					"response": []
 				},
-				"response": []
-			},
-			{
-				"name": "Update Transaction Item",
-				"request": {
-					"method": "PUT",
-					"header": [{ "key": "Content-Type", "value": "application/json" }],
-					"body": {
-						"mode": "raw",
-						"raw": "{\n    \"quantity\": 20\n}"
+				{
+					"name": "Update Treatment",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Updated treatment description\",\n    \"cost\": 750.00,\n    \"notes\": \"Updated notes\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/treatments/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"treatments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Update a treatment."
 					},
-					"url": {
-						"raw": "{{base_url}}/inventory-transaction-items/:id",
-						"host": ["{{base_url}}"],
-						"path": ["inventory-transaction-items", ":id"],
-						"variable": [{ "key": "id", "value": "1" }]
-					},
-					"description": "Update a transaction item. Can update item_type, item_id, and quantity. All fields are optional."
+					"response": []
 				},
-				"response": []
-			},
-			{
-				"name": "Delete Transaction Item",
-				"request": {
-					"method": "DELETE",
-					"header": [],
-					"url": {
-						"raw": "{{base_url}}/inventory-transaction-items/:id",
-						"host": ["{{base_url}}"],
-						"path": ["inventory-transaction-items", ":id"],
-						"variable": [{ "key": "id", "value": "1" }]
+				{
+					"name": "Update Treatment Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"completed\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/treatments/:id/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"treatments",
+								":id",
+								"status"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Update treatment status. Values: pending, completed."
 					},
-					"description": "Delete a transaction item (soft delete). Reverses the inventory change for this item."
+					"response": []
 				},
-				"response": []
-			}
-		]
-	}
+				{
+					"name": "Delete Treatment",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/treatments/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"treatments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Delete a treatment (soft delete)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Inventory Transactions",
+			"item": [
+				{
+					"name": "Get All Inventory Transactions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/inventory-transactions?page=1&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"inventory-transactions"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "transaction_type",
+									"value": "purchase",
+									"disabled": true
+								},
+								{
+									"key": "third_party_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "transaction_date",
+									"value": "2026-03-01",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "order",
+									"value": "asc",
+									"disabled": true
+								}
+							]
+						},
+						"description": "List all inventory transactions with pagination and filters. Filters: transaction_type (purchase/donation/prescription/loss/breakage/expiration/destruction), third_party_id, transaction_date. Sortable fields: id, transaction_type, transaction_date."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Inventory Transaction by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/inventory-transactions/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"inventory-transactions",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Get inventory transaction by ID. Includes transaction items with item names."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Inventory Transaction (Purchase)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"transaction_type\": \"purchase\",\n    \"transaction_date\": \"2026-03-01\",\n    \"notes\": \"Monthly medicine restock\",\n    \"items\": [\n        {\n            \"item_type\": \"medicine\",\n            \"item_id\": 1,\n            \"quantity\": 100\n        },\n        {\n            \"item_type\": \"equipment\",\n            \"item_id\": 1,\n            \"quantity\": 5\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/inventory-transactions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"inventory-transactions"
+							]
+						},
+						"description": "Create a purchase transaction. third_party_id is auto-set to the current user's third_party. Items are optional and can be added later."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Inventory Transaction (Donation)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"transaction_type\": \"donation\",\n    \"third_party_id\": 1,\n    \"transaction_date\": \"2026-03-01\",\n    \"notes\": \"Donation from partner\",\n    \"items\": [\n        {\n            \"item_type\": \"medicine\",\n            \"item_id\": 1,\n            \"quantity\": 50\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/inventory-transactions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"inventory-transactions"
+							]
+						},
+						"description": "Create a donation transaction. third_party_id is required and must point to a partner with partner_type of 'donor' or 'both'."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Inventory Transaction (Prescription)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"transaction_type\": \"prescription\",\n    \"third_party_id\": 1,\n    \"transaction_date\": \"2026-03-01\",\n    \"notes\": \"Patient prescription\",\n    \"items\": [\n        {\n            \"item_type\": \"medicine\",\n            \"item_id\": 1,\n            \"quantity\": 2\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/inventory-transactions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"inventory-transactions"
+							]
+						},
+						"description": "Create a prescription transaction. third_party_id is required and must point to a doctor. Decreases inventory automatically."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Inventory Transaction",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"transaction_date\": \"2026-03-02\",\n    \"notes\": \"Updated notes\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/inventory-transactions/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"inventory-transactions",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Update an inventory transaction. Only transaction_date and notes can be updated."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Inventory Transaction",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/inventory-transactions/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"inventory-transactions",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Delete an inventory transaction (soft delete). Reverses inventory changes."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Inventory Transaction Items",
+			"item": [
+				{
+					"name": "Get Transaction Items",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/inventory-transactions/:transaction_id/items",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"inventory-transactions",
+								":transaction_id",
+								"items"
+							],
+							"variable": [
+								{
+									"key": "transaction_id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "List all items for a specific inventory transaction."
+					},
+					"response": []
+				},
+				{
+					"name": "Add Transaction Item",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"item_type\": \"medicine\",\n    \"item_id\": 1,\n    \"quantity\": 10\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/inventory-transactions/:transaction_id/items",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"inventory-transactions",
+								":transaction_id",
+								"items"
+							],
+							"variable": [
+								{
+									"key": "transaction_id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Add an item to an existing inventory transaction. item_type can be: medicine, equipment, medical_device. quantity must be greater than 0."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Transaction Item",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quantity\": 20\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/inventory-transaction-items/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"inventory-transaction-items",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Update a transaction item. Can update item_type, item_id, and quantity. All fields are optional."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Transaction Item",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/inventory-transaction-items/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"inventory-transaction-items",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Delete a transaction item (soft delete). Reverses the inventory change for this item."
+					},
+					"response": []
+				}
+			]
+		}
 	],
 	"auth": {
 		"type": "bearer",
@@ -1867,7 +3429,9 @@
 				"type": "text/javascript",
 				"packages": {},
 				"requests": {},
-				"exec": [""]
+				"exec": [
+					""
+				]
 			}
 		},
 		{
@@ -1876,7 +3440,9 @@
 				"type": "text/javascript",
 				"packages": {},
 				"requests": {},
-				"exec": [""]
+				"exec": [
+					""
+				]
 			}
 		}
 	],
