@@ -796,14 +796,13 @@
 						"query": [
 							{ "key": "page", "value": "1" },
 							{ "key": "size", "value": "10" },
-							{ "key": "type", "value": "user", "disabled": true },
 							{ "key": "is_active", "value": "true", "disabled": true },
 							{ "key": "search", "value": "", "disabled": true },
 							{ "key": "sort", "value": "id", "disabled": true },
 							{ "key": "order", "value": "asc", "disabled": true }
 						]
 					},
-					"description": "Get all third parties. Read-only. Filters: type (user/doctor/patient/partner), is_active. Records created automatically when creating users, doctors, patients, or partners."
+					"description": "Get all third parties. Read-only. Filters: is_active. Records created automatically when creating users, doctors, patients, or partners."
 				},
 				"response": []
 			},
