@@ -8,7 +8,6 @@
 Table third_parties {
   id int [pk, increment]
   name varchar [not null]
-  type varchar [not null, note: 'user, doctor, patient, partner']
   phone varchar
   email varchar
   is_active boolean [default: true]

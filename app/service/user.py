@@ -9,7 +9,6 @@ from app.model.third_party import ThirdParty
 from app.schema.user import UserCreate, UserUpdate
 from app.utility.security import get_password_hash, verify_password
 from app.service.third_party import ThirdPartyService
-from app.schema.third_party import ThirdPartyType
 
 logger = logging.getLogger("medbase.service.user")
 
@@ -100,12 +99,11 @@ class UserService:
         return list(users), total
     
     async def create(self, user_data: UserCreate, created_by: Optional[str] = None) -> User:
-        """Create a new user. Automatically creates a third_party record (type: user)."""
+        """Create a new user. Automatically creates a third_party record."""
         # Auto-create third_party record
         tp_service = ThirdPartyService(self.db)
         third_party = await tp_service.create(
             name=user_data.name,
-            type=ThirdPartyType.USER,
             email=user_data.email,
             is_active=user_data.is_active,
             created_by=created_by,

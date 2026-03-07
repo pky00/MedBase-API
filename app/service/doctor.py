@@ -7,7 +7,6 @@ from app.model.doctor import Doctor
 from app.model.partner import Partner
 from app.schema.doctor import DoctorCreate, DoctorUpdate, DoctorDetailResponse
 from app.service.third_party import ThirdPartyService
-from app.schema.third_party import ThirdPartyType
 
 logger = logging.getLogger("medbase.service.doctor")
 
@@ -106,7 +105,6 @@ class DoctorService:
         else:
             tp = await tp_service.create(
                 name=data.name,
-                type=ThirdPartyType.DOCTOR,
                 phone=data.phone,
                 email=data.email,
                 is_active=data.is_active,

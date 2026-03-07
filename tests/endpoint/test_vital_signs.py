@@ -17,7 +17,7 @@ from app.model.user import User
 @pytest.fixture
 async def patient(db_session: AsyncSession, admin_user: User) -> Patient:
     """Create a patient for testing."""
-    tp = ThirdParty(name="VS Patient", type="patient", is_active=True)
+    tp = ThirdParty(name="VS Patient", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)

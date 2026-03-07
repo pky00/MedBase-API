@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.utility.database import get_db
 from app.utility.auth import get_current_user
 from app.service.third_party import ThirdPartyService
-from app.schema.third_party import ThirdPartyResponse, ThirdPartyType
+from app.schema.third_party import ThirdPartyResponse
 from app.schema.base import PaginatedResponse
 from app.model.user import User
 
@@ -19,7 +19,6 @@ router = APIRouter(prefix="/third-parties", tags=["Third Parties"])
 async def get_third_parties(
     page: int = Query(1, ge=1, description="Page number"),
     size: int = Query(10, ge=1, le=100, description="Page size"),
-    type: Optional[ThirdPartyType] = Query(None, description="Filter by type (user/doctor/patient/partner)"),
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
     search: Optional[str] = Query(None, description="Search in name, email, phone"),
     sort: str = Query("id", description="Sort field"),
@@ -32,7 +31,7 @@ async def get_third_parties(
 
     service = ThirdPartyService(db)
     records, total = await service.get_all(
-        page=page, size=size, type=type, is_active=is_active,
+        page=page, size=size, is_active=is_active,
         search=search, sort=sort, order=order,
     )
 

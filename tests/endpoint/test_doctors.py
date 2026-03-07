@@ -13,7 +13,7 @@ from app.model.user import User
 @pytest.fixture
 async def partner(db_session: AsyncSession, admin_user: User) -> Partner:
     """Create a partner for doctor testing."""
-    tp = ThirdParty(name="Doctor Test Partner", type="partner", is_active=True)
+    tp = ThirdParty(name="Doctor Test Partner", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)
@@ -36,7 +36,7 @@ async def partner(db_session: AsyncSession, admin_user: User) -> Partner:
 @pytest.fixture
 async def internal_doctor(db_session: AsyncSession, admin_user: User) -> Doctor:
     """Create an internal doctor for testing."""
-    tp = ThirdParty(name="Dr. Internal", type="doctor", is_active=True)
+    tp = ThirdParty(name="Dr. Internal", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)
@@ -61,7 +61,7 @@ async def internal_doctor(db_session: AsyncSession, admin_user: User) -> Doctor:
 @pytest.fixture
 async def partner_doctor(db_session: AsyncSession, admin_user: User, partner: Partner) -> Doctor:
     """Create a partner-provided doctor for testing."""
-    tp = ThirdParty(name="Dr. Partner Provided", type="doctor", is_active=True)
+    tp = ThirdParty(name="Dr. Partner Provided", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)
@@ -214,7 +214,6 @@ class TestCreateDoctor:
         )
         tp = result.scalar_one_or_none()
         assert tp is not None
-        assert tp.type == "doctor"
 
     @pytest.mark.asyncio
     async def test_create_partner_provided_doctor(
@@ -279,7 +278,7 @@ class TestCreateDoctor:
         self, client: AsyncClient, admin_headers: dict, db_session: AsyncSession,
     ):
         """Test creating doctor with name that already exists in third_parties fails."""
-        tp = ThirdParty(name="Existing TP Doctor", type="patient", is_active=True)
+        tp = ThirdParty(name="Existing TP Doctor", is_active=True)
         db_session.add(tp)
         await db_session.commit()
 
@@ -306,7 +305,7 @@ class TestCreateDoctor:
         self, client: AsyncClient, admin_headers: dict, db_session: AsyncSession,
     ):
         """Test creating a doctor with an existing third_party_id."""
-        tp = ThirdParty(name="Pre-existing TP", type="doctor", is_active=True)
+        tp = ThirdParty(name="Pre-existing TP", is_active=True)
         db_session.add(tp)
         await db_session.commit()
         await db_session.refresh(tp)

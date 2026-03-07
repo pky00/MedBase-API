@@ -12,7 +12,7 @@ from app.model.user import User
 @pytest.fixture
 async def donor_partner(db_session: AsyncSession, admin_user: User) -> Partner:
     """Create a donor partner for testing."""
-    tp = ThirdParty(name="Test Donor NGO", type="partner", is_active=True)
+    tp = ThirdParty(name="Test Donor NGO", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)
@@ -39,7 +39,7 @@ async def donor_partner(db_session: AsyncSession, admin_user: User) -> Partner:
 @pytest.fixture
 async def referral_partner(db_session: AsyncSession, admin_user: User) -> Partner:
     """Create a referral partner for testing."""
-    tp = ThirdParty(name="Test Referral Hospital", type="partner", is_active=True)
+    tp = ThirdParty(name="Test Referral Hospital", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)
@@ -132,7 +132,7 @@ class TestGetPartners:
     ):
         """Test pagination of partners."""
         for i in range(5):
-            tp = ThirdParty(name=f"Partner {i}", type="partner", is_active=True)
+            tp = ThirdParty(name=f"Partner {i}", is_active=True)
             db_session.add(tp)
             await db_session.flush()
             p = Partner(
@@ -206,7 +206,6 @@ class TestCreatePartner:
         )
         tp = result.scalar_one_or_none()
         assert tp is not None
-        assert tp.type == "partner"
         assert tp.name == "New Auto TP Partner"
 
     @pytest.mark.asyncio
@@ -215,7 +214,7 @@ class TestCreatePartner:
         db_session: AsyncSession,
     ):
         """Test creating a partner linked to an existing third_party."""
-        tp = ThirdParty(name="Existing TP", type="partner", is_active=True)
+        tp = ThirdParty(name="Existing TP", is_active=True)
         db_session.add(tp)
         await db_session.commit()
         await db_session.refresh(tp)

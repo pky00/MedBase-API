@@ -8,7 +8,6 @@ from app.model.patient_document import PatientDocument
 from app.schema.patient import PatientCreate, PatientUpdate
 from app.schema.patient_document import PatientDocumentResponse
 from app.service.third_party import ThirdPartyService
-from app.schema.third_party import ThirdPartyType
 from app.utility import storage
 
 logger = logging.getLogger("medbase.service.patient")
@@ -122,7 +121,6 @@ class PatientService:
         else:
             tp = await tp_service.create(
                 name=full_name,
-                type=ThirdPartyType.PATIENT,
                 phone=data.phone,
                 email=data.email,
                 is_active=data.is_active,

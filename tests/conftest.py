@@ -104,7 +104,6 @@ async def _create_user_with_third_party(
     """Helper to create a user with its third_party record."""
     tp = ThirdParty(
         name=username,
-        type="user",
         email=email,
         is_active=True,
     )

@@ -15,7 +15,7 @@ async def _create_test_user(
     """Helper to create a user with its required third_party record."""
     from app.utility.security import get_password_hash
 
-    tp = ThirdParty(name=username, type="user", email=email, is_active=is_active)
+    tp = ThirdParty(name=username, email=email, is_active=is_active)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)
@@ -248,7 +248,7 @@ class TestCreateUser:
     ):
         """Test creating user with name that already exists in third_parties fails."""
         # Create a third_party with a specific name
-        tp = ThirdParty(name="Existing TP Name", type="patient", is_active=True)
+        tp = ThirdParty(name="Existing TP Name", is_active=True)
         db_session.add(tp)
         await db_session.commit()
 

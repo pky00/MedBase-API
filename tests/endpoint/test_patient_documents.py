@@ -31,7 +31,7 @@ def mock_presigned_url():
 @pytest.fixture
 async def patient(db_session: AsyncSession, admin_user: User) -> Patient:
     """Create a patient for document testing."""
-    tp = ThirdParty(name="Doc Patient", type="patient", is_active=True)
+    tp = ThirdParty(name="Doc Patient", is_active=True)
     db_session.add(tp)
     await db_session.flush()
     await db_session.refresh(tp)
