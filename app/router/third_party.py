@@ -23,6 +23,10 @@ async def get_third_parties(
     search: Optional[str] = Query(None, description="Search in name, email, phone"),
     sort: str = Query("id", description="Sort field"),
     order: str = Query("asc", description="Sort order (asc/desc)"),
+    exclude_patients: bool = Query(False, description="Exclude third parties linked to patients"),
+    exclude_doctors: bool = Query(False, description="Exclude third parties linked to doctors"),
+    exclude_partners: bool = Query(False, description="Exclude third parties linked to partners"),
+    exclude_users: bool = Query(False, description="Exclude third parties linked to users"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -33,6 +37,8 @@ async def get_third_parties(
     records, total = await service.get_all(
         page=page, size=size, is_active=is_active,
         search=search, sort=sort, order=order,
+        exclude_patients=exclude_patients, exclude_doctors=exclude_doctors,
+        exclude_partners=exclude_partners, exclude_users=exclude_users,
     )
 
     logger.info("Returning %d third parties (total=%d)", len(records), total)

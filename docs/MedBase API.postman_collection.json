@@ -799,10 +799,14 @@
 							{ "key": "is_active", "value": "true", "disabled": true },
 							{ "key": "search", "value": "", "disabled": true },
 							{ "key": "sort", "value": "id", "disabled": true },
-							{ "key": "order", "value": "asc", "disabled": true }
+							{ "key": "order", "value": "asc", "disabled": true },
+							{ "key": "exclude_patients", "value": "true", "disabled": true },
+							{ "key": "exclude_doctors", "value": "true", "disabled": true },
+							{ "key": "exclude_partners", "value": "true", "disabled": true },
+							{ "key": "exclude_users", "value": "true", "disabled": true }
 						]
 					},
-					"description": "Get all third parties. Read-only. Filters: is_active. Records created automatically when creating users, doctors, patients, or partners."
+					"description": "Get all third parties. Read-only. Filters: is_active. Exclusion flags: exclude_patients, exclude_doctors, exclude_partners, exclude_users (set to true to remove third parties linked to respective entities). Records created automatically when creating users, doctors, patients, or partners."
 				},
 				"response": []
 			},

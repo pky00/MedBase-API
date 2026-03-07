@@ -1,9 +1,13 @@
 import logging
 from typing import Optional, List, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, or_
 
 from app.model.third_party import ThirdParty
+from app.model.patient import Patient
+from app.model.doctor import Doctor
+from app.model.partner import Partner
+from app.model.user import User
 
 logger = logging.getLogger("medbase.service.third_party")
 
@@ -47,15 +51,31 @@ class ThirdPartyService:
         search: Optional[str] = None,
         sort: str = "id",
         order: str = "asc",
+        exclude_patients: bool = False,
+        exclude_doctors: bool = False,
+        exclude_partners: bool = False,
+        exclude_users: bool = False,
     ) -> Tuple[List[ThirdParty], int]:
         """Get all third parties with pagination and filtering."""
         query = select(ThirdParty).where(ThirdParty.is_deleted == False)
+
+        if exclude_patients:
+            patient_tp_ids = select(Patient.third_party_id).where(Patient.is_deleted == False)
+            query = query.where(ThirdParty.id.not_in(patient_tp_ids))
+        if exclude_doctors:
+            doctor_tp_ids = select(Doctor.third_party_id).where(Doctor.is_deleted == False)
+            query = query.where(ThirdParty.id.not_in(doctor_tp_ids))
+        if exclude_partners:
+            partner_tp_ids = select(Partner.third_party_id).where(Partner.is_deleted == False)
+            query = query.where(ThirdParty.id.not_in(partner_tp_ids))
+        if exclude_users:
+            user_tp_ids = select(User.third_party_id).where(User.is_deleted == False)
+            query = query.where(ThirdParty.id.not_in(user_tp_ids))
 
         if is_active is not None:
             query = query.where(ThirdParty.is_active == is_active)
         if search:
             search_term = f"%{search}%"
-            from sqlalchemy import or_
             query = query.where(
                 or_(
                     ThirdParty.name.ilike(search_term),
