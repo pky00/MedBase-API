@@ -1974,7 +1974,7 @@
 								}
 							]
 						},
-						"description": "Get all patients with pagination, filters, and search. Filters: is_active, gender (male/female). Search: first_name, last_name, phone, email."
+						"description": "Get all patients with pagination, filters, and search. Filters: is_active, gender (male/female). Search: name, phone, email."
 					},
 					"response": [
 						{
@@ -1988,7 +1988,7 @@
 									"value": "application/json"
 								}
 							],
-							"body": "{\n    \"items\": [\n        {\n            \"id\": 1,\n            \"first_name\": \"Ahmad\",\n            \"last_name\": \"Hassan\",\n            \"date_of_birth\": \"1990-05-15\",\n            \"gender\": \"male\",\n            \"address\": \"123 Main Street\",\n            \"emergency_contact\": \"Sara Hassan\",\n            \"emergency_phone\": \"+0987654321\",\n            \"third_party_id\": 3,\n            \"third_party\": {\n                \"id\": 3,\n                \"name\": \"Ahmad Hassan\",\n                \"phone\": \"+1234567890\",\n                \"email\": \"ahmad.hassan@example.com\",\n                \"is_active\": true,\n                \"is_deleted\": false,\n                \"created_by\": 1,\n                \"created_at\": \"2026-03-01T10:00:00\",\n                \"updated_by\": 1,\n                \"updated_at\": \"2026-03-01T10:00:00\"\n            },\n            \"is_active\": true,\n            \"is_deleted\": false,\n            \"created_by\": 1,\n            \"created_at\": \"2026-03-01T10:00:00\",\n            \"updated_by\": 1,\n            \"updated_at\": \"2026-03-01T10:00:00\"\n        }\n    ],\n    \"total\": 1,\n    \"page\": 1,\n    \"size\": 10,\n    \"pages\": 1\n}",
+							"body": "{\n    \"items\": [\n        {\n            \"id\": 1,\n            \"date_of_birth\": \"1990-05-15\",\n            \"gender\": \"male\",\n            \"address\": \"123 Main Street\",\n            \"emergency_contact\": \"Sara Hassan\",\n            \"emergency_phone\": \"+0987654321\",\n            \"third_party_id\": 3,\n            \"third_party\": {\n                \"id\": 3,\n                \"name\": \"Ahmad Hassan\",\n                \"phone\": \"+1234567890\",\n                \"email\": \"ahmad.hassan@example.com\",\n                \"is_active\": true,\n                \"is_deleted\": false,\n                \"created_by\": 1,\n                \"created_at\": \"2026-03-01T10:00:00\",\n                \"updated_by\": 1,\n                \"updated_at\": \"2026-03-01T10:00:00\"\n            },\n            \"is_active\": true,\n            \"is_deleted\": false,\n            \"created_by\": 1,\n            \"created_at\": \"2026-03-01T10:00:00\",\n            \"updated_by\": 1,\n            \"updated_at\": \"2026-03-01T10:00:00\"\n        }\n    ],\n    \"total\": 1,\n    \"page\": 1,\n    \"size\": 10,\n    \"pages\": 1\n}",
 							"_postman_previewlanguage": "json"
 						}
 					]
@@ -2029,7 +2029,7 @@
 									"value": "application/json"
 								}
 							],
-							"body": "{\n    \"id\": 1,\n    \"first_name\": \"Ahmad\",\n    \"last_name\": \"Hassan\",\n    \"date_of_birth\": \"1990-05-15\",\n    \"gender\": \"male\",\n    \"address\": \"123 Main Street\",\n    \"emergency_contact\": \"Sara Hassan\",\n    \"emergency_phone\": \"+0987654321\",\n    \"third_party_id\": 3,\n    \"third_party\": {\n        \"id\": 3,\n        \"name\": \"Ahmad Hassan\",\n        \"phone\": \"+1234567890\",\n        \"email\": \"ahmad.hassan@example.com\",\n        \"is_active\": true,\n        \"is_deleted\": false,\n        \"created_by\": 1,\n        \"created_at\": \"2026-03-01T10:00:00\",\n        \"updated_by\": 1,\n        \"updated_at\": \"2026-03-01T10:00:00\"\n    },\n    \"is_active\": true,\n    \"is_deleted\": false,\n    \"created_by\": 1,\n    \"created_at\": \"2026-03-01T10:00:00\",\n    \"updated_by\": 1,\n    \"updated_at\": \"2026-03-01T10:00:00\"\n}",
+							"body": "{\n    \"id\": 1,\n    \"date_of_birth\": \"1990-05-15\",\n    \"gender\": \"male\",\n    \"address\": \"123 Main Street\",\n    \"emergency_contact\": \"Sara Hassan\",\n    \"emergency_phone\": \"+0987654321\",\n    \"third_party_id\": 3,\n    \"third_party\": {\n        \"id\": 3,\n        \"name\": \"Ahmad Hassan\",\n        \"phone\": \"+1234567890\",\n        \"email\": \"ahmad.hassan@example.com\",\n        \"is_active\": true,\n        \"is_deleted\": false,\n        \"created_by\": 1,\n        \"created_at\": \"2026-03-01T10:00:00\",\n        \"updated_by\": 1,\n        \"updated_at\": \"2026-03-01T10:00:00\"\n    },\n    \"is_active\": true,\n    \"is_deleted\": false,\n    \"created_by\": 1,\n    \"created_at\": \"2026-03-01T10:00:00\",\n    \"updated_by\": 1,\n    \"updated_at\": \"2026-03-01T10:00:00\"\n}",
 							"_postman_previewlanguage": "json"
 						}
 					]
@@ -2046,7 +2046,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"first_name\": \"Ahmad\",\n    \"last_name\": \"Hassan\",\n    \"date_of_birth\": \"1990-05-15\",\n    \"gender\": \"male\",\n    \"phone\": \"+1234567890\",\n    \"email\": \"ahmad.hassan@example.com\",\n    \"address\": \"123 Main Street\",\n    \"emergency_contact\": \"Sara Hassan\",\n    \"emergency_phone\": \"+0987654321\",\n    \"is_active\": true\n}"
+							"raw": "{\n    \"name\": \"Ahmad Hassan\",\n    \"date_of_birth\": \"1990-05-15\",\n    \"gender\": \"male\",\n    \"phone\": \"+1234567890\",\n    \"email\": \"ahmad.hassan@example.com\",\n    \"address\": \"123 Main Street\",\n    \"emergency_contact\": \"Sara Hassan\",\n    \"emergency_phone\": \"+0987654321\",\n    \"is_active\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/patients",
@@ -2071,7 +2071,7 @@
 									"value": "application/json"
 								}
 							],
-							"body": "{\n    \"id\": 1,\n    \"first_name\": \"Ahmad\",\n    \"last_name\": \"Hassan\",\n    \"date_of_birth\": \"1990-05-15\",\n    \"gender\": \"male\",\n    \"address\": \"123 Main Street\",\n    \"emergency_contact\": \"Sara Hassan\",\n    \"emergency_phone\": \"+0987654321\",\n    \"third_party_id\": 3,\n    \"third_party\": {\n        \"id\": 3,\n        \"name\": \"Ahmad Hassan\",\n        \"phone\": \"+1234567890\",\n        \"email\": \"ahmad.hassan@example.com\",\n        \"is_active\": true,\n        \"is_deleted\": false,\n        \"created_by\": 1,\n        \"created_at\": \"2026-03-01T10:00:00\",\n        \"updated_by\": 1,\n        \"updated_at\": \"2026-03-01T10:00:00\"\n    },\n    \"is_active\": true,\n    \"is_deleted\": false,\n    \"created_by\": 1,\n    \"created_at\": \"2026-03-01T10:00:00\",\n    \"updated_by\": 1,\n    \"updated_at\": \"2026-03-01T10:00:00\"\n}",
+							"body": "{\n    \"id\": 1,\n    \"date_of_birth\": \"1990-05-15\",\n    \"gender\": \"male\",\n    \"address\": \"123 Main Street\",\n    \"emergency_contact\": \"Sara Hassan\",\n    \"emergency_phone\": \"+0987654321\",\n    \"third_party_id\": 3,\n    \"third_party\": {\n        \"id\": 3,\n        \"name\": \"Ahmad Hassan\",\n        \"phone\": \"+1234567890\",\n        \"email\": \"ahmad.hassan@example.com\",\n        \"is_active\": true,\n        \"is_deleted\": false,\n        \"created_by\": 1,\n        \"created_at\": \"2026-03-01T10:00:00\",\n        \"updated_by\": 1,\n        \"updated_at\": \"2026-03-01T10:00:00\"\n    },\n    \"is_active\": true,\n    \"is_deleted\": false,\n    \"created_by\": 1,\n    \"created_at\": \"2026-03-01T10:00:00\",\n    \"updated_by\": 1,\n    \"updated_at\": \"2026-03-01T10:00:00\"\n}",
 							"_postman_previewlanguage": "json"
 						}
 					]
@@ -2088,7 +2088,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"first_name\": \"Ahmad\",\n    \"last_name\": \"Hassan Updated\",\n    \"emergency_contact\": \"Ali Hassan\",\n    \"is_active\": true\n}"
+							"raw": "{\n    \"emergency_contact\": \"Ali Hassan\",\n    \"is_active\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/patients/1",
@@ -2114,7 +2114,7 @@
 									"value": "application/json"
 								}
 							],
-							"body": "{\n    \"id\": 1,\n    \"first_name\": \"Ahmad\",\n    \"last_name\": \"Hassan Updated\",\n    \"date_of_birth\": \"1990-05-15\",\n    \"gender\": \"male\",\n    \"address\": \"123 Main Street\",\n    \"emergency_contact\": \"Sara Hassan\",\n    \"emergency_phone\": \"+0987654321\",\n    \"third_party_id\": 3,\n    \"third_party\": {\n        \"id\": 3,\n        \"name\": \"Ahmad Hassan\",\n        \"phone\": \"+1234567890\",\n        \"email\": \"ahmad.hassan@example.com\",\n        \"is_active\": true,\n        \"is_deleted\": false,\n        \"created_by\": 1,\n        \"created_at\": \"2026-03-01T10:00:00\",\n        \"updated_by\": 1,\n        \"updated_at\": \"2026-03-01T10:00:00\"\n    },\n    \"is_active\": true,\n    \"is_deleted\": false,\n    \"created_by\": 1,\n    \"created_at\": \"2026-03-01T10:00:00\",\n    \"updated_by\": 1,\n    \"updated_at\": \"2026-03-01T10:00:00\"\n}",
+							"body": "{\n    \"id\": 1,\n    \"date_of_birth\": \"1990-05-15\",\n    \"gender\": \"male\",\n    \"address\": \"123 Main Street\",\n    \"emergency_contact\": \"Ali Hassan\",\n    \"emergency_phone\": \"+0987654321\",\n    \"third_party_id\": 3,\n    \"third_party\": {\n        \"id\": 3,\n        \"name\": \"Ahmad Hassan\",\n        \"phone\": \"+1234567890\",\n        \"email\": \"ahmad.hassan@example.com\",\n        \"is_active\": true,\n        \"is_deleted\": false,\n        \"created_by\": 1,\n        \"created_at\": \"2026-03-01T10:00:00\",\n        \"updated_by\": 1,\n        \"updated_at\": \"2026-03-01T10:00:00\"\n    },\n    \"is_active\": true,\n    \"is_deleted\": false,\n    \"created_by\": 1,\n    \"created_at\": \"2026-03-01T10:00:00\",\n    \"updated_by\": 1,\n    \"updated_at\": \"2026-03-01T10:00:00\"\n}",
 							"_postman_previewlanguage": "json"
 						}
 					]

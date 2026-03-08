@@ -11,8 +11,6 @@ class Patient(BaseModel):
 
     third_party_id = Column(Integer, ForeignKey("third_parties.id"), nullable=False)
     third_party = relationship("ThirdParty", lazy="noload")
-    first_name = Column(String, nullable=False)
-    last_name = Column(String, nullable=False)
     date_of_birth = Column(Date, nullable=True)
     gender = Column(String, nullable=True)
     address = Column(Text, nullable=True)

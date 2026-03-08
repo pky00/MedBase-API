@@ -21,8 +21,6 @@ async def patient(db_session: AsyncSession, admin_user: User) -> Patient:
 
     patient = Patient(
         third_party_id=tp.id,
-        first_name="John",
-        last_name="Doe",
         date_of_birth=date(1990, 5, 15),
         gender="male",
         address="123 Main St",
@@ -49,8 +47,6 @@ async def second_patient(db_session: AsyncSession, admin_user: User) -> Patient:
 
     patient = Patient(
         third_party_id=tp.id,
-        first_name="Jane",
-        last_name="Smith",
         date_of_birth=date(1985, 3, 20),
         gender="female",
         is_active=True,
@@ -116,7 +112,7 @@ class TestGetPatients:
     async def test_get_patients_with_search(
         self, client: AsyncClient, admin_headers: dict, patient: Patient,
     ):
-        """Test searching patients by first_name."""
+        """Test searching patients by name."""
         response = await client.get(
             "/api/v1/patients", params={"search": "John"}, headers=admin_headers,
         )
@@ -125,10 +121,10 @@ class TestGetPatients:
         assert data["total"] >= 1
 
     @pytest.mark.asyncio
-    async def test_get_patients_search_by_last_name(
+    async def test_get_patients_search_by_name(
         self, client: AsyncClient, admin_headers: dict, patient: Patient,
     ):
-        """Test searching patients by last_name."""
+        """Test searching patients by name."""
         response = await client.get(
             "/api/v1/patients", params={"search": "Doe"}, headers=admin_headers,
         )
@@ -164,10 +160,9 @@ class TestGetPatient:
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["first_name"] == "John"
-        assert data["last_name"] == "Doe"
         assert data["gender"] == "male"
         assert "third_party_id" in data
+        assert data["third_party"]["name"] == "John Doe"
         assert data["third_party"]["phone"] == "1234567890"
 
     @pytest.mark.asyncio
@@ -189,8 +184,7 @@ class TestCreatePatient:
         response = await client.post(
             "/api/v1/patients",
             json={
-                "first_name": "New",
-                "last_name": "Patient",
+                "name": "New Patient",
                 "gender": "female",
                 "phone": "111222333",
                 "email": "new.patient@test.com",
@@ -199,10 +193,9 @@ class TestCreatePatient:
         )
         assert response.status_code == 201
         data = response.json()
-        assert data["first_name"] == "New"
-        assert data["last_name"] == "Patient"
         assert data["gender"] == "female"
         assert "third_party_id" in data
+        assert data["third_party"]["name"] == "New Patient"
         assert data["third_party"]["phone"] == "111222333"
 
         # Verify third_party was created
@@ -221,8 +214,7 @@ class TestCreatePatient:
         response = await client.post(
             "/api/v1/patients",
             json={
-                "first_name": "Full",
-                "last_name": "Record",
+                "name": "Full Record",
                 "date_of_birth": "2000-01-01",
                 "gender": "male",
                 "phone": "444555666",
@@ -248,13 +240,12 @@ class TestCreatePatient:
         """Test creating a patient with only required fields."""
         response = await client.post(
             "/api/v1/patients",
-            json={"first_name": "Minimal", "last_name": "Patient"},
+            json={"name": "Minimal Patient"},
             headers=admin_headers,
         )
         assert response.status_code == 201
         data = response.json()
-        assert data["first_name"] == "Minimal"
-        assert data["last_name"] == "Patient"
+        assert data["third_party"]["name"] == "Minimal Patient"
         assert data["gender"] is None
 
     @pytest.mark.asyncio
@@ -264,7 +255,7 @@ class TestCreatePatient:
         """Test creating patient with duplicate name fails."""
         response = await client.post(
             "/api/v1/patients",
-            json={"first_name": "John", "last_name": "Doe"},
+            json={"name": "John Doe"},
             headers=admin_headers,
         )
         assert response.status_code == 400
@@ -281,35 +272,24 @@ class TestCreatePatient:
 
         response = await client.post(
             "/api/v1/patients",
-            json={"first_name": "Existing TP", "last_name": "Patient"},
+            json={"name": "Existing TP Patient"},
             headers=admin_headers,
         )
         assert response.status_code == 400
         assert "already exists in third parties" in response.json()["detail"]
 
     @pytest.mark.asyncio
-    async def test_create_patient_empty_first_name(
+    async def test_create_patient_no_name_no_third_party(
         self, client: AsyncClient, admin_headers: dict,
     ):
-        """Test creating patient with empty first_name fails."""
+        """Test creating patient without name and without third_party_id fails."""
         response = await client.post(
             "/api/v1/patients",
-            json={"first_name": "", "last_name": "Test"},
+            json={"gender": "male"},
             headers=admin_headers,
         )
-        assert response.status_code == 422
-
-    @pytest.mark.asyncio
-    async def test_create_patient_empty_last_name(
-        self, client: AsyncClient, admin_headers: dict,
-    ):
-        """Test creating patient with empty last_name fails."""
-        response = await client.post(
-            "/api/v1/patients",
-            json={"first_name": "Test", "last_name": ""},
-            headers=admin_headers,
-        )
-        assert response.status_code == 422
+        assert response.status_code == 400
+        assert "Name is required" in response.json()["detail"]
 
     @pytest.mark.asyncio
     async def test_create_patient_with_existing_third_party(
@@ -324,8 +304,6 @@ class TestCreatePatient:
         response = await client.post(
             "/api/v1/patients",
             json={
-                "first_name": "Linked",
-                "last_name": "Patient",
                 "third_party_id": tp.id,
             },
             headers=admin_headers,
@@ -342,8 +320,6 @@ class TestCreatePatient:
         response = await client.post(
             "/api/v1/patients",
             json={
-                "first_name": "Bad",
-                "last_name": "ThirdParty",
                 "third_party_id": 99999,
             },
             headers=admin_headers,
@@ -359,8 +335,7 @@ class TestCreatePatient:
         response = await client.post(
             "/api/v1/patients",
             json={
-                "first_name": "Bad",
-                "last_name": "Gender",
+                "name": "Bad Gender",
                 "gender": "invalid",
             },
             headers=admin_headers,
@@ -379,45 +354,20 @@ class TestUpdatePatient:
         """Test updating a patient."""
         response = await client.put(
             f"/api/v1/patients/{patient.id}",
-            json={"first_name": "Johnny"},
+            json={"address": "456 New Address"},
             headers=admin_headers,
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["first_name"] == "Johnny"
-        assert data["last_name"] == "Doe"
+        assert data["address"] == "456 New Address"
 
     @pytest.mark.asyncio
     async def test_update_patient_not_found(self, client: AsyncClient, admin_headers: dict):
         """Test updating non-existent patient."""
         response = await client.put(
-            "/api/v1/patients/99999", json={"first_name": "Test"}, headers=admin_headers,
+            "/api/v1/patients/99999", json={"address": "Test"}, headers=admin_headers,
         )
         assert response.status_code == 404
-
-    @pytest.mark.asyncio
-    async def test_update_patient_syncs_third_party(
-        self, client: AsyncClient, admin_headers: dict,
-        db_session: AsyncSession, patient: Patient,
-    ):
-        """Test updating patient name syncs the third_party record."""
-        patient_id = patient.id
-        third_party_id = patient.third_party_id
-
-        response = await client.put(
-            f"/api/v1/patients/{patient_id}",
-            json={"first_name": "Updated", "last_name": "Name"},
-            headers=admin_headers,
-        )
-        assert response.status_code == 200
-
-        # Verify third_party name was synced
-        db_session.expire_all()
-        result = await db_session.execute(
-            select(ThirdParty).where(ThirdParty.id == third_party_id)
-        )
-        tp = result.scalar_one_or_none()
-        assert tp.name == "Updated Name"
 
 
 class TestDeletePatient:

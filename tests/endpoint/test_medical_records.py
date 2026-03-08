@@ -23,8 +23,6 @@ async def patient(db_session: AsyncSession, admin_user: User) -> Patient:
 
     patient = Patient(
         third_party_id=tp.id,
-        first_name="MR",
-        last_name="Patient",
         gender="female",
         is_active=True,
         created_by=admin_user.username,

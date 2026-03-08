@@ -31,14 +31,16 @@ class TreatmentService:
 
     async def get_by_id_with_names(self, treatment_id: int) -> Optional[TreatmentResponse]:
         """Get treatment by ID with patient and partner names."""
+        PatientTP = aliased(ThirdParty)
         PartnerTP = aliased(ThirdParty)
         result = await self.db.execute(
             select(
                 Treatment,
-                func.concat(Patient.first_name, ' ', Patient.last_name).label("patient_name"),
+                PatientTP.name.label("patient_name"),
                 PartnerTP.name.label("partner_name"),
             )
             .outerjoin(Patient, Treatment.patient_id == Patient.id)
+            .outerjoin(PatientTP, Patient.third_party_id == PatientTP.id)
             .outerjoin(Partner, Treatment.partner_id == Partner.id)
             .outerjoin(PartnerTP, Partner.third_party_id == PartnerTP.id)
             .where(
@@ -64,14 +66,16 @@ class TreatmentService:
         order: str = "asc",
     ) -> Tuple[List[dict], int]:
         """Get all treatments with pagination and filtering."""
+        PatientTP = aliased(ThirdParty)
         PartnerTP = aliased(ThirdParty)
         query = (
             select(
                 Treatment,
-                func.concat(Patient.first_name, ' ', Patient.last_name).label("patient_name"),
+                PatientTP.name.label("patient_name"),
                 PartnerTP.name.label("partner_name"),
             )
             .outerjoin(Patient, Treatment.patient_id == Patient.id)
+            .outerjoin(PatientTP, Patient.third_party_id == PatientTP.id)
             .outerjoin(Partner, Treatment.partner_id == Partner.id)
             .outerjoin(PartnerTP, Partner.third_party_id == PartnerTP.id)
             .where(Treatment.is_deleted == False)

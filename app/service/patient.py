@@ -20,15 +20,14 @@ class PatientService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def get_by_name(self, first_name: str, last_name: str) -> Optional[Patient]:
-        """Get patient by first_name and last_name."""
+    async def get_by_name(self, name: str) -> Optional[Patient]:
+        """Get patient by name (via third_party)."""
         result = await self.db.execute(
             select(Patient)
             .outerjoin(ThirdParty, Patient.third_party_id == ThirdParty.id)
             .options(contains_eager(Patient.third_party))
             .where(
-                Patient.first_name == first_name,
-                Patient.last_name == last_name,
+                ThirdParty.name == name,
                 Patient.is_deleted == False,
             )
         )
@@ -94,8 +93,7 @@ class PatientService:
             search_term = f"%{search}%"
             query = query.where(
                 or_(
-                    Patient.first_name.ilike(search_term),
-                    Patient.last_name.ilike(search_term),
+                    ThirdParty.name.ilike(search_term),
                     ThirdParty.phone.ilike(search_term),
                     ThirdParty.email.ilike(search_term),
                 )
@@ -105,7 +103,7 @@ class PatientService:
         total_result = await self.db.execute(count_query)
         total = total_result.scalar()
 
-        tp_sort_map = {"phone": ThirdParty.phone, "email": ThirdParty.email}
+        tp_sort_map = {"name": ThirdParty.name, "phone": ThirdParty.phone, "email": ThirdParty.email}
         sort_column = tp_sort_map.get(sort, getattr(Patient, sort, Patient.id))
         if order.lower() == "desc":
             query = query.order_by(sort_column.desc())
@@ -124,7 +122,6 @@ class PatientService:
     async def create(self, data: PatientCreate, created_by: Optional[str] = None) -> Patient:
         """Create a new patient. Auto-creates a third_party record if third_party_id not provided."""
         tp_service = ThirdPartyService(self.db)
-        full_name = f"{data.first_name} {data.last_name}"
 
         if data.third_party_id:
             tp = await tp_service.get_by_id(data.third_party_id)
@@ -133,7 +130,7 @@ class PatientService:
             third_party_id = data.third_party_id
         else:
             tp = await tp_service.create(
-                name=full_name,
+                name=data.name,
                 phone=data.phone,
                 email=data.email,
                 is_active=data.is_active,
@@ -143,8 +140,6 @@ class PatientService:
 
         patient = Patient(
             third_party_id=third_party_id,
-            first_name=data.first_name,
-            last_name=data.last_name,
             date_of_birth=data.date_of_birth,
             gender=data.gender,
             address=data.address,
@@ -159,7 +154,7 @@ class PatientService:
         await self.db.refresh(patient)
         patient.third_party = tp
 
-        logger.info("Created patient id=%d name='%s' third_party_id=%d", patient.id, full_name, third_party_id)
+        logger.info("Created patient id=%d name='%s' third_party_id=%d", patient.id, tp.name, third_party_id)
         return patient
 
     async def update(self, patient_id: int, data: PatientUpdate, updated_by: Optional[str] = None) -> Optional[Patient]:
@@ -173,15 +168,6 @@ class PatientService:
         for field, value in update_data.items():
             setattr(patient, field, value)
         patient.updated_by = updated_by
-
-        # Sync third_party name if first/last name changed
-        if "first_name" in update_data or "last_name" in update_data:
-            tp_service = ThirdPartyService(self.db)
-            await tp_service.update(
-                patient.third_party_id,
-                name=f"{patient.first_name} {patient.last_name}",
-                updated_by=updated_by,
-            )
 
         await self.db.flush()
         logger.info("Updated patient id=%d fields=%s", patient_id, list(update_data.keys()))

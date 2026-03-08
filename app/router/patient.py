@@ -27,7 +27,7 @@ async def get_patients(
     size: int = Query(10, ge=1, le=100, description="Page size"),
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
     gender: Optional[Gender] = Query(None, description="Filter by gender"),
-    search: Optional[str] = Query(None, description="Search in first_name, last_name, phone, email"),
+    search: Optional[str] = Query(None, description="Search in name, phone, email"),
     sort: str = Query("id", description="Sort field"),
     order: str = Query("asc", description="Sort order (asc/desc)"),
     db: AsyncSession = Depends(get_db),
@@ -84,12 +84,11 @@ async def create_patient(
 ):
     """Create a new patient. Auto-creates a third_party record if third_party_id not provided."""
     logger.info(
-        "Creating patient name='%s %s' by user_id=%d",
-        data.first_name, data.last_name, current_user.id,
+        "Creating patient name='%s' by user_id=%d",
+        data.name, current_user.id,
     )
 
     service = PatientService(db)
-    full_name = f"{data.first_name} {data.last_name}"
 
     # Validate third_party_id if provided, otherwise check name uniqueness
     if data.third_party_id:
@@ -98,17 +97,22 @@ async def create_patient(
         if not tp:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Third party not found")
     else:
-        existing = await service.get_by_name(data.first_name, data.last_name)
-        if existing:
-            logger.warning("Third party name already exists name='%s'", full_name)
+        if not data.name:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Third party name already exists",
+                detail="Name is required when not providing a third_party_id",
+            )
+        existing = await service.get_by_name(data.name)
+        if existing:
+            logger.warning("Patient name already exists name='%s'", data.name)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Patient name already exists",
             )
         tp_service = ThirdPartyService(db)
-        existing_tp = await tp_service.get_by_name(full_name)
+        existing_tp = await tp_service.get_by_name(data.name)
         if existing_tp:
-            logger.warning("Name already exists in third parties name='%s'", full_name)
+            logger.warning("Name already exists in third parties name='%s'", data.name)
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Name already exists in third parties",
