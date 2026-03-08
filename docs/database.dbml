@@ -204,8 +204,6 @@ Table partners {
 Table patients {
   id int [pk, increment]
   third_party_id int [ref: > third_parties.id, not null]
-  first_name varchar [not null]
-  last_name varchar [not null]
   date_of_birth date
   gender varchar
   phone varchar

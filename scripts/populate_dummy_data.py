@@ -215,18 +215,17 @@ async def populate():
         patient_service = PatientService(db)
         patient_map = {}
         for p in data.get("patients", []):
-            full_name = f"{p['first_name']} {p['last_name']}"
-            existing = await patient_service.get_by_name(p["first_name"], p["last_name"])
+            existing = await patient_service.get_by_name(p["name"])
             if existing:
-                patient_map[full_name] = existing.id
-                print(f"  [skip] Patient '{full_name}' already exists")
+                patient_map[p["name"]] = existing.id
+                print(f"  [skip] Patient '{p['name']}' already exists")
                 continue
             patient = await patient_service.create(
                 PatientCreate(**p),
                 created_by=CREATED_BY,
             )
-            patient_map[full_name] = patient.id
-            print(f"  [created] Patient '{full_name}'")
+            patient_map[p["name"]] = patient.id
+            print(f"  [created] Patient '{p['name']}'")
 
         await db.commit()
 

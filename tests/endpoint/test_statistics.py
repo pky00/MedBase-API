@@ -30,12 +30,12 @@ async def dashboard_data(db_session: AsyncSession, admin_user: User):
     await db_session.flush()
 
     patient1 = Patient(
-        third_party_id=tp1.id, first_name="Patient", last_name="One",
+        third_party_id=tp1.id,
         gender="male", is_active=True,
         created_by=admin_user.username, updated_by=admin_user.username,
     )
     patient2 = Patient(
-        third_party_id=tp2.id, first_name="Patient", last_name="Two",
+        third_party_id=tp2.id,
         gender="female", is_active=True,
         created_by=admin_user.username, updated_by=admin_user.username,
     )

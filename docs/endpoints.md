@@ -252,7 +252,7 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 
 **Notes:**
 - Filters: `is_active`, `gender`
-- Search searches: `first_name`, `last_name`, `phone`, `email`
+- Search searches: `name` (via third_party), `phone`, `email`
 - If no `third_party_id` is provided, automatically creates a third_party record; if provided, links to the existing one
 
 ---

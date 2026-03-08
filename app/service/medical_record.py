@@ -6,6 +6,7 @@ from sqlalchemy import select, func
 from app.model.medical_record import MedicalRecord
 from app.model.appointment import Appointment
 from app.model.patient import Patient
+from app.model.third_party import ThirdParty
 from app.schema.medical_record import MedicalRecordCreate, MedicalRecordUpdate, MedicalRecordResponse
 
 logger = logging.getLogger("medbase.service.medical_record")
@@ -32,10 +33,11 @@ class MedicalRecordService:
         result = await self.db.execute(
             select(
                 MedicalRecord,
-                func.concat(Patient.first_name, ' ', Patient.last_name).label("patient_name"),
+                ThirdParty.name.label("patient_name"),
             )
             .outerjoin(Appointment, MedicalRecord.appointment_id == Appointment.id)
             .outerjoin(Patient, Appointment.patient_id == Patient.id)
+            .outerjoin(ThirdParty, Patient.third_party_id == ThirdParty.id)
             .where(
                 MedicalRecord.id == record_id,
                 MedicalRecord.is_deleted == False,
@@ -70,10 +72,11 @@ class MedicalRecordService:
         query = (
             select(
                 MedicalRecord,
-                func.concat(Patient.first_name, ' ', Patient.last_name).label("patient_name"),
+                ThirdParty.name.label("patient_name"),
             )
             .outerjoin(Appointment, MedicalRecord.appointment_id == Appointment.id)
             .outerjoin(Patient, Appointment.patient_id == Patient.id)
+            .outerjoin(ThirdParty, Patient.third_party_id == ThirdParty.id)
             .where(MedicalRecord.is_deleted == False)
         )
 

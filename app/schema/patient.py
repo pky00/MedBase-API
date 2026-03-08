@@ -16,8 +16,7 @@ class PatientCreate(BaseModel):
     """Schema for creating a patient."""
 
     third_party_id: Optional[int] = None
-    first_name: str = Field(..., min_length=1, max_length=255)
-    last_name: str = Field(..., min_length=1, max_length=255)
+    name: Optional[str] = Field(None, min_length=1, max_length=255)
     phone: Optional[str] = Field(None, max_length=50)
     email: Optional[str] = Field(None, max_length=255)
     date_of_birth: Optional[date] = None
@@ -31,8 +30,6 @@ class PatientCreate(BaseModel):
 class PatientUpdate(BaseModel):
     """Schema for updating a patient."""
 
-    first_name: Optional[str] = Field(None, min_length=1, max_length=255)
-    last_name: Optional[str] = Field(None, min_length=1, max_length=255)
     date_of_birth: Optional[date] = None
     gender: Optional[Gender] = None
     address: Optional[str] = None
@@ -49,8 +46,6 @@ class PatientResponse(BaseModel):
     id: int
     third_party_id: int
     third_party: Optional[ThirdPartyResponse] = None
-    first_name: str
-    last_name: str
     date_of_birth: Optional[date] = None
     gender: Optional[str] = None
     address: Optional[str] = None

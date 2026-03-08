@@ -132,8 +132,7 @@
   ],
   "patients": [
     {
-      "first_name": "Ali",
-      "last_name": "Hassan",
+      "name": "Ali Hassan",
       "date_of_birth": "1985-03-15",
       "gender": "male",
       "phone": "+1-555-2001",
@@ -143,8 +142,7 @@
       "emergency_phone": "+1-555-2002"
     },
     {
-      "first_name": "Maryam",
-      "last_name": "Khoury",
+      "name": "Maryam Khoury",
       "date_of_birth": "1992-07-22",
       "gender": "female",
       "phone": "+1-555-2003",
@@ -154,8 +152,7 @@
       "emergency_phone": "+1-555-2004"
     },
     {
-      "first_name": "Youssef",
-      "last_name": "El-Amin",
+      "name": "Youssef El-Amin",
       "date_of_birth": "1978-11-03",
       "gender": "male",
       "phone": "+1-555-2005",
@@ -165,8 +162,7 @@
       "emergency_phone": "+1-555-2006"
     },
     {
-      "first_name": "Layla",
-      "last_name": "Rashid",
+      "name": "Layla Rashid",
       "date_of_birth": "2001-01-30",
       "gender": "female",
       "phone": "+1-555-2007",
@@ -174,8 +170,7 @@
       "address": "33 Cedar Lane, Seattle, WA"
     },
     {
-      "first_name": "Omar",
-      "last_name": "Farah",
+      "name": "Omar Farah",
       "date_of_birth": "1965-09-18",
       "gender": "male",
       "phone": "+1-555-2009",

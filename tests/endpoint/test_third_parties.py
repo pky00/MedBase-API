@@ -104,7 +104,6 @@ class TestGetThirdPartiesExclusionFlags:
         await db_session.refresh(tp_patient)
         patient = Patient(
             third_party_id=tp_patient.id,
-            first_name="Test", last_name="Patient",
         )
         db_session.add(patient)
 
@@ -238,7 +237,6 @@ class TestGetThirdPartiesExclusionFlags:
         await db_session.refresh(tp_patient)
         patient = Patient(
             third_party_id=tp_patient.id,
-            first_name="Multi", last_name="Patient",
         )
         db_session.add(patient)
 
