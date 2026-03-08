@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 039074b781f1
+Revision ID: 7e69c2d87fc9
 Revises: 
-Create Date: 2026-02-26 19:32:57.085048
+Create Date: 2026-03-07 20:27:03.269422
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '039074b781f1'
+revision: str = '7e69c2d87fc9'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -74,7 +74,6 @@ def upgrade() -> None:
     op.create_index(op.f('ix_medicine_categories_id'), 'medicine_categories', ['id'], unique=False)
     op.create_table('third_parties',
     sa.Column('name', sa.String(), nullable=False),
-    sa.Column('type', sa.String(), nullable=False),
     sa.Column('phone', sa.String(), nullable=True),
     sa.Column('email', sa.String(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=False),
@@ -104,6 +103,21 @@ def upgrade() -> None:
     sa.UniqueConstraint('name')
     )
     op.create_index(op.f('ix_equipment_id'), 'equipment', ['id'], unique=False)
+    op.create_table('inventory_transactions',
+    sa.Column('transaction_type', sa.String(), nullable=False),
+    sa.Column('third_party_id', sa.Integer(), nullable=False),
+    sa.Column('transaction_date', sa.Date(), nullable=False),
+    sa.Column('notes', sa.Text(), nullable=True),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('is_deleted', sa.Boolean(), nullable=False),
+    sa.Column('created_by', sa.String(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_by', sa.String(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['third_party_id'], ['third_parties.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_inventory_transactions_id'), 'inventory_transactions', ['id'], unique=False)
     op.create_table('medical_devices',
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('category_id', sa.Integer(), nullable=True),
@@ -140,12 +154,9 @@ def upgrade() -> None:
     op.create_index(op.f('ix_medicines_id'), 'medicines', ['id'], unique=False)
     op.create_table('partners',
     sa.Column('third_party_id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(), nullable=False),
     sa.Column('partner_type', sa.String(), nullable=False),
     sa.Column('organization_type', sa.String(), nullable=True),
     sa.Column('contact_person', sa.String(), nullable=True),
-    sa.Column('phone', sa.String(), nullable=True),
-    sa.Column('email', sa.String(), nullable=True),
     sa.Column('address', sa.Text(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -155,15 +166,33 @@ def upgrade() -> None:
     sa.Column('updated_by', sa.String(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['third_party_id'], ['third_parties.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('name')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_partners_id'), 'partners', ['id'], unique=False)
+    op.create_table('patients',
+    sa.Column('third_party_id', sa.Integer(), nullable=False),
+    sa.Column('first_name', sa.String(), nullable=False),
+    sa.Column('last_name', sa.String(), nullable=False),
+    sa.Column('date_of_birth', sa.Date(), nullable=True),
+    sa.Column('gender', sa.String(), nullable=True),
+    sa.Column('address', sa.Text(), nullable=True),
+    sa.Column('emergency_contact', sa.String(), nullable=True),
+    sa.Column('emergency_phone', sa.String(), nullable=True),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('is_deleted', sa.Boolean(), nullable=False),
+    sa.Column('created_by', sa.String(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_by', sa.String(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['third_party_id'], ['third_parties.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_patients_id'), 'patients', ['id'], unique=False)
     op.create_table('users',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('third_party_id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(), nullable=False),
-    sa.Column('email', sa.String(), nullable=False),
     sa.Column('password_hash', sa.String(), nullable=False),
     sa.Column('role', sa.String(), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=False),
@@ -175,15 +204,11 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['third_party_id'], ['third_parties.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
     op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=True)
     op.create_table('doctors',
     sa.Column('third_party_id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(), nullable=False),
     sa.Column('specialization', sa.String(), nullable=True),
-    sa.Column('phone', sa.String(), nullable=True),
-    sa.Column('email', sa.String(), nullable=True),
     sa.Column('type', sa.String(), nullable=False),
     sa.Column('partner_id', sa.Integer(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=False),
@@ -195,27 +220,151 @@ def upgrade() -> None:
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['partner_id'], ['partners.id'], ),
     sa.ForeignKeyConstraint(['third_party_id'], ['third_parties.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('name')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_doctors_id'), 'doctors', ['id'], unique=False)
+    op.create_table('inventory_transaction_items',
+    sa.Column('transaction_id', sa.Integer(), nullable=False),
+    sa.Column('item_type', sa.String(), nullable=False),
+    sa.Column('item_id', sa.Integer(), nullable=False),
+    sa.Column('quantity', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('is_deleted', sa.Boolean(), nullable=False),
+    sa.Column('created_by', sa.String(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_by', sa.String(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['transaction_id'], ['inventory_transactions.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_inventory_transaction_items_id'), 'inventory_transaction_items', ['id'], unique=False)
+    op.create_table('patient_documents',
+    sa.Column('patient_id', sa.Integer(), nullable=False),
+    sa.Column('document_name', sa.String(), nullable=False),
+    sa.Column('document_type', sa.String(), nullable=True),
+    sa.Column('file_path', sa.String(), nullable=False),
+    sa.Column('upload_date', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('is_deleted', sa.Boolean(), nullable=False),
+    sa.Column('created_by', sa.String(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_by', sa.String(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['patient_id'], ['patients.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_patient_documents_id'), 'patient_documents', ['id'], unique=False)
+    op.create_table('appointments',
+    sa.Column('patient_id', sa.Integer(), nullable=False),
+    sa.Column('doctor_id', sa.Integer(), nullable=True),
+    sa.Column('partner_id', sa.Integer(), nullable=True),
+    sa.Column('appointment_date', sa.DateTime(), nullable=False),
+    sa.Column('status', sa.String(), nullable=False),
+    sa.Column('type', sa.String(), nullable=False),
+    sa.Column('location', sa.String(), nullable=False),
+    sa.Column('notes', sa.Text(), nullable=True),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('is_deleted', sa.Boolean(), nullable=False),
+    sa.Column('created_by', sa.String(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_by', sa.String(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['doctor_id'], ['doctors.id'], ),
+    sa.ForeignKeyConstraint(['partner_id'], ['partners.id'], ),
+    sa.ForeignKeyConstraint(['patient_id'], ['patients.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_appointments_id'), 'appointments', ['id'], unique=False)
+    op.create_table('medical_records',
+    sa.Column('appointment_id', sa.Integer(), nullable=False),
+    sa.Column('chief_complaint', sa.Text(), nullable=True),
+    sa.Column('diagnosis', sa.Text(), nullable=True),
+    sa.Column('treatment_notes', sa.Text(), nullable=True),
+    sa.Column('follow_up_date', sa.Date(), nullable=True),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('is_deleted', sa.Boolean(), nullable=False),
+    sa.Column('created_by', sa.String(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_by', sa.String(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['appointment_id'], ['appointments.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_medical_records_id'), 'medical_records', ['id'], unique=False)
+    op.create_table('treatments',
+    sa.Column('patient_id', sa.Integer(), nullable=False),
+    sa.Column('appointment_id', sa.Integer(), nullable=True),
+    sa.Column('partner_id', sa.Integer(), nullable=False),
+    sa.Column('treatment_type', sa.String(), nullable=False),
+    sa.Column('description', sa.Text(), nullable=True),
+    sa.Column('treatment_date', sa.Date(), nullable=True),
+    sa.Column('status', sa.String(), nullable=False),
+    sa.Column('cost', sa.Numeric(precision=12, scale=2), nullable=True),
+    sa.Column('notes', sa.Text(), nullable=True),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('is_deleted', sa.Boolean(), nullable=False),
+    sa.Column('created_by', sa.String(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_by', sa.String(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['appointment_id'], ['appointments.id'], ),
+    sa.ForeignKeyConstraint(['partner_id'], ['partners.id'], ),
+    sa.ForeignKeyConstraint(['patient_id'], ['patients.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_treatments_id'), 'treatments', ['id'], unique=False)
+    op.create_table('vital_signs',
+    sa.Column('appointment_id', sa.Integer(), nullable=False),
+    sa.Column('blood_pressure_systolic', sa.Integer(), nullable=True),
+    sa.Column('blood_pressure_diastolic', sa.Integer(), nullable=True),
+    sa.Column('heart_rate', sa.Integer(), nullable=True),
+    sa.Column('temperature', sa.Numeric(precision=5, scale=2), nullable=True),
+    sa.Column('respiratory_rate', sa.Integer(), nullable=True),
+    sa.Column('weight', sa.Numeric(precision=6, scale=2), nullable=True),
+    sa.Column('height', sa.Numeric(precision=5, scale=2), nullable=True),
+    sa.Column('notes', sa.Text(), nullable=True),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('is_deleted', sa.Boolean(), nullable=False),
+    sa.Column('created_by', sa.String(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_by', sa.String(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['appointment_id'], ['appointments.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_vital_signs_id'), 'vital_signs', ['id'], unique=False)
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_index(op.f('ix_vital_signs_id'), table_name='vital_signs')
+    op.drop_table('vital_signs')
+    op.drop_index(op.f('ix_treatments_id'), table_name='treatments')
+    op.drop_table('treatments')
+    op.drop_index(op.f('ix_medical_records_id'), table_name='medical_records')
+    op.drop_table('medical_records')
+    op.drop_index(op.f('ix_appointments_id'), table_name='appointments')
+    op.drop_table('appointments')
+    op.drop_index(op.f('ix_patient_documents_id'), table_name='patient_documents')
+    op.drop_table('patient_documents')
+    op.drop_index(op.f('ix_inventory_transaction_items_id'), table_name='inventory_transaction_items')
+    op.drop_table('inventory_transaction_items')
     op.drop_index(op.f('ix_doctors_id'), table_name='doctors')
     op.drop_table('doctors')
     op.drop_index(op.f('ix_users_username'), table_name='users')
     op.drop_index(op.f('ix_users_id'), table_name='users')
-    op.drop_index(op.f('ix_users_email'), table_name='users')
     op.drop_table('users')
+    op.drop_index(op.f('ix_patients_id'), table_name='patients')
+    op.drop_table('patients')
     op.drop_index(op.f('ix_partners_id'), table_name='partners')
     op.drop_table('partners')
     op.drop_index(op.f('ix_medicines_id'), table_name='medicines')
     op.drop_table('medicines')
     op.drop_index(op.f('ix_medical_devices_id'), table_name='medical_devices')
     op.drop_table('medical_devices')
+    op.drop_index(op.f('ix_inventory_transactions_id'), table_name='inventory_transactions')
+    op.drop_table('inventory_transactions')
     op.drop_index(op.f('ix_equipment_id'), table_name='equipment')
     op.drop_table('equipment')
     op.drop_index(op.f('ix_third_parties_id'), table_name='third_parties')

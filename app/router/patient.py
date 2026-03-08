@@ -100,10 +100,10 @@ async def create_patient(
     else:
         existing = await service.get_by_name(data.first_name, data.last_name)
         if existing:
-            logger.warning("Patient name already exists name='%s'", full_name)
+            logger.warning("Third party name already exists name='%s'", full_name)
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Patient name already exists",
+                detail="Third party name already exists",
             )
         tp_service = ThirdPartyService(db)
         existing_tp = await tp_service.get_by_name(full_name)

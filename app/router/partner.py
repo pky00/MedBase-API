@@ -93,8 +93,8 @@ async def create_partner(
             )
         existing = await service.get_by_name(data.name)
         if existing:
-            logger.warning("Partner name already exists name='%s'", data.name)
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Partner name already exists")
+            logger.warning("Third party name already exists name='%s'", data.name)
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Third party name already exists")
         tp_service = ThirdPartyService(db)
         existing_tp = await tp_service.get_by_name(data.name)
         if existing_tp:
