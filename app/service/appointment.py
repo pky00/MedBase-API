@@ -2,6 +2,7 @@ import logging
 from typing import Optional, List, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, or_
+from sqlalchemy.orm import aliased
 
 from app.model.appointment import Appointment
 from app.model.vital_sign import VitalSign
@@ -9,6 +10,7 @@ from app.model.medical_record import MedicalRecord
 from app.model.patient import Patient
 from app.model.doctor import Doctor
 from app.model.partner import Partner
+from app.model.third_party import ThirdParty
 from app.schema.appointment import AppointmentCreate, AppointmentUpdate, AppointmentDetailResponse, AppointmentResponse
 
 logger = logging.getLogger("medbase.service.appointment")
@@ -32,18 +34,22 @@ class AppointmentService:
 
     async def get_by_id_with_details(self, appointment_id: int) -> Optional[AppointmentDetailResponse]:
         """Get appointment by ID with patient/doctor/partner names, vitals, and medical record."""
+        DoctorTP = aliased(ThirdParty)
+        PartnerTP = aliased(ThirdParty)
         result = await self.db.execute(
             select(
                 Appointment,
                 func.concat(Patient.first_name, ' ', Patient.last_name).label("patient_name"),
-                Doctor.name.label("doctor_name"),
-                Partner.name.label("partner_name"),
+                DoctorTP.name.label("doctor_name"),
+                PartnerTP.name.label("partner_name"),
                 VitalSign,
                 MedicalRecord,
             )
             .outerjoin(Patient, Appointment.patient_id == Patient.id)
             .outerjoin(Doctor, Appointment.doctor_id == Doctor.id)
+            .outerjoin(DoctorTP, Doctor.third_party_id == DoctorTP.id)
             .outerjoin(Partner, Appointment.partner_id == Partner.id)
+            .outerjoin(PartnerTP, Partner.third_party_id == PartnerTP.id)
             .outerjoin(VitalSign, (VitalSign.appointment_id == Appointment.id) & (VitalSign.is_deleted == False))
             .outerjoin(MedicalRecord, (MedicalRecord.appointment_id == Appointment.id) & (MedicalRecord.is_deleted == False))
             .where(
@@ -73,18 +79,22 @@ class AppointmentService:
         order: str = "asc",
     ) -> Tuple[List[dict], int]:
         """Get all appointments with pagination, filtering, and sorting."""
+        DoctorTP = aliased(ThirdParty)
+        PartnerTP = aliased(ThirdParty)
         query = (
             select(
                 Appointment,
                 func.concat(Patient.first_name, ' ', Patient.last_name).label("patient_name"),
-                Doctor.name.label("doctor_name"),
-                Partner.name.label("partner_name"),
+                DoctorTP.name.label("doctor_name"),
+                PartnerTP.name.label("partner_name"),
                 VitalSign.id.label("vital_sign_id"),
                 MedicalRecord.id.label("medical_record_id"),
             )
             .outerjoin(Patient, Appointment.patient_id == Patient.id)
             .outerjoin(Doctor, Appointment.doctor_id == Doctor.id)
+            .outerjoin(DoctorTP, Doctor.third_party_id == DoctorTP.id)
             .outerjoin(Partner, Appointment.partner_id == Partner.id)
+            .outerjoin(PartnerTP, Partner.third_party_id == PartnerTP.id)
             .outerjoin(VitalSign, (VitalSign.appointment_id == Appointment.id) & (VitalSign.is_deleted == False))
             .outerjoin(MedicalRecord, (MedicalRecord.appointment_id == Appointment.id) & (MedicalRecord.is_deleted == False))
             .where(Appointment.is_deleted == False)
@@ -110,8 +120,8 @@ class AppointmentService:
                 or_(
                     Patient.first_name.ilike(search_term),
                     Patient.last_name.ilike(search_term),
-                    Doctor.name.ilike(search_term),
-                    Partner.name.ilike(search_term),
+                    DoctorTP.name.ilike(search_term),
+                    PartnerTP.name.ilike(search_term),
                 )
             )
 

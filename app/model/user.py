@@ -8,14 +8,13 @@ from app.schema.user import UserRole
 
 class User(Base):
     """User model for authentication and authorization."""
-    
+
     __tablename__ = "users"
-    
+
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     third_party_id = Column(Integer, ForeignKey("third_parties.id"), nullable=False)
     third_party = relationship("ThirdParty", lazy="noload")
     username = Column(String, unique=True, nullable=False, index=True)
-    email = Column(String, unique=True, nullable=False, index=True)
     password_hash = Column(String, nullable=False)
     role = Column(String, nullable=False, default=UserRole.USER)
     is_active = Column(Boolean, default=True, nullable=False)

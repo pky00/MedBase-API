@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.utility.database import get_db
 from app.utility.auth import get_current_user
 from app.service.partner import PartnerService
+from app.service.third_party import ThirdPartyService
 from app.schema.partner import (
     PartnerCreate,
     PartnerUpdate,
@@ -78,18 +79,27 @@ async def create_partner(
 
     service = PartnerService(db)
 
-    existing = await service.get_by_name(data.name)
-    if existing:
-        logger.warning("Partner name already exists name='%s'", data.name)
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Partner name already exists")
-
-    # Validate third_party_id if provided
+    # Validate third_party_id if provided, otherwise check name uniqueness
     if data.third_party_id:
-        from app.service.third_party import ThirdPartyService
         tp_service = ThirdPartyService(db)
         tp = await tp_service.get_by_id(data.third_party_id)
         if not tp:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Third party not found")
+    else:
+        if not data.name:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Name is required when not providing a third_party_id",
+            )
+        existing = await service.get_by_name(data.name)
+        if existing:
+            logger.warning("Third party name already exists name='%s'", data.name)
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Third party name already exists")
+        tp_service = ThirdPartyService(db)
+        existing_tp = await tp_service.get_by_name(data.name)
+        if existing_tp:
+            logger.warning("Name already exists in third parties name='%s'", data.name)
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Name already exists in third parties")
 
     partner = await service.create(data, created_by=current_user.username)
     logger.info("Partner created partner_id=%d", partner.id)
@@ -112,12 +122,6 @@ async def update_partner(
     if not partner:
         logger.warning("Partner not found for update partner_id=%d", partner_id)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Partner not found")
-
-    if data.name and data.name != partner.name:
-        existing = await service.get_by_name(data.name)
-        if existing:
-            logger.warning("Partner name already exists name='%s'", data.name)
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Partner name already exists")
 
     updated = await service.update(partner_id, data, updated_by=current_user.username)
     logger.info("Partner updated partner_id=%d", partner_id)

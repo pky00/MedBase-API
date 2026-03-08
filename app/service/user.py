@@ -15,10 +15,10 @@ logger = logging.getLogger("medbase.service.user")
 
 class UserService:
     """Service layer for user operations."""
-    
+
     def __init__(self, db: AsyncSession):
         self.db = db
-    
+
     async def get_by_id(self, user_id: int) -> Optional[User]:
         """Get user by ID."""
         result = await self.db.execute(
@@ -28,21 +28,24 @@ class UserService:
             .where(User.id == user_id, User.is_deleted == False)
         )
         return result.unique().scalar_one_or_none()
-    
+
     async def get_by_username(self, username: str) -> Optional[User]:
         """Get user by username."""
         result = await self.db.execute(
             select(User).where(User.username == username, User.is_deleted == False)
         )
         return result.scalar_one_or_none()
-    
+
     async def get_by_email(self, email: str) -> Optional[User]:
-        """Get user by email."""
+        """Get user by email (via third_party)."""
         result = await self.db.execute(
-            select(User).where(User.email == email, User.is_deleted == False)
+            select(User)
+            .outerjoin(ThirdParty, User.third_party_id == ThirdParty.id)
+            .options(contains_eager(User.third_party))
+            .where(ThirdParty.email == email, User.is_deleted == False)
         )
-        return result.scalar_one_or_none()
-    
+        return result.unique().scalar_one_or_none()
+
     async def get_all(
         self,
         page: int = 1,
@@ -54,7 +57,12 @@ class UserService:
         order: str = "asc"
     ) -> Tuple[List[User], int]:
         """Get all users with pagination, filtering, and sorting."""
-        query = select(User).where(User.is_deleted == False)
+        query = (
+            select(User)
+            .outerjoin(ThirdParty, User.third_party_id == ThirdParty.id)
+            .options(contains_eager(User.third_party))
+            .where(User.is_deleted == False)
+        )
 
         # Apply filters
         if role:
@@ -66,7 +74,7 @@ class UserService:
             query = query.where(
                 or_(
                     User.username.ilike(search_term),
-                    User.email.ilike(search_term)
+                    ThirdParty.email.ilike(search_term)
                 )
             )
 
@@ -75,13 +83,9 @@ class UserService:
         total_result = await self.db.execute(count_query)
         total = total_result.scalar()
 
-        # Join third_party
-        query = query.outerjoin(ThirdParty, User.third_party_id == ThirdParty.id).options(
-            contains_eager(User.third_party)
-        )
-
         # Apply sorting
-        sort_column = getattr(User, sort, User.id)
+        tp_sort_map = {"email": ThirdParty.email, "name": ThirdParty.name}
+        sort_column = tp_sort_map.get(sort, getattr(User, sort, User.id))
         if order.lower() == "desc":
             query = query.order_by(sort_column.desc())
         else:
@@ -93,26 +97,32 @@ class UserService:
 
         result = await self.db.execute(query)
         users = result.unique().scalars().all()
-        
+
         logger.debug("Queried users: total=%d returned=%d", total, len(users))
-        
+
         return list(users), total
-    
+
     async def create(self, user_data: UserCreate, created_by: Optional[str] = None) -> User:
-        """Create a new user. Automatically creates a third_party record."""
-        # Auto-create third_party record
+        """Create a new user. Auto-creates a third_party record if third_party_id not provided."""
         tp_service = ThirdPartyService(self.db)
-        third_party = await tp_service.create(
-            name=user_data.name,
-            email=user_data.email,
-            is_active=user_data.is_active,
-            created_by=created_by,
-        )
+
+        if user_data.third_party_id:
+            tp = await tp_service.get_by_id(user_data.third_party_id)
+            if not tp:
+                raise ValueError("Third party not found")
+            third_party_id = user_data.third_party_id
+        else:
+            tp = await tp_service.create(
+                name=user_data.name,
+                email=user_data.email,
+                is_active=user_data.is_active,
+                created_by=created_by,
+            )
+            third_party_id = tp.id
 
         user = User(
-            third_party_id=third_party.id,
+            third_party_id=third_party_id,
             username=user_data.username,
-            email=user_data.email,
             password_hash=get_password_hash(user_data.password),
             role=user_data.role,
             is_active=user_data.is_active,
@@ -122,9 +132,10 @@ class UserService:
         self.db.add(user)
         await self.db.flush()
         await self.db.refresh(user)
-        logger.info("Created user id=%d username='%s' third_party_id=%d", user.id, user.username, third_party.id)
+        user.third_party = tp
+        logger.info("Created user id=%d username='%s' third_party_id=%d", user.id, user.username, third_party_id)
         return user
-    
+
     async def update(
         self,
         user_id: int,
@@ -135,35 +146,32 @@ class UserService:
         user = await self.get_by_id(user_id)
         if not user:
             return None
-        
+
         update_data = user_data.model_dump(exclude_unset=True)
-        
-        # Hash password if provided
+
         if "password" in update_data:
             update_data["password_hash"] = get_password_hash(update_data.pop("password"))
-        
-        # Update fields
+
         for field, value in update_data.items():
             setattr(user, field, value)
-        
         user.updated_by = updated_by
+
         await self.db.flush()
-        await self.db.refresh(user)
         logger.info("Updated user id=%d fields=%s", user_id, list(update_data.keys()))
-        return user
-    
+        return await self.get_by_id(user_id)
+
     async def delete(self, user_id: int, deleted_by: Optional[str] = None) -> bool:
         """Soft delete a user."""
         user = await self.get_by_id(user_id)
         if not user:
             return False
-        
+
         user.is_deleted = True
         user.updated_by = deleted_by
         await self.db.flush()
         logger.info("Soft-deleted user id=%d", user_id)
         return True
-    
+
     async def authenticate(self, username: str, password: str) -> Optional[User]:
         """Authenticate a user by username and password."""
         user = await self.get_by_username(username)

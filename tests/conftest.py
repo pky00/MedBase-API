@@ -114,7 +114,6 @@ async def _create_user_with_third_party(
     user = User(
         third_party_id=tp.id,
         username=username,
-        email=email,
         password_hash=get_password_hash(password),
         role=role,
         is_active=True,
