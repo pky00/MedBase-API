@@ -92,6 +92,7 @@ class MedicalDeviceService:
             search_term = f"%{search}%"
             base_query = base_query.where(
                 or_(
+                    MedicalDevice.code.ilike(search_term),
                     MedicalDevice.name.ilike(search_term),
                     MedicalDevice.description.ilike(search_term),
                 )
@@ -128,6 +129,7 @@ class MedicalDeviceService:
             search_term = f"%{search}%"
             query = query.where(
                 or_(
+                    MedicalDevice.code.ilike(search_term),
                     MedicalDevice.name.ilike(search_term),
                     MedicalDevice.description.ilike(search_term),
                 )
@@ -157,6 +159,7 @@ class MedicalDeviceService:
     ) -> MedicalDevice:
         """Create a new medical device and its inventory record."""
         device = MedicalDevice(
+            code=data.code,
             name=data.name,
             category_id=data.category_id,
             description=data.description,

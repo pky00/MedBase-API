@@ -8,6 +8,7 @@ from app.schema.medical_device_category import MedicalDeviceCategoryResponse
 class MedicalDeviceBase(BaseModel):
     """Base schema for medical device."""
 
+    code: str = Field(..., min_length=1, max_length=50)
     name: str = Field(..., min_length=1, max_length=255)
     category_id: Optional[int] = None
     description: Optional[str] = None
@@ -23,6 +24,7 @@ class MedicalDeviceCreate(MedicalDeviceBase):
 class MedicalDeviceUpdate(BaseModel):
     """Schema for updating a medical device."""
 
+    code: Optional[str] = Field(None, min_length=1, max_length=50)
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     category_id: Optional[int] = None
     description: Optional[str] = None
@@ -57,6 +59,7 @@ class MedicalDeviceDetailResponse(MedicalDeviceResponse):
         return cls.model_validate(
             {
                 "id": device.id,
+                "code": device.code,
                 "name": device.name,
                 "category_id": device.category_id,
                 "description": device.description,

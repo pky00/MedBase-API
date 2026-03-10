@@ -8,6 +8,7 @@ from app.schema.medicine_category import MedicineCategoryResponse
 class MedicineBase(BaseModel):
     """Base schema for medicine."""
 
+    code: str = Field(..., min_length=1, max_length=50)
     name: str = Field(..., min_length=1, max_length=255)
     category_id: Optional[int] = None
     description: Optional[str] = None
@@ -23,6 +24,7 @@ class MedicineCreate(MedicineBase):
 class MedicineUpdate(BaseModel):
     """Schema for updating a medicine."""
 
+    code: Optional[str] = Field(None, min_length=1, max_length=50)
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     category_id: Optional[int] = None
     description: Optional[str] = None
@@ -57,6 +59,7 @@ class MedicineDetailResponse(MedicineResponse):
         return cls.model_validate(
             {
                 "id": medicine.id,
+                "code": medicine.code,
                 "name": medicine.name,
                 "category_id": medicine.category_id,
                 "description": medicine.description,

@@ -40,6 +40,7 @@ async def medicine_with_inventory(
 ) -> tuple:
     """Create a medicine with inventory record."""
     medicine = Medicine(
+        code="TST-MED",
         name="Test Medicine",
         category_id=medicine_category.id,
         unit="tablets",
@@ -80,6 +81,7 @@ async def equipment_with_inventory(
     await db_session.refresh(cat)
 
     equip = Equipment(
+        code="TST-EQP",
         name="Test Equipment",
         category_id=cat.id,
         condition="new",

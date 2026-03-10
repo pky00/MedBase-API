@@ -63,6 +63,7 @@ class InventoryTransactionCreate(BaseModel):
 
     transaction_type: TransactionType
     third_party_id: Optional[int] = None
+    appointment_id: Optional[int] = None
     transaction_date: date
     notes: Optional[str] = None
     items: Optional[List[TransactionItemCreate]] = None
@@ -83,6 +84,7 @@ class InventoryTransactionResponse(BaseModel):
     id: int
     transaction_type: str
     third_party_id: int
+    appointment_id: Optional[int] = None
     transaction_date: date
     notes: Optional[str] = None
     is_deleted: bool
@@ -102,6 +104,7 @@ class InventoryTransactionListResponse(BaseModel):
     id: int
     transaction_type: str
     third_party_id: int
+    appointment_id: Optional[int] = None
     transaction_date: date
     notes: Optional[str] = None
     is_deleted: bool
@@ -120,6 +123,7 @@ class InventoryTransactionListResponse(BaseModel):
                 "id": transaction.id,
                 "transaction_type": transaction.transaction_type,
                 "third_party_id": transaction.third_party_id,
+                "appointment_id": transaction.appointment_id,
                 "transaction_date": transaction.transaction_date,
                 "notes": transaction.notes,
                 "is_deleted": transaction.is_deleted,

@@ -53,7 +53,7 @@ class TestGetMedicines:
     ):
         """Test filtering medicines by category."""
         med = Medicine(
-            name="Amoxicillin", category_id=medicine_category.id,
+            code="AMX001", name="Amoxicillin", category_id=medicine_category.id,
             created_by=admin_user.username, updated_by=admin_user.username,
         )
         db_session.add(med)
@@ -76,8 +76,8 @@ class TestGetMedicines:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test searching medicines."""
-        med1 = Medicine(name="Amoxicillin", description="Antibiotic", created_by=admin_user.username, updated_by=admin_user.username)
-        med2 = Medicine(name="Ibuprofen", description="Painkiller", created_by=admin_user.username, updated_by=admin_user.username)
+        med1 = Medicine(code="AMX002", name="Amoxicillin", description="Antibiotic", created_by=admin_user.username, updated_by=admin_user.username)
+        med2 = Medicine(code="IBU001", name="Ibuprofen", description="Painkiller", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add_all([med1, med2])
         await db_session.commit()
 
@@ -97,8 +97,8 @@ class TestGetMedicines:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test filtering by active status."""
-        med1 = Medicine(name="Active Med", is_active=True, created_by=admin_user.username, updated_by=admin_user.username)
-        med2 = Medicine(name="Inactive Med", is_active=False, created_by=admin_user.username, updated_by=admin_user.username)
+        med1 = Medicine(code="ACT001", name="Active Med", is_active=True, created_by=admin_user.username, updated_by=admin_user.username)
+        med2 = Medicine(code="INA001", name="Inactive Med", is_active=False, created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add_all([med1, med2])
         await db_session.commit()
 
@@ -127,6 +127,7 @@ class TestGetMedicine:
         response = await client.post(
             "/api/v1/medicines",
             json={
+                "code": "AMX500",
                 "name": "Amoxicillin",
                 "category_id": medicine_category.id,
                 "description": "Antibiotic",
@@ -167,6 +168,7 @@ class TestCreateMedicine:
     ):
         """Test creating a medicine and verify database state (including inventory)."""
         medicine_data = {
+            "code": "AMX501",
             "name": "Amoxicillin",
             "category_id": medicine_category.id,
             "description": "Broad-spectrum antibiotic",
@@ -213,7 +215,7 @@ class TestCreateMedicine:
         """Test creating medicine without a category."""
         response = await client.post(
             "/api/v1/medicines",
-            json={"name": "Generic Med", "unit": "ml"},
+            json={"code": "GEN001", "name": "Generic Med", "unit": "ml"},
             headers=admin_headers,
         )
 
@@ -228,7 +230,7 @@ class TestCreateMedicine:
         """Test creating medicine with non-existent category."""
         response = await client.post(
             "/api/v1/medicines",
-            json={"name": "Test Med", "category_id": 99999},
+            json={"code": "TST001", "name": "Test Med", "category_id": 99999},
             headers=admin_headers,
         )
 
@@ -240,13 +242,13 @@ class TestCreateMedicine:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test creating medicine with duplicate name fails."""
-        med = Medicine(name="Duplicate Med", created_by=admin_user.username, updated_by=admin_user.username)
+        med = Medicine(code="DUP001", name="Duplicate Med", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(med)
         await db_session.commit()
 
         response = await client.post(
             "/api/v1/medicines",
-            json={"name": "Duplicate Med"},
+            json={"code": "DUP002", "name": "Duplicate Med"},
             headers=admin_headers,
         )
         assert response.status_code == 400
@@ -275,7 +277,7 @@ class TestUpdateMedicine:
         """Test updating a medicine and verify in database."""
         admin_username = admin_user.username
 
-        med = Medicine(name="Old Name", unit="tablets", created_by=admin_username, updated_by=admin_username)
+        med = Medicine(code="OLD001", name="Old Name", unit="tablets", created_by=admin_username, updated_by=admin_username)
         db_session.add(med)
         await db_session.commit()
         await db_session.refresh(med)
@@ -316,7 +318,7 @@ class TestUpdateMedicine:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test updating medicine with non-existent category."""
-        med = Medicine(name="Test Med", created_by=admin_user.username, updated_by=admin_user.username)
+        med = Medicine(code="TST002", name="Test Med", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(med)
         await db_session.commit()
         await db_session.refresh(med)
@@ -340,7 +342,7 @@ class TestDeleteMedicine:
         # Create via API to auto-create inventory
         response = await client.post(
             "/api/v1/medicines",
-            json={"name": "To Delete"},
+            json={"code": "DEL001", "name": "To Delete"},
             headers=admin_headers,
         )
         assert response.status_code == 201
@@ -380,7 +382,7 @@ class TestDeleteMedicine:
     ):
         """Test cannot delete medicine when inventory quantity > 0."""
         # Create medicine with inventory > 0
-        med = Medicine(name="Has Stock", created_by=admin_user.username, updated_by=admin_user.username)
+        med = Medicine(code="STK001", name="Has Stock", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(med)
         await db_session.flush()
         await db_session.refresh(med)

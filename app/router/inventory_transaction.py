@@ -31,6 +31,7 @@ async def get_transactions(
     size: int = Query(10, ge=1, le=100, description="Page size"),
     transaction_type: Optional[TransactionType] = Query(None, description="Filter by transaction type"),
     third_party_id: Optional[int] = Query(None, description="Filter by third party"),
+    appointment_id: Optional[int] = Query(None, description="Filter by appointment"),
     transaction_date: Optional[date] = Query(None, description="Filter by date"),
     sort: str = Query("id", description="Sort field"),
     order: str = Query("asc", description="Sort order (asc/desc)"),
@@ -43,7 +44,8 @@ async def get_transactions(
     service = InventoryTransactionService(db)
     transactions, total = await service.get_all(
         page=page, size=size, transaction_type=transaction_type,
-        third_party_id=third_party_id, transaction_date=str(transaction_date) if transaction_date else None,
+        third_party_id=third_party_id, appointment_id=appointment_id,
+        transaction_date=str(transaction_date) if transaction_date else None,
         sort=sort, order=order,
     )
 

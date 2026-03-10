@@ -385,9 +385,15 @@ async def populate():
                     quantity=item["quantity"],
                 ))
 
+            # Resolve appointment_id if provided
+            appt_id = None
+            if "appointment_index" in tx and tx["appointment_index"] < len(appointment_ids):
+                appt_id = appointment_ids[tx["appointment_index"]]
+
             tx_data = InventoryTransactionCreate(
                 transaction_type=tx_type,
                 third_party_id=third_party_id,
+                appointment_id=appt_id,
                 transaction_date=tx["transaction_date"],
                 notes=tx.get("notes"),
                 items=items if items else None,

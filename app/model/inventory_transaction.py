@@ -10,5 +10,6 @@ class InventoryTransaction(BaseModel):
 
     transaction_type = Column(String, nullable=False)
     third_party_id = Column(Integer, ForeignKey("third_parties.id"), nullable=False)
+    appointment_id = Column(Integer, ForeignKey("appointments.id"), nullable=True)
     transaction_date = Column(Date, nullable=False)
     notes = Column(Text, nullable=True)

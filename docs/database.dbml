@@ -7,6 +7,7 @@
 
 Table third_parties {
   id int [pk, increment]
+  code varchar [unique, not null, note: 'auto-generated unique identifier']
   name varchar [not null]
   phone varchar
   email varchar
@@ -75,6 +76,7 @@ Table medical_device_categories {
 
 Table medicines {
   id int [pk, increment]
+  code varchar [unique, not null, note: 'user-provided unique identifier']
   name varchar [unique, not null]
   category_id int [ref: > medicine_categories.id]
   description text
@@ -89,6 +91,7 @@ Table medicines {
 
 Table equipment {
   id int [pk, increment]
+  code varchar [unique, not null, note: 'user-provided unique identifier']
   name varchar [unique, not null]
   category_id int [ref: > equipment_categories.id]
   description text
@@ -103,6 +106,7 @@ Table equipment {
 
 Table medical_devices {
   id int [pk, increment]
+  code varchar [unique, not null, note: 'user-provided unique identifier']
   name varchar [unique, not null]
   category_id int [ref: > medical_device_categories.id]
   description text
@@ -131,6 +135,7 @@ Table inventory_transactions {
   id int [pk, increment]
   transaction_type varchar [not null, note: 'purchase, donation, prescription, loss, breakage, expiration, destruction']
   third_party_id int [ref: > third_parties.id, not null, note: 'donor for donations, doctor for prescriptions, user for other types']
+  appointment_id int [ref: > appointments.id, note: 'optional link to appointment']
   transaction_date date [not null]
   notes text
   is_deleted boolean [default: false, not null]
@@ -230,6 +235,7 @@ Table patient_documents {
 
 Table appointments {
   id int [pk, increment]
+  code varchar [unique, not null, note: 'auto-generated unique identifier']
   patient_id int [ref: > patients.id, not null]
   doctor_id int [ref: > doctors.id]
   partner_id int [ref: > partners.id, note: 'for external appointments']

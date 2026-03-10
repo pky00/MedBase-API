@@ -78,6 +78,7 @@ class ThirdPartyService:
             search_term = f"%{search}%"
             query = query.where(
                 or_(
+                    ThirdParty.code.ilike(search_term),
                     ThirdParty.name.ilike(search_term),
                     ThirdParty.email.ilike(search_term),
                     ThirdParty.phone.ilike(search_term),

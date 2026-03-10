@@ -51,8 +51,8 @@ class TestGetEquipment:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test filtering equipment by condition."""
-        e1 = Equipment(name="New Scalpel", condition="new", created_by=admin_user.username, updated_by=admin_user.username)
-        e2 = Equipment(name="Old Scalpel", condition="poor", created_by=admin_user.username, updated_by=admin_user.username)
+        e1 = Equipment(code="EQ-NSC", name="New Scalpel", condition="new", created_by=admin_user.username, updated_by=admin_user.username)
+        e2 = Equipment(code="EQ-OSC", name="Old Scalpel", condition="poor", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add_all([e1, e2])
         await db_session.commit()
 
@@ -72,8 +72,8 @@ class TestGetEquipment:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test searching equipment."""
-        e1 = Equipment(name="Scalpel", created_by=admin_user.username, updated_by=admin_user.username)
-        e2 = Equipment(name="Stethoscope", created_by=admin_user.username, updated_by=admin_user.username)
+        e1 = Equipment(code="EQ-SCA", name="Scalpel", created_by=admin_user.username, updated_by=admin_user.username)
+        e2 = Equipment(code="EQ-STH", name="Stethoscope", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add_all([e1, e2])
         await db_session.commit()
 
@@ -101,6 +101,7 @@ class TestGetEquipmentById:
         response = await client.post(
             "/api/v1/equipment",
             json={
+                "code": "EQ-SC1",
                 "name": "Scalpel",
                 "category_id": equipment_category.id,
                 "condition": "new",
@@ -137,6 +138,7 @@ class TestCreateEquipment:
     ):
         """Test creating equipment and verify database state."""
         equipment_data = {
+            "code": "EQ-SSC",
             "name": "Surgical Scalpel",
             "category_id": equipment_category.id,
             "description": "Precision scalpel",
@@ -182,7 +184,7 @@ class TestCreateEquipment:
         """Test creating equipment with invalid condition."""
         response = await client.post(
             "/api/v1/equipment",
-            json={"name": "Test", "condition": "invalid"},
+            json={"code": "EQ-INV", "name": "Test", "condition": "invalid"},
             headers=admin_headers,
         )
         assert response.status_code == 422
@@ -194,7 +196,7 @@ class TestCreateEquipment:
         """Test creating equipment with non-existent category."""
         response = await client.post(
             "/api/v1/equipment",
-            json={"name": "Test", "category_id": 99999},
+            json={"code": "EQ-IC1", "name": "Test", "category_id": 99999},
             headers=admin_headers,
         )
         assert response.status_code == 400
@@ -204,13 +206,13 @@ class TestCreateEquipment:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test creating equipment with duplicate name fails."""
-        equip = Equipment(name="Duplicate Equip", created_by=admin_user.username, updated_by=admin_user.username)
+        equip = Equipment(code="EQ-DUP", name="Duplicate Equip", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(equip)
         await db_session.commit()
 
         response = await client.post(
             "/api/v1/equipment",
-            json={"name": "Duplicate Equip"},
+            json={"code": "EQ-DU2", "name": "Duplicate Equip"},
             headers=admin_headers,
         )
         assert response.status_code == 400
@@ -226,7 +228,7 @@ class TestUpdateEquipment:
     ):
         """Test updating equipment and verify in database."""
         admin_username = admin_user.username
-        equip = Equipment(name="Old Name", condition="good", created_by=admin_username, updated_by=admin_username)
+        equip = Equipment(code="EQ-OLD", name="Old Name", condition="good", created_by=admin_username, updated_by=admin_username)
         db_session.add(equip)
         await db_session.commit()
         await db_session.refresh(equip)
@@ -273,7 +275,7 @@ class TestDeleteEquipment:
         """Test deleting equipment when inventory is 0."""
         response = await client.post(
             "/api/v1/equipment",
-            json={"name": "To Delete", "condition": "new"},
+            json={"code": "EQ-DEL", "name": "To Delete", "condition": "new"},
             headers=admin_headers,
         )
         assert response.status_code == 201
@@ -309,7 +311,7 @@ class TestDeleteEquipment:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test cannot delete equipment when inventory quantity > 0."""
-        equip = Equipment(name="Has Stock", created_by=admin_user.username, updated_by=admin_user.username)
+        equip = Equipment(code="EQ-STK", name="Has Stock", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(equip)
         await db_session.flush()
         await db_session.refresh(equip)

@@ -103,6 +103,7 @@ class AppointmentResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    code: str
     patient_id: int
     doctor_id: Optional[int] = None
     partner_id: Optional[int] = None
@@ -127,6 +128,7 @@ class AppointmentResponse(BaseModel):
         return cls.model_validate(
             {
                 "id": appt.id,
+                "code": appt.code,
                 "patient_id": appt.patient_id,
                 "doctor_id": appt.doctor_id,
                 "partner_id": appt.partner_id,
@@ -160,6 +162,7 @@ class AppointmentDetailResponse(AppointmentResponse):
         return cls.model_validate(
             {
                 "id": appt.id,
+                "code": appt.code,
                 "patient_id": appt.patient_id,
                 "doctor_id": appt.doctor_id,
                 "partner_id": appt.partner_id,

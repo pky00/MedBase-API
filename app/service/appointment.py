@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, or_
 from sqlalchemy.orm import aliased
 
-from app.model.appointment import Appointment
+from app.model.appointment import Appointment, generate_code
 from app.model.vital_sign import VitalSign
 from app.model.medical_record import MedicalRecord
 from app.model.patient import Patient
@@ -122,6 +122,7 @@ class AppointmentService:
             search_term = f"%{search}%"
             query = query.where(
                 or_(
+                    Appointment.code.ilike(search_term),
                     PatientTP.name.ilike(search_term),
                     DoctorTP.name.ilike(search_term),
                     PartnerTP.name.ilike(search_term),
@@ -155,6 +156,7 @@ class AppointmentService:
     async def create(self, data: AppointmentCreate, created_by: Optional[str] = None) -> Appointment:
         """Create a new appointment."""
         appointment = Appointment(
+            code=generate_code(),
             patient_id=data.patient_id,
             doctor_id=data.doctor_id,
             partner_id=data.partner_id,
