@@ -213,6 +213,7 @@ class InventoryTransactionService:
             id=transaction.id,
             transaction_type=transaction.transaction_type,
             third_party_id=transaction.third_party_id,
+            appointment_id=transaction.appointment_id,
             transaction_date=transaction.transaction_date,
             notes=transaction.notes,
             is_deleted=transaction.is_deleted,
@@ -246,6 +247,7 @@ class InventoryTransactionService:
         size: int = 10,
         transaction_type: Optional[str] = None,
         third_party_id: Optional[int] = None,
+        appointment_id: Optional[int] = None,
         transaction_date: Optional[str] = None,
         sort: str = "id",
         order: str = "asc",
@@ -264,6 +266,8 @@ class InventoryTransactionService:
             query = query.where(InventoryTransaction.transaction_type == transaction_type)
         if third_party_id is not None:
             query = query.where(InventoryTransaction.third_party_id == third_party_id)
+        if appointment_id is not None:
+            query = query.where(InventoryTransaction.appointment_id == appointment_id)
         if transaction_date is not None:
             query = query.where(InventoryTransaction.transaction_date == transaction_date)
 
@@ -301,6 +305,7 @@ class InventoryTransactionService:
         transaction = InventoryTransaction(
             transaction_type=data.transaction_type,
             third_party_id=third_party_id,
+            appointment_id=data.appointment_id,
             transaction_date=data.transaction_date,
             notes=data.notes,
             created_by=created_by,

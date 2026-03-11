@@ -95,6 +95,7 @@ class EquipmentService:
             search_term = f"%{search}%"
             base_query = base_query.where(
                 or_(
+                    Equipment.code.ilike(search_term),
                     Equipment.name.ilike(search_term),
                     Equipment.description.ilike(search_term),
                 )
@@ -133,6 +134,7 @@ class EquipmentService:
             search_term = f"%{search}%"
             query = query.where(
                 or_(
+                    Equipment.code.ilike(search_term),
                     Equipment.name.ilike(search_term),
                     Equipment.description.ilike(search_term),
                 )
@@ -162,6 +164,7 @@ class EquipmentService:
     ) -> Equipment:
         """Create new equipment and its inventory record."""
         equipment = Equipment(
+            code=data.code,
             name=data.name,
             category_id=data.category_id,
             description=data.description,

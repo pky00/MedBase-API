@@ -97,7 +97,7 @@ async def dashboard_data(db_session: AsyncSession, admin_user: User):
     await db_session.flush()
 
     medicine = Medicine(
-        name="Stats Medicine", category_id=med_cat.id, unit="tablets",
+        code="ST-MED", name="Stats Medicine", category_id=med_cat.id, unit="tablets",
         is_active=True, created_by=admin_user.username, updated_by=admin_user.username,
     )
     db_session.add(medicine)
@@ -117,7 +117,7 @@ async def dashboard_data(db_session: AsyncSession, admin_user: User):
     await db_session.flush()
 
     equip = Equipment(
-        name="Stats Equipment", category_id=equip_cat.id, condition="new",
+        code="ST-EQP", name="Stats Equipment", category_id=equip_cat.id, condition="new",
         is_active=True, created_by=admin_user.username, updated_by=admin_user.username,
     )
     db_session.add(equip)

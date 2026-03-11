@@ -53,7 +53,7 @@ class TestGetMedicalDevices:
     ):
         """Test filtering devices by category."""
         dev = MedicalDevice(
-            name="BP Monitor", category_id=device_category.id,
+            code="MD-BPM", name="BP Monitor", category_id=device_category.id,
             created_by=admin_user.username, updated_by=admin_user.username,
         )
         db_session.add(dev)
@@ -76,8 +76,8 @@ class TestGetMedicalDevices:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test searching medical devices."""
-        d1 = MedicalDevice(name="Blood Pressure Monitor", created_by=admin_user.username, updated_by=admin_user.username)
-        d2 = MedicalDevice(name="Pulse Oximeter", created_by=admin_user.username, updated_by=admin_user.username)
+        d1 = MedicalDevice(code="MD-BP1", name="Blood Pressure Monitor", created_by=admin_user.username, updated_by=admin_user.username)
+        d2 = MedicalDevice(code="MD-POX", name="Pulse Oximeter", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add_all([d1, d2])
         await db_session.commit()
 
@@ -105,6 +105,7 @@ class TestGetMedicalDevice:
         response = await client.post(
             "/api/v1/medical-devices",
             json={
+                "code": "MD-HRM",
                 "name": "Heart Monitor",
                 "category_id": device_category.id,
                 "serial_number": "HM-001",
@@ -144,6 +145,7 @@ class TestCreateMedicalDevice:
     ):
         """Test creating a medical device and verify database state."""
         device_data = {
+            "code": "MD-ECG",
             "name": "ECG Machine",
             "category_id": device_category.id,
             "description": "12-lead ECG",
@@ -189,7 +191,7 @@ class TestCreateMedicalDevice:
         """Test creating device without a category."""
         response = await client.post(
             "/api/v1/medical-devices",
-            json={"name": "Generic Device"},
+            json={"code": "MD-GEN", "name": "Generic Device"},
             headers=admin_headers,
         )
 
@@ -203,7 +205,7 @@ class TestCreateMedicalDevice:
         """Test creating device with non-existent category."""
         response = await client.post(
             "/api/v1/medical-devices",
-            json={"name": "Test Device", "category_id": 99999},
+            json={"code": "MD-TST", "name": "Test Device", "category_id": 99999},
             headers=admin_headers,
         )
         assert response.status_code == 400
@@ -213,13 +215,13 @@ class TestCreateMedicalDevice:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test creating device with duplicate name fails."""
-        dev = MedicalDevice(name="Duplicate Device", created_by=admin_user.username, updated_by=admin_user.username)
+        dev = MedicalDevice(code="MD-DUP", name="Duplicate Device", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(dev)
         await db_session.commit()
 
         response = await client.post(
             "/api/v1/medical-devices",
-            json={"name": "Duplicate Device"},
+            json={"code": "MD-DU2", "name": "Duplicate Device"},
             headers=admin_headers,
         )
         assert response.status_code == 400
@@ -236,7 +238,7 @@ class TestUpdateMedicalDevice:
         """Test updating a medical device and verify in database."""
         admin_username = admin_user.username
         dev = MedicalDevice(
-            name="Old Name", serial_number="OLD-001",
+            code="MD-OLD", name="Old Name", serial_number="OLD-001",
             created_by=admin_username, updated_by=admin_username,
         )
         db_session.add(dev)
@@ -285,7 +287,7 @@ class TestDeleteMedicalDevice:
         """Test deleting a medical device when inventory is 0."""
         response = await client.post(
             "/api/v1/medical-devices",
-            json={"name": "To Delete", "serial_number": "DEL-001"},
+            json={"code": "MD-DEL", "name": "To Delete", "serial_number": "DEL-001"},
             headers=admin_headers,
         )
         assert response.status_code == 201
@@ -321,7 +323,7 @@ class TestDeleteMedicalDevice:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test cannot delete device when inventory quantity > 0."""
-        dev = MedicalDevice(name="Has Stock", created_by=admin_user.username, updated_by=admin_user.username)
+        dev = MedicalDevice(code="MD-STK", name="Has Stock", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(dev)
         await db_session.flush()
         await db_session.refresh(dev)

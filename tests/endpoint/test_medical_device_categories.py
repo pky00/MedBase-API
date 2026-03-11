@@ -199,7 +199,7 @@ class TestDeleteMedicalDeviceCategory:
         await db_session.commit()
         await db_session.refresh(cat)
 
-        device = MedicalDevice(name="Test Device", category_id=cat.id, created_by=admin_user.username, updated_by=admin_user.username)
+        device = MedicalDevice(code="MD-CAT", name="Test Device", category_id=cat.id, created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(device)
         await db_session.commit()
 

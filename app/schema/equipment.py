@@ -18,6 +18,7 @@ class EquipmentCondition(str, Enum):
 class EquipmentBase(BaseModel):
     """Base schema for equipment."""
 
+    code: str = Field(..., min_length=1, max_length=50)
     name: str = Field(..., min_length=1, max_length=255)
     category_id: Optional[int] = None
     description: Optional[str] = None
@@ -33,6 +34,7 @@ class EquipmentCreate(EquipmentBase):
 class EquipmentUpdate(BaseModel):
     """Schema for updating equipment."""
 
+    code: Optional[str] = Field(None, min_length=1, max_length=50)
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     category_id: Optional[int] = None
     description: Optional[str] = None
@@ -67,6 +69,7 @@ class EquipmentDetailResponse(EquipmentResponse):
         return cls.model_validate(
             {
                 "id": equipment.id,
+                "code": equipment.code,
                 "name": equipment.name,
                 "category_id": equipment.category_id,
                 "description": equipment.description,

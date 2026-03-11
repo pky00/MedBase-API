@@ -294,7 +294,7 @@ class TestDeleteMedicineCategory:
         await db_session.commit()
         await db_session.refresh(cat)
 
-        med = Medicine(name="Test Med", category_id=cat.id, created_by=admin_username, updated_by=admin_username)
+        med = Medicine(code="TST-CAT", name="Test Med", category_id=cat.id, created_by=admin_username, updated_by=admin_username)
         db_session.add(med)
         await db_session.commit()
 

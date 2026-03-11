@@ -200,7 +200,7 @@ class TestDeleteEquipmentCategory:
         await db_session.commit()
         await db_session.refresh(cat)
 
-        equip = Equipment(name="Test Equip", category_id=cat.id, created_by=admin_user.username, updated_by=admin_user.username)
+        equip = Equipment(code="EQ-CAT", name="Test Equip", category_id=cat.id, created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(equip)
         await db_session.commit()
 

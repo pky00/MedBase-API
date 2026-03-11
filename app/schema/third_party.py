@@ -18,6 +18,7 @@ class ThirdPartyResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    code: str
     name: str
     phone: Optional[str] = None
     email: Optional[str] = None

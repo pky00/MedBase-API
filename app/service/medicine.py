@@ -92,6 +92,7 @@ class MedicineService:
             search_term = f"%{search}%"
             base_query = base_query.where(
                 or_(
+                    Medicine.code.ilike(search_term),
                     Medicine.name.ilike(search_term),
                     Medicine.description.ilike(search_term),
                 )
@@ -128,6 +129,7 @@ class MedicineService:
             search_term = f"%{search}%"
             query = query.where(
                 or_(
+                    Medicine.code.ilike(search_term),
                     Medicine.name.ilike(search_term),
                     Medicine.description.ilike(search_term),
                 )
@@ -157,6 +159,7 @@ class MedicineService:
     ) -> Medicine:
         """Create a new medicine and its inventory record."""
         medicine = Medicine(
+            code=data.code,
             name=data.name,
             category_id=data.category_id,
             description=data.description,

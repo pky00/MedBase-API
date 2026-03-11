@@ -230,6 +230,7 @@ class TestGetAppointments:
         data = response.json()
         assert data["total"] >= 1
         item = data["items"][0]
+        assert "code" in item
         assert "patient_name" in item
         assert "doctor_name" in item
 
@@ -248,6 +249,7 @@ class TestGetAppointment:
         assert response.status_code == 200
         data = response.json()
         assert data["id"] == appointment.id
+        assert "code" in data
         assert data["status"] == "scheduled"
         assert data["type"] == "scheduled"
         assert data["location"] == "internal"
@@ -292,6 +294,8 @@ class TestCreateAppointment:
         assert data["type"] == "scheduled"
         assert data["location"] == "internal"
         assert data["notes"] == "Follow-up visit"
+        assert "code" in data
+        assert len(data["code"]) == 6
 
         # Verify in database
         result = await db_session.execute(

@@ -13,6 +13,34 @@
       "email": "sara@medbase.com",
       "password": "password123",
       "role": "user"
+    },
+    {
+      "username": "nurse_lina",
+      "name": "Nurse Lina Barakat",
+      "email": "lina.b@medbase.com",
+      "password": "password123",
+      "role": "user"
+    },
+    {
+      "username": "clerk_hana",
+      "name": "Hana Jaber",
+      "email": "hana@medbase.com",
+      "password": "password123",
+      "role": "user"
+    },
+    {
+      "username": "clerk_rami",
+      "name": "Rami Nassar",
+      "email": "rami@medbase.com",
+      "password": "password123",
+      "role": "user"
+    },
+    {
+      "username": "nurse_dina",
+      "name": "Nurse Dina Khalil",
+      "email": "dina@medbase.com",
+      "password": "password123",
+      "role": "user"
     }
   ],
   "medicine_categories": [
@@ -20,46 +48,99 @@
     { "name": "Painkillers", "description": "Medicines for pain relief" },
     { "name": "Vitamins", "description": "Nutritional supplements and vitamins" },
     { "name": "Antifungals", "description": "Medicines used to treat fungal infections" },
-    { "name": "Antihistamines", "description": "Medicines for allergic reactions" }
+    { "name": "Antihistamines", "description": "Medicines for allergic reactions" },
+    { "name": "Cardiovascular", "description": "Medicines for heart and blood pressure conditions" },
+    { "name": "Gastrointestinal", "description": "Medicines for digestive system disorders" },
+    { "name": "Respiratory", "description": "Medicines for respiratory conditions" },
+    { "name": "Diabetes", "description": "Medicines for managing diabetes" },
+    { "name": "Topical", "description": "Creams, ointments, and external applications" }
   ],
   "equipment_categories": [
     { "name": "Surgical Instruments", "description": "Tools used in surgical procedures" },
     { "name": "Diagnostic Equipment", "description": "Equipment used for diagnosis" },
     { "name": "Patient Furniture", "description": "Beds, chairs, and other furniture" },
-    { "name": "Sterilization Equipment", "description": "Equipment for sterilizing tools" }
+    { "name": "Sterilization Equipment", "description": "Equipment for sterilizing tools" },
+    { "name": "Emergency Equipment", "description": "Equipment for emergency and trauma care" },
+    { "name": "Laboratory Equipment", "description": "Equipment for lab tests and analysis" },
+    { "name": "Rehabilitation Equipment", "description": "Equipment for physical therapy and rehab" }
   ],
   "medical_device_categories": [
     { "name": "Monitoring Devices", "description": "Devices for patient monitoring" },
     { "name": "Respiratory Devices", "description": "Devices for respiratory support" },
-    { "name": "Imaging Devices", "description": "Devices for medical imaging" }
+    { "name": "Imaging Devices", "description": "Devices for medical imaging" },
+    { "name": "Infusion Devices", "description": "Devices for IV and fluid delivery" },
+    { "name": "Diagnostic Devices", "description": "Portable diagnostic instruments" }
   ],
   "medicines": [
-    { "name": "Amoxicillin 500mg", "category": "Antibiotics", "description": "Broad-spectrum antibiotic", "unit": "tablets" },
-    { "name": "Azithromycin 250mg", "category": "Antibiotics", "description": "Macrolide antibiotic", "unit": "tablets" },
-    { "name": "Paracetamol 500mg", "category": "Painkillers", "description": "Fever and pain reducer", "unit": "tablets" },
-    { "name": "Ibuprofen 400mg", "category": "Painkillers", "description": "Anti-inflammatory painkiller", "unit": "tablets" },
-    { "name": "Vitamin C 1000mg", "category": "Vitamins", "description": "Immune system support", "unit": "tablets" },
-    { "name": "Vitamin D3 5000IU", "category": "Vitamins", "description": "Bone health supplement", "unit": "tablets" },
-    { "name": "Fluconazole 150mg", "category": "Antifungals", "description": "Antifungal medication", "unit": "tablets" },
-    { "name": "Cetirizine 10mg", "category": "Antihistamines", "description": "Allergy relief", "unit": "tablets" },
-    { "name": "Amoxicillin Syrup", "category": "Antibiotics", "description": "Liquid antibiotic for children", "unit": "ml" },
-    { "name": "Diclofenac Gel", "category": "Painkillers", "description": "Topical anti-inflammatory", "unit": "mg" }
+    { "code": "AMX500", "name": "Amoxicillin 500mg", "category": "Antibiotics", "description": "Broad-spectrum antibiotic", "unit": "tablets" },
+    { "code": "AZT250", "name": "Azithromycin 250mg", "category": "Antibiotics", "description": "Macrolide antibiotic", "unit": "tablets" },
+    { "code": "PCM500", "name": "Paracetamol 500mg", "category": "Painkillers", "description": "Fever and pain reducer", "unit": "tablets" },
+    { "code": "IBU400", "name": "Ibuprofen 400mg", "category": "Painkillers", "description": "Anti-inflammatory painkiller", "unit": "tablets" },
+    { "code": "VTC1K", "name": "Vitamin C 1000mg", "category": "Vitamins", "description": "Immune system support", "unit": "tablets" },
+    { "code": "VTD5K", "name": "Vitamin D3 5000IU", "category": "Vitamins", "description": "Bone health supplement", "unit": "tablets" },
+    { "code": "FLU150", "name": "Fluconazole 150mg", "category": "Antifungals", "description": "Antifungal medication", "unit": "tablets" },
+    { "code": "CTZ10", "name": "Cetirizine 10mg", "category": "Antihistamines", "description": "Allergy relief", "unit": "tablets" },
+    { "code": "AMXSYR", "name": "Amoxicillin Syrup", "category": "Antibiotics", "description": "Liquid antibiotic for children", "unit": "ml" },
+    { "code": "DCLGEL", "name": "Diclofenac Gel", "category": "Painkillers", "description": "Topical anti-inflammatory", "unit": "mg" },
+    { "code": "CIP500", "name": "Ciprofloxacin 500mg", "category": "Antibiotics", "description": "Fluoroquinolone antibiotic", "unit": "tablets" },
+    { "code": "MTZ400", "name": "Metronidazole 400mg", "category": "Antibiotics", "description": "Antiprotozoal and antibiotic", "unit": "tablets" },
+    { "code": "AML5", "name": "Amlodipine 5mg", "category": "Cardiovascular", "description": "Calcium channel blocker for hypertension", "unit": "tablets" },
+    { "code": "ATN50", "name": "Atenolol 50mg", "category": "Cardiovascular", "description": "Beta-blocker for heart conditions", "unit": "tablets" },
+    { "code": "OMP20", "name": "Omeprazole 20mg", "category": "Gastrointestinal", "description": "Proton pump inhibitor for acid reflux", "unit": "tablets" },
+    { "code": "LOP2", "name": "Loperamide 2mg", "category": "Gastrointestinal", "description": "Anti-diarrheal medication", "unit": "tablets" },
+    { "code": "SALB", "name": "Salbutamol Inhaler", "category": "Respiratory", "description": "Bronchodilator for asthma", "unit": "puffs" },
+    { "code": "MNT10", "name": "Montelukast 10mg", "category": "Respiratory", "description": "Leukotriene receptor antagonist", "unit": "tablets" },
+    { "code": "MET500", "name": "Metformin 500mg", "category": "Diabetes", "description": "Oral diabetes medication", "unit": "tablets" },
+    { "code": "GLB5", "name": "Glibenclamide 5mg", "category": "Diabetes", "description": "Sulfonylurea for type 2 diabetes", "unit": "tablets" },
+    { "code": "HCCRM", "name": "Hydrocortisone Cream", "category": "Topical", "description": "Anti-inflammatory skin cream", "unit": "mg" },
+    { "code": "MUPONT", "name": "Mupirocin Ointment", "category": "Topical", "description": "Topical antibiotic for skin infections", "unit": "mg" },
+    { "code": "TRM50", "name": "Tramadol 50mg", "category": "Painkillers", "description": "Moderate pain relief opioid", "unit": "tablets" },
+    { "code": "LOR10", "name": "Loratadine 10mg", "category": "Antihistamines", "description": "Non-drowsy allergy relief", "unit": "tablets" },
+    { "code": "VTBC", "name": "Vitamin B Complex", "category": "Vitamins", "description": "B vitamin supplement", "unit": "tablets" },
+    { "code": "FE65", "name": "Iron Supplement 65mg", "category": "Vitamins", "description": "Iron deficiency treatment", "unit": "tablets" },
+    { "code": "CLTCRM", "name": "Clotrimazole Cream", "category": "Antifungals", "description": "Topical antifungal", "unit": "mg" },
+    { "code": "KTZ200", "name": "Ketoconazole 200mg", "category": "Antifungals", "description": "Systemic antifungal", "unit": "tablets" },
+    { "code": "ASP100", "name": "Aspirin 100mg", "category": "Cardiovascular", "description": "Low-dose aspirin for heart protection", "unit": "tablets" },
+    { "code": "RAN150", "name": "Ranitidine 150mg", "category": "Gastrointestinal", "description": "H2 blocker for stomach acid", "unit": "tablets" }
   ],
   "equipment": [
-    { "name": "Scalpel Set", "category": "Surgical Instruments", "description": "Set of surgical scalpels", "condition": "new" },
-    { "name": "Forceps Kit", "category": "Surgical Instruments", "description": "Assorted medical forceps", "condition": "new" },
-    { "name": "Stethoscope", "category": "Diagnostic Equipment", "description": "Standard clinical stethoscope", "condition": "good" },
-    { "name": "Blood Pressure Cuff", "category": "Diagnostic Equipment", "description": "Manual sphygmomanometer", "condition": "good" },
-    { "name": "Examination Table", "category": "Patient Furniture", "description": "Adjustable examination table", "condition": "good" },
-    { "name": "Wheelchair", "category": "Patient Furniture", "description": "Standard folding wheelchair", "condition": "fair" },
-    { "name": "Autoclave Machine", "category": "Sterilization Equipment", "description": "Steam sterilizer for instruments", "condition": "new" }
+    { "code": "EQ-SCA", "name": "Scalpel Set", "category": "Surgical Instruments", "description": "Set of surgical scalpels", "condition": "new" },
+    { "code": "EQ-FRC", "name": "Forceps Kit", "category": "Surgical Instruments", "description": "Assorted medical forceps", "condition": "new" },
+    { "code": "EQ-STH", "name": "Stethoscope", "category": "Diagnostic Equipment", "description": "Standard clinical stethoscope", "condition": "good" },
+    { "code": "EQ-BPC", "name": "Blood Pressure Cuff", "category": "Diagnostic Equipment", "description": "Manual sphygmomanometer", "condition": "good" },
+    { "code": "EQ-EXT", "name": "Examination Table", "category": "Patient Furniture", "description": "Adjustable examination table", "condition": "good" },
+    { "code": "EQ-WCH", "name": "Wheelchair", "category": "Patient Furniture", "description": "Standard folding wheelchair", "condition": "fair" },
+    { "code": "EQ-ATC", "name": "Autoclave Machine", "category": "Sterilization Equipment", "description": "Steam sterilizer for instruments", "condition": "new" },
+    { "code": "EQ-SUT", "name": "Suture Kit", "category": "Surgical Instruments", "description": "Complete suturing instrument set", "condition": "new" },
+    { "code": "EQ-RET", "name": "Retractor Set", "category": "Surgical Instruments", "description": "Assorted surgical retractors", "condition": "good" },
+    { "code": "EQ-OTO", "name": "Otoscope", "category": "Diagnostic Equipment", "description": "Ear examination instrument", "condition": "new" },
+    { "code": "EQ-OPH", "name": "Ophthalmoscope", "category": "Diagnostic Equipment", "description": "Eye examination device", "condition": "good" },
+    { "code": "EQ-HBD", "name": "Hospital Bed", "category": "Patient Furniture", "description": "Electric adjustable hospital bed", "condition": "new" },
+    { "code": "EQ-IVS", "name": "IV Stand", "category": "Patient Furniture", "description": "Adjustable intravenous drip stand", "condition": "good" },
+    { "code": "EQ-UVS", "name": "UV Sterilizer", "category": "Sterilization Equipment", "description": "UV light sterilization cabinet", "condition": "new" },
+    { "code": "EQ-CRC", "name": "Crash Cart", "category": "Emergency Equipment", "description": "Emergency response cart with supplies", "condition": "good" },
+    { "code": "EQ-DEF", "name": "Defibrillator", "category": "Emergency Equipment", "description": "Automated external defibrillator", "condition": "new" },
+    { "code": "EQ-CTF", "name": "Centrifuge", "category": "Laboratory Equipment", "description": "Lab centrifuge for blood separation", "condition": "good" },
+    { "code": "EQ-MIC", "name": "Microscope", "category": "Laboratory Equipment", "description": "Clinical microscope for lab analysis", "condition": "new" },
+    { "code": "EQ-EXB", "name": "Exercise Bike", "category": "Rehabilitation Equipment", "description": "Stationary bike for physical therapy", "condition": "good" },
+    { "code": "EQ-RBS", "name": "Resistance Bands Set", "category": "Rehabilitation Equipment", "description": "Set of therapy resistance bands", "condition": "new" }
   ],
   "medical_devices": [
-    { "name": "Pulse Oximeter", "category": "Monitoring Devices", "description": "Measures blood oxygen levels", "serial_number": "PO-2024-001" },
-    { "name": "ECG Monitor", "category": "Monitoring Devices", "description": "12-lead electrocardiogram monitor", "serial_number": "ECG-2024-001" },
-    { "name": "Nebulizer", "category": "Respiratory Devices", "description": "Aerosol medication delivery device", "serial_number": "NEB-2024-001" },
-    { "name": "Oxygen Concentrator", "category": "Respiratory Devices", "description": "Portable oxygen supply", "serial_number": "OC-2024-001" },
-    { "name": "Portable Ultrasound", "category": "Imaging Devices", "description": "Handheld ultrasound scanner", "serial_number": "US-2024-001" }
+    { "code": "MD-POX", "name": "Pulse Oximeter", "category": "Monitoring Devices", "description": "Measures blood oxygen levels", "serial_number": "PO-2024-001" },
+    { "code": "MD-ECG", "name": "ECG Monitor", "category": "Monitoring Devices", "description": "12-lead electrocardiogram monitor", "serial_number": "ECG-2024-001" },
+    { "code": "MD-NEB", "name": "Nebulizer", "category": "Respiratory Devices", "description": "Aerosol medication delivery device", "serial_number": "NEB-2024-001" },
+    { "code": "MD-OXC", "name": "Oxygen Concentrator", "category": "Respiratory Devices", "description": "Portable oxygen supply", "serial_number": "OC-2024-001" },
+    { "code": "MD-PUS", "name": "Portable Ultrasound", "category": "Imaging Devices", "description": "Handheld ultrasound scanner", "serial_number": "US-2024-001" },
+    { "code": "MD-BPM", "name": "Blood Pressure Monitor", "category": "Monitoring Devices", "description": "Digital automatic BP monitor", "serial_number": "BPM-2024-001" },
+    { "code": "MD-FDP", "name": "Fetal Doppler", "category": "Monitoring Devices", "description": "Fetal heart rate monitor", "serial_number": "FD-2024-001" },
+    { "code": "MD-CPP", "name": "CPAP Machine", "category": "Respiratory Devices", "description": "Continuous positive airway pressure device", "serial_number": "CPAP-2024-001" },
+    { "code": "MD-SPR", "name": "Spirometer", "category": "Respiratory Devices", "description": "Lung function testing device", "serial_number": "SP-2024-001" },
+    { "code": "MD-DRM", "name": "Dermatoscope", "category": "Imaging Devices", "description": "Skin lesion examination device", "serial_number": "DS-2024-001" },
+    { "code": "MD-INF", "name": "Infusion Pump", "category": "Infusion Devices", "description": "Programmable IV infusion pump", "serial_number": "IP-2024-001" },
+    { "code": "MD-SYP", "name": "Syringe Pump", "category": "Infusion Devices", "description": "Precision syringe driver for medication delivery", "serial_number": "SYP-2024-001" },
+    { "code": "MD-GLU", "name": "Glucometer", "category": "Diagnostic Devices", "description": "Blood glucose monitoring device", "serial_number": "GLU-2024-001" },
+    { "code": "MD-HBM", "name": "Hemoglobin Meter", "category": "Diagnostic Devices", "description": "Point-of-care hemoglobin testing", "serial_number": "HB-2024-001" },
+    { "code": "MD-THD", "name": "Thermometer Digital", "category": "Diagnostic Devices", "description": "Non-contact infrared thermometer", "serial_number": "TD-2024-001" }
   ],
   "partners": [
     {
@@ -97,6 +178,78 @@
       "phone": "+1-555-0404",
       "email": "info@hassanclinic.com",
       "address": "321 Medical Blvd, Houston, TX"
+    },
+    {
+      "name": "Care Without Borders",
+      "partner_type": "donor",
+      "organization_type": "NGO",
+      "contact_person": "Sarah Johnson",
+      "phone": "+1-555-0505",
+      "email": "sarah@cwb.org",
+      "address": "55 Peace Avenue, San Francisco, CA"
+    },
+    {
+      "name": "Regional Medical Center",
+      "partner_type": "referral",
+      "organization_type": "hospital",
+      "contact_person": "Dr. Karen White",
+      "phone": "+1-555-0606",
+      "email": "referrals@regionalmed.com",
+      "address": "900 Health Parkway, Atlanta, GA"
+    },
+    {
+      "name": "Hope Medical Foundation",
+      "partner_type": "both",
+      "organization_type": "NGO",
+      "contact_person": "Ahmed Yusuf",
+      "phone": "+1-555-0707",
+      "email": "ahmed@hopemed.org",
+      "address": "42 Wellness Road, Philadelphia, PA"
+    },
+    {
+      "name": "Dr. Nadia Specialty Clinic",
+      "partner_type": "referral",
+      "organization_type": "medical_center",
+      "contact_person": "Dr. Nadia Saleh",
+      "phone": "+1-555-0808",
+      "email": "nadia@specialtyclinic.com",
+      "address": "18 Specialist Lane, Phoenix, AZ"
+    },
+    {
+      "name": "Wellness Alliance",
+      "partner_type": "donor",
+      "organization_type": "organization",
+      "contact_person": "Robert Chen",
+      "phone": "+1-555-0909",
+      "email": "robert@wellnessalliance.org",
+      "address": "77 Donor Drive, Portland, OR"
+    },
+    {
+      "name": "Community Health Partners",
+      "partner_type": "both",
+      "organization_type": "NGO",
+      "contact_person": "Lisa Park",
+      "phone": "+1-555-1010",
+      "email": "lisa@chp.org",
+      "address": "150 Community Blvd, Austin, TX"
+    },
+    {
+      "name": "Metro Surgical Center",
+      "partner_type": "referral",
+      "organization_type": "hospital",
+      "contact_person": "Dr. James Wright",
+      "phone": "+1-555-1111",
+      "email": "referrals@metrosurgical.com",
+      "address": "600 Surgical Way, Minneapolis, MN"
+    },
+    {
+      "name": "Relief Medical Aid",
+      "partner_type": "donor",
+      "organization_type": "individual",
+      "contact_person": "David Kumar",
+      "phone": "+1-555-1212",
+      "email": "david@reliefaid.com",
+      "address": "22 Donor Circle, Nashville, TN"
     }
   ],
   "doctors": [
@@ -128,6 +281,64 @@
       "email": "lina@medaid.org",
       "type": "partner_provided",
       "partner_name": "MedAid International"
+    },
+    {
+      "name": "Dr. Tariq Haddad",
+      "specialization": "Cardiology",
+      "phone": "+1-555-1005",
+      "email": "tariq@medbase.com",
+      "type": "internal"
+    },
+    {
+      "name": "Dr. Nour El-Din",
+      "specialization": "Internal Medicine",
+      "phone": "+1-555-1006",
+      "email": "nour@medbase.com",
+      "type": "internal"
+    },
+    {
+      "name": "Dr. Reem Abdallah",
+      "specialization": "Obstetrics & Gynecology",
+      "phone": "+1-555-1007",
+      "email": "reem@external.com",
+      "type": "external"
+    },
+    {
+      "name": "Dr. Sami Jaber",
+      "specialization": "Pulmonology",
+      "phone": "+1-555-1008",
+      "email": "sami@hopemed.org",
+      "type": "partner_provided",
+      "partner_name": "Hope Medical Foundation"
+    },
+    {
+      "name": "Dr. Aisha Mahmoud",
+      "specialization": "Ophthalmology",
+      "phone": "+1-555-1009",
+      "email": "aisha@medbase.com",
+      "type": "internal"
+    },
+    {
+      "name": "Dr. Kamal Rizk",
+      "specialization": "ENT",
+      "phone": "+1-555-1010",
+      "email": "kamal@external.com",
+      "type": "external"
+    },
+    {
+      "name": "Dr. Hala Nassar",
+      "specialization": "Endocrinology",
+      "phone": "+1-555-1011",
+      "email": "hala@chp.org",
+      "type": "partner_provided",
+      "partner_name": "Community Health Partners"
+    },
+    {
+      "name": "Dr. Ziad Karam",
+      "specialization": "General Surgery",
+      "phone": "+1-555-1012",
+      "email": "ziad@medbase.com",
+      "type": "internal"
     }
   ],
   "patients": [
@@ -178,6 +389,102 @@
       "address": "200 Birch Road, Denver, CO",
       "emergency_contact": "Amina Farah",
       "emergency_phone": "+1-555-2010"
+    },
+    {
+      "name": "Salma Taha",
+      "date_of_birth": "1990-05-12",
+      "gender": "female",
+      "phone": "+1-555-2011",
+      "email": "salma.taha@email.com",
+      "address": "67 Elm Court, Chicago, IL",
+      "emergency_contact": "Karim Taha",
+      "emergency_phone": "+1-555-2012"
+    },
+    {
+      "name": "Khaled Barakat",
+      "date_of_birth": "1972-08-25",
+      "gender": "male",
+      "phone": "+1-555-2013",
+      "email": "khaled.barakat@email.com",
+      "address": "91 Willow Street, Houston, TX",
+      "emergency_contact": "Rania Barakat",
+      "emergency_phone": "+1-555-2014"
+    },
+    {
+      "name": "Noor Abed",
+      "date_of_birth": "1998-12-05",
+      "gender": "female",
+      "phone": "+1-555-2015",
+      "email": "noor.abed@email.com",
+      "address": "14 Jasmine Way, Portland, OR",
+      "emergency_contact": "Hassan Abed",
+      "emergency_phone": "+1-555-2016"
+    },
+    {
+      "name": "Rami Hammad",
+      "date_of_birth": "1988-02-18",
+      "gender": "male",
+      "phone": "+1-555-2017",
+      "email": "rami.hammad@email.com",
+      "address": "300 Palm Drive, Phoenix, AZ",
+      "emergency_contact": "Sara Hammad",
+      "emergency_phone": "+1-555-2018"
+    },
+    {
+      "name": "Dina Younis",
+      "date_of_birth": "2005-06-20",
+      "gender": "female",
+      "phone": "+1-555-2019",
+      "email": "dina.younis@email.com",
+      "address": "55 Magnolia Lane, Nashville, TN"
+    },
+    {
+      "name": "Tariq Mansour",
+      "date_of_birth": "1960-10-08",
+      "gender": "male",
+      "phone": "+1-555-2021",
+      "email": "tariq.mansour@email.com",
+      "address": "180 Walnut Blvd, San Diego, CA",
+      "emergency_contact": "Leila Mansour",
+      "emergency_phone": "+1-555-2022"
+    },
+    {
+      "name": "Rana Obeid",
+      "date_of_birth": "1995-04-14",
+      "gender": "female",
+      "phone": "+1-555-2023",
+      "email": "rana.obeid@email.com",
+      "address": "22 Rose Avenue, Austin, TX",
+      "emergency_contact": "Mazen Obeid",
+      "emergency_phone": "+1-555-2024"
+    },
+    {
+      "name": "Fadi Khoury",
+      "date_of_birth": "1982-09-30",
+      "gender": "male",
+      "phone": "+1-555-2025",
+      "email": "fadi.khoury@email.com",
+      "address": "44 Cypress Street, Minneapolis, MN",
+      "emergency_contact": "Maya Khoury",
+      "emergency_phone": "+1-555-2026"
+    },
+    {
+      "name": "Hiba Saleh",
+      "date_of_birth": "2003-03-22",
+      "gender": "female",
+      "phone": "+1-555-2027",
+      "email": "hiba.saleh@email.com",
+      "address": "8 Lily Lane, Atlanta, GA"
+    },
+    {
+      "name": "Adel Nasser",
+      "date_of_birth": "1975-07-11",
+      "gender": "male",
+      "phone": "+1-555-2029",
+      "email": "adel.nasser@email.com",
+      "address": "130 Cedar Blvd, Philadelphia, PA",
+      "emergency_contact": "Samira Nasser",
+      "emergency_phone": "+1-555-2030"
     }
   ],
   "appointments": [
@@ -187,7 +494,7 @@
       "appointment_date": "2026-03-01T09:00:00",
       "type": "scheduled",
       "location": "internal",
-      "status": "scheduled",
+      "status": "completed",
       "notes": "Routine checkup"
     },
     {
@@ -196,7 +503,7 @@
       "appointment_date": "2026-03-02T10:30:00",
       "type": "scheduled",
       "location": "internal",
-      "status": "in_progress",
+      "status": "completed",
       "notes": "Follow-up for flu symptoms"
     },
     {
@@ -216,7 +523,7 @@
       "appointment_date": "2026-03-04T11:00:00",
       "type": "walk_in",
       "location": "internal",
-      "status": "in_progress",
+      "status": "completed",
       "notes": "Skin rash evaluation"
     },
     {
@@ -225,8 +532,101 @@
       "appointment_date": "2026-03-05T08:30:00",
       "type": "scheduled",
       "location": "internal",
-      "status": "scheduled",
+      "status": "completed",
       "notes": "Blood pressure monitoring"
+    },
+    {
+      "patient_name": "Salma Taha",
+      "doctor_name": "Dr. Tariq Haddad",
+      "appointment_date": "2026-03-05T10:00:00",
+      "type": "scheduled",
+      "location": "internal",
+      "status": "completed",
+      "notes": "Cardiac evaluation - chest pain"
+    },
+    {
+      "patient_name": "Khaled Barakat",
+      "doctor_name": "Dr. Nour El-Din",
+      "appointment_date": "2026-03-06T09:00:00",
+      "type": "scheduled",
+      "location": "internal",
+      "status": "completed",
+      "notes": "Diabetes management follow-up"
+    },
+    {
+      "patient_name": "Noor Abed",
+      "doctor_name": "Dr. Reem Abdallah",
+      "partner_name": "Regional Medical Center",
+      "appointment_date": "2026-03-06T14:30:00",
+      "type": "scheduled",
+      "location": "external",
+      "status": "scheduled",
+      "notes": "Prenatal checkup"
+    },
+    {
+      "patient_name": "Rami Hammad",
+      "doctor_name": "Dr. Sami Jaber",
+      "appointment_date": "2026-03-07T08:00:00",
+      "type": "walk_in",
+      "location": "internal",
+      "status": "completed",
+      "notes": "Persistent cough and breathing difficulty"
+    },
+    {
+      "patient_name": "Dina Younis",
+      "doctor_name": "Dr. Fatima Noor",
+      "appointment_date": "2026-03-07T11:00:00",
+      "type": "scheduled",
+      "location": "internal",
+      "status": "completed",
+      "notes": "Pediatric vaccination"
+    },
+    {
+      "patient_name": "Tariq Mansour",
+      "doctor_name": "Dr. Tariq Haddad",
+      "appointment_date": "2026-03-08T09:30:00",
+      "type": "scheduled",
+      "location": "internal",
+      "status": "in_progress",
+      "notes": "Hypertension management and ECG"
+    },
+    {
+      "patient_name": "Rana Obeid",
+      "doctor_name": "Dr. Aisha Mahmoud",
+      "appointment_date": "2026-03-08T13:00:00",
+      "type": "walk_in",
+      "location": "internal",
+      "status": "completed",
+      "notes": "Eye irritation and blurry vision"
+    },
+    {
+      "patient_name": "Fadi Khoury",
+      "doctor_name": "Dr. Kamal Rizk",
+      "partner_name": "Dr. Nadia Specialty Clinic",
+      "appointment_date": "2026-03-09T10:00:00",
+      "type": "scheduled",
+      "location": "external",
+      "status": "scheduled",
+      "notes": "ENT specialist consultation - chronic sinusitis"
+    },
+    {
+      "patient_name": "Hiba Saleh",
+      "doctor_name": "Dr. Hala Nassar",
+      "appointment_date": "2026-03-09T15:00:00",
+      "type": "scheduled",
+      "location": "internal",
+      "status": "scheduled",
+      "notes": "Thyroid function evaluation"
+    },
+    {
+      "patient_name": "Adel Nasser",
+      "doctor_name": "Dr. Ziad Karam",
+      "partner_name": "Metro Surgical Center",
+      "appointment_date": "2026-03-10T08:00:00",
+      "type": "scheduled",
+      "location": "external",
+      "status": "scheduled",
+      "notes": "Pre-surgical assessment for hernia repair"
     }
   ],
   "vital_signs": [
@@ -262,6 +662,83 @@
       "weight": 55.0,
       "height": 160.0,
       "notes": "Vitals within normal range"
+    },
+    {
+      "appointment_index": 4,
+      "blood_pressure_systolic": 145,
+      "blood_pressure_diastolic": 92,
+      "heart_rate": 78,
+      "temperature": 36.5,
+      "respiratory_rate": 17,
+      "weight": 88.0,
+      "height": 170.0,
+      "notes": "Elevated blood pressure - requires monitoring"
+    },
+    {
+      "appointment_index": 5,
+      "blood_pressure_systolic": 130,
+      "blood_pressure_diastolic": 85,
+      "heart_rate": 95,
+      "temperature": 36.7,
+      "respiratory_rate": 18,
+      "weight": 68.0,
+      "height": 165.0,
+      "notes": "Elevated heart rate during chest pain episode"
+    },
+    {
+      "appointment_index": 6,
+      "blood_pressure_systolic": 138,
+      "blood_pressure_diastolic": 88,
+      "heart_rate": 74,
+      "temperature": 36.4,
+      "respiratory_rate": 16,
+      "weight": 92.0,
+      "height": 180.0,
+      "notes": "Slightly elevated BP - diabetic patient"
+    },
+    {
+      "appointment_index": 8,
+      "blood_pressure_systolic": 122,
+      "blood_pressure_diastolic": 78,
+      "heart_rate": 82,
+      "temperature": 37.1,
+      "respiratory_rate": 22,
+      "weight": 78.0,
+      "height": 176.0,
+      "notes": "Elevated respiratory rate - breathing difficulty"
+    },
+    {
+      "appointment_index": 9,
+      "blood_pressure_systolic": 105,
+      "blood_pressure_diastolic": 68,
+      "heart_rate": 70,
+      "temperature": 36.6,
+      "respiratory_rate": 15,
+      "weight": 45.0,
+      "height": 155.0,
+      "notes": "Normal vitals - pediatric patient"
+    },
+    {
+      "appointment_index": 10,
+      "blood_pressure_systolic": 155,
+      "blood_pressure_diastolic": 98,
+      "heart_rate": 80,
+      "temperature": 36.5,
+      "respiratory_rate": 17,
+      "weight": 82.0,
+      "height": 172.0,
+      "notes": "High blood pressure - hypertension patient"
+    },
+    {
+      "appointment_index": 11,
+      "blood_pressure_systolic": 115,
+      "blood_pressure_diastolic": 75,
+      "heart_rate": 72,
+      "temperature": 36.7,
+      "respiratory_rate": 16,
+      "weight": 58.0,
+      "height": 162.0,
+      "notes": "Normal vitals"
     }
   ],
   "medical_records": [
@@ -278,6 +755,41 @@
       "diagnosis": "Contact dermatitis",
       "treatment_notes": "Prescribed topical corticosteroid cream. Avoid known irritants.",
       "follow_up_date": "2026-03-18"
+    },
+    {
+      "appointment_index": 4,
+      "chief_complaint": "Dizziness and headache",
+      "diagnosis": "Stage 1 hypertension",
+      "treatment_notes": "Started on Amlodipine 5mg daily. Lifestyle modifications discussed. Low-sodium diet recommended.",
+      "follow_up_date": "2026-04-05"
+    },
+    {
+      "appointment_index": 5,
+      "chief_complaint": "Intermittent chest pain, worsened with exertion",
+      "diagnosis": "Angina pectoris - stable",
+      "treatment_notes": "ECG performed. Low-dose aspirin started. Referred for stress test at City General Hospital.",
+      "follow_up_date": "2026-03-20"
+    },
+    {
+      "appointment_index": 6,
+      "chief_complaint": "Fatigue and frequent urination",
+      "diagnosis": "Type 2 diabetes - poorly controlled",
+      "treatment_notes": "HbA1c elevated. Metformin dose adjusted to 1000mg BID. Diet counseling provided.",
+      "follow_up_date": "2026-04-06"
+    },
+    {
+      "appointment_index": 8,
+      "chief_complaint": "Persistent dry cough and shortness of breath for 2 weeks",
+      "diagnosis": "Mild asthma exacerbation",
+      "treatment_notes": "Spirometry showed mild obstruction. Salbutamol inhaler prescribed. Montelukast added.",
+      "follow_up_date": "2026-03-21"
+    },
+    {
+      "appointment_index": 11,
+      "chief_complaint": "Red, irritated eyes with blurry vision for 3 days",
+      "diagnosis": "Allergic conjunctivitis",
+      "treatment_notes": "Antihistamine eye drops prescribed. Oral cetirizine for systemic relief. Avoid allergens.",
+      "follow_up_date": "2026-03-22"
     }
   ],
   "treatments": [
@@ -309,6 +821,64 @@
       "treatment_date": "2026-03-04",
       "cost": 75.00,
       "notes": "Apply cream twice daily"
+    },
+    {
+      "patient_name": "Salma Taha",
+      "partner_name": "City General Hospital",
+      "appointment_index": 5,
+      "treatment_type": "Cardiac Stress Test",
+      "description": "Exercise stress test to evaluate cardiac function",
+      "treatment_date": "2026-03-15",
+      "cost": 800.00,
+      "notes": "Fasting required before test"
+    },
+    {
+      "patient_name": "Rami Hammad",
+      "partner_name": "Hope Medical Foundation",
+      "appointment_index": 8,
+      "treatment_type": "Pulmonary Rehabilitation",
+      "description": "Breathing exercises and nebulizer therapy sessions",
+      "treatment_date": "2026-03-14",
+      "cost": 300.00,
+      "notes": "Weekly sessions for 4 weeks"
+    },
+    {
+      "patient_name": "Adel Nasser",
+      "partner_name": "Metro Surgical Center",
+      "appointment_index": 14,
+      "treatment_type": "Hernia Repair Surgery",
+      "description": "Laparoscopic inguinal hernia repair",
+      "treatment_date": "2026-03-20",
+      "cost": 3500.00,
+      "notes": "Pre-op labs required. NPO after midnight before surgery."
+    },
+    {
+      "patient_name": "Khaled Barakat",
+      "partner_name": "Dr. Nadia Specialty Clinic",
+      "treatment_type": "Diabetic Eye Screening",
+      "description": "Retinal examination for diabetic retinopathy screening",
+      "treatment_date": "2026-03-18",
+      "cost": 200.00,
+      "notes": "Annual screening recommended"
+    },
+    {
+      "patient_name": "Fadi Khoury",
+      "partner_name": "Dr. Nadia Specialty Clinic",
+      "appointment_index": 12,
+      "treatment_type": "Sinus Surgery Evaluation",
+      "description": "CT scan and evaluation for endoscopic sinus surgery",
+      "treatment_date": "2026-03-25",
+      "cost": 1200.00,
+      "notes": "CT scan included in cost"
+    },
+    {
+      "patient_name": "Tariq Mansour",
+      "partner_name": "Regional Medical Center",
+      "treatment_type": "24-Hour Holter Monitor",
+      "description": "Continuous ECG monitoring for arrhythmia detection",
+      "treatment_date": "2026-03-12",
+      "cost": 450.00,
+      "notes": "Keep activity diary during monitoring"
     }
   ],
   "inventory_transactions": [
@@ -336,6 +906,78 @@
       ]
     },
     {
+      "transaction_type": "purchase",
+      "transaction_date": "2026-02-18",
+      "notes": "Cardiovascular and diabetes medicines restock",
+      "items": [
+        { "item_type": "medicine", "item_name": "Amlodipine 5mg", "quantity": 200 },
+        { "item_type": "medicine", "item_name": "Atenolol 50mg", "quantity": 150 },
+        { "item_type": "medicine", "item_name": "Metformin 500mg", "quantity": 300 },
+        { "item_type": "medicine", "item_name": "Aspirin 100mg", "quantity": 500 },
+        { "item_type": "medicine", "item_name": "Glibenclamide 5mg", "quantity": 100 }
+      ]
+    },
+    {
+      "transaction_type": "purchase",
+      "transaction_date": "2026-02-19",
+      "notes": "Respiratory and GI medicines procurement",
+      "items": [
+        { "item_type": "medicine", "item_name": "Salbutamol Inhaler", "quantity": 50 },
+        { "item_type": "medicine", "item_name": "Montelukast 10mg", "quantity": 100 },
+        { "item_type": "medicine", "item_name": "Omeprazole 20mg", "quantity": 200 },
+        { "item_type": "medicine", "item_name": "Loperamide 2mg", "quantity": 100 },
+        { "item_type": "medicine", "item_name": "Ranitidine 150mg", "quantity": 150 }
+      ]
+    },
+    {
+      "transaction_type": "purchase",
+      "transaction_date": "2026-02-21",
+      "notes": "Topical and antibiotic medicines",
+      "items": [
+        { "item_type": "medicine", "item_name": "Hydrocortisone Cream", "quantity": 60 },
+        { "item_type": "medicine", "item_name": "Mupirocin Ointment", "quantity": 40 },
+        { "item_type": "medicine", "item_name": "Ciprofloxacin 500mg", "quantity": 100 },
+        { "item_type": "medicine", "item_name": "Metronidazole 400mg", "quantity": 100 },
+        { "item_type": "medicine", "item_name": "Clotrimazole Cream", "quantity": 50 },
+        { "item_type": "medicine", "item_name": "Ketoconazole 200mg", "quantity": 60 }
+      ]
+    },
+    {
+      "transaction_type": "purchase",
+      "transaction_date": "2026-02-22",
+      "notes": "Additional medicines and supplements",
+      "items": [
+        { "item_type": "medicine", "item_name": "Tramadol 50mg", "quantity": 50 },
+        { "item_type": "medicine", "item_name": "Loratadine 10mg", "quantity": 100 },
+        { "item_type": "medicine", "item_name": "Vitamin B Complex", "quantity": 200 },
+        { "item_type": "medicine", "item_name": "Iron Supplement 65mg", "quantity": 150 }
+      ]
+    },
+    {
+      "transaction_type": "purchase",
+      "transaction_date": "2026-02-23",
+      "notes": "Additional equipment procurement",
+      "items": [
+        { "item_type": "equipment", "item_name": "Suture Kit", "quantity": 15 },
+        { "item_type": "equipment", "item_name": "Otoscope", "quantity": 3 },
+        { "item_type": "equipment", "item_name": "Hospital Bed", "quantity": 2 },
+        { "item_type": "equipment", "item_name": "IV Stand", "quantity": 8 },
+        { "item_type": "equipment", "item_name": "Crash Cart", "quantity": 1 }
+      ]
+    },
+    {
+      "transaction_type": "purchase",
+      "transaction_date": "2026-02-24",
+      "notes": "Medical devices procurement",
+      "items": [
+        { "item_type": "medical_device", "item_name": "Blood Pressure Monitor", "quantity": 5 },
+        { "item_type": "medical_device", "item_name": "Glucometer", "quantity": 8 },
+        { "item_type": "medical_device", "item_name": "Thermometer Digital", "quantity": 12 },
+        { "item_type": "medical_device", "item_name": "Infusion Pump", "quantity": 3 },
+        { "item_type": "medical_device", "item_name": "Spirometer", "quantity": 2 }
+      ]
+    },
+    {
       "transaction_type": "donation",
       "partner_name": "Global Health Foundation",
       "transaction_date": "2026-02-22",
@@ -359,9 +1001,67 @@
       ]
     },
     {
+      "transaction_type": "donation",
+      "partner_name": "Care Without Borders",
+      "transaction_date": "2026-03-01",
+      "notes": "Medical supply donation - monthly batch",
+      "items": [
+        { "item_type": "medicine", "item_name": "Paracetamol 500mg", "quantity": 300 },
+        { "item_type": "medicine", "item_name": "Amoxicillin 500mg", "quantity": 100 },
+        { "item_type": "medicine", "item_name": "Iron Supplement 65mg", "quantity": 200 },
+        { "item_type": "equipment", "item_name": "Forceps Kit", "quantity": 5 }
+      ]
+    },
+    {
+      "transaction_type": "donation",
+      "partner_name": "Hope Medical Foundation",
+      "transaction_date": "2026-03-03",
+      "notes": "Respiratory equipment donation",
+      "items": [
+        { "item_type": "medical_device", "item_name": "CPAP Machine", "quantity": 2 },
+        { "item_type": "medical_device", "item_name": "Nebulizer", "quantity": 3 },
+        { "item_type": "equipment", "item_name": "Defibrillator", "quantity": 1 }
+      ]
+    },
+    {
+      "transaction_type": "donation",
+      "partner_name": "Wellness Alliance",
+      "transaction_date": "2026-03-05",
+      "notes": "Diabetes care supplies donation",
+      "items": [
+        { "item_type": "medicine", "item_name": "Metformin 500mg", "quantity": 200 },
+        { "item_type": "medicine", "item_name": "Glibenclamide 5mg", "quantity": 100 },
+        { "item_type": "medical_device", "item_name": "Glucometer", "quantity": 5 }
+      ]
+    },
+    {
+      "transaction_type": "donation",
+      "partner_name": "Community Health Partners",
+      "transaction_date": "2026-03-06",
+      "notes": "General medical supplies donation",
+      "items": [
+        { "item_type": "medicine", "item_name": "Vitamin B Complex", "quantity": 300 },
+        { "item_type": "medicine", "item_name": "Cetirizine 10mg", "quantity": 200 },
+        { "item_type": "equipment", "item_name": "Resistance Bands Set", "quantity": 10 },
+        { "item_type": "equipment", "item_name": "Exercise Bike", "quantity": 2 }
+      ]
+    },
+    {
+      "transaction_type": "donation",
+      "partner_name": "Relief Medical Aid",
+      "transaction_date": "2026-03-07",
+      "notes": "Individual donor - lab equipment",
+      "items": [
+        { "item_type": "equipment", "item_name": "Microscope", "quantity": 1 },
+        { "item_type": "equipment", "item_name": "Centrifuge", "quantity": 1 },
+        { "item_type": "medical_device", "item_name": "Hemoglobin Meter", "quantity": 3 }
+      ]
+    },
+    {
       "transaction_type": "prescription",
       "doctor_name": "Dr. Ahmad Khalil",
       "transaction_date": "2026-03-01",
+      "appointment_index": 0,
       "notes": "Prescription for patient Ali Hassan - routine checkup",
       "items": [
         { "item_type": "medicine", "item_name": "Paracetamol 500mg", "quantity": 20 },
@@ -372,11 +1072,89 @@
       "transaction_type": "prescription",
       "doctor_name": "Dr. Fatima Noor",
       "transaction_date": "2026-03-02",
+      "appointment_index": 1,
       "notes": "Prescription for patient Maryam Khoury - respiratory infection",
       "items": [
         { "item_type": "medicine", "item_name": "Amoxicillin 500mg", "quantity": 21 },
         { "item_type": "medicine", "item_name": "Paracetamol 500mg", "quantity": 10 },
         { "item_type": "medicine", "item_name": "Cetirizine 10mg", "quantity": 7 }
+      ]
+    },
+    {
+      "transaction_type": "prescription",
+      "doctor_name": "Dr. Lina Mansour",
+      "transaction_date": "2026-03-04",
+      "appointment_index": 3,
+      "notes": "Prescription for patient Layla Rashid - dermatitis treatment",
+      "items": [
+        { "item_type": "medicine", "item_name": "Cetirizine 10mg", "quantity": 14 },
+        { "item_type": "medicine", "item_name": "Hydrocortisone Cream", "quantity": 2 }
+      ]
+    },
+    {
+      "transaction_type": "prescription",
+      "doctor_name": "Dr. Ahmad Khalil",
+      "transaction_date": "2026-03-05",
+      "appointment_index": 4,
+      "notes": "Prescription for patient Omar Farah - hypertension",
+      "items": [
+        { "item_type": "medicine", "item_name": "Amlodipine 5mg", "quantity": 30 },
+        { "item_type": "medicine", "item_name": "Aspirin 100mg", "quantity": 30 }
+      ]
+    },
+    {
+      "transaction_type": "prescription",
+      "doctor_name": "Dr. Tariq Haddad",
+      "transaction_date": "2026-03-05",
+      "appointment_index": 5,
+      "notes": "Prescription for patient Salma Taha - cardiac evaluation",
+      "items": [
+        { "item_type": "medicine", "item_name": "Aspirin 100mg", "quantity": 30 },
+        { "item_type": "medicine", "item_name": "Atenolol 50mg", "quantity": 30 }
+      ]
+    },
+    {
+      "transaction_type": "prescription",
+      "doctor_name": "Dr. Nour El-Din",
+      "transaction_date": "2026-03-06",
+      "appointment_index": 6,
+      "notes": "Prescription for patient Khaled Barakat - diabetes management",
+      "items": [
+        { "item_type": "medicine", "item_name": "Metformin 500mg", "quantity": 60 },
+        { "item_type": "medicine", "item_name": "Glibenclamide 5mg", "quantity": 30 },
+        { "item_type": "medicine", "item_name": "Vitamin B Complex", "quantity": 30 }
+      ]
+    },
+    {
+      "transaction_type": "prescription",
+      "doctor_name": "Dr. Sami Jaber",
+      "transaction_date": "2026-03-07",
+      "appointment_index": 8,
+      "notes": "Prescription for patient Rami Hammad - asthma",
+      "items": [
+        { "item_type": "medicine", "item_name": "Salbutamol Inhaler", "quantity": 2 },
+        { "item_type": "medicine", "item_name": "Montelukast 10mg", "quantity": 30 }
+      ]
+    },
+    {
+      "transaction_type": "prescription",
+      "doctor_name": "Dr. Fatima Noor",
+      "transaction_date": "2026-03-07",
+      "appointment_index": 9,
+      "notes": "Prescription for patient Dina Younis - post-vaccination",
+      "items": [
+        { "item_type": "medicine", "item_name": "Paracetamol 500mg", "quantity": 10 }
+      ]
+    },
+    {
+      "transaction_type": "prescription",
+      "doctor_name": "Dr. Aisha Mahmoud",
+      "transaction_date": "2026-03-08",
+      "appointment_index": 11,
+      "notes": "Prescription for patient Rana Obeid - allergic conjunctivitis",
+      "items": [
+        { "item_type": "medicine", "item_name": "Cetirizine 10mg", "quantity": 14 },
+        { "item_type": "medicine", "item_name": "Loratadine 10mg", "quantity": 14 }
       ]
     },
     {
@@ -388,11 +1166,46 @@
       ]
     },
     {
+      "transaction_type": "loss",
+      "transaction_date": "2026-03-05",
+      "notes": "Dropped during transfer between storage areas",
+      "items": [
+        { "item_type": "medicine", "item_name": "Amoxicillin Syrup", "quantity": 3 },
+        { "item_type": "medicine", "item_name": "Omeprazole 20mg", "quantity": 10 }
+      ]
+    },
+    {
       "transaction_type": "expiration",
       "transaction_date": "2026-02-28",
       "notes": "Monthly expiration check - Feb 2026",
       "items": [
         { "item_type": "medicine", "item_name": "Ibuprofen 400mg", "quantity": 15 }
+      ]
+    },
+    {
+      "transaction_type": "expiration",
+      "transaction_date": "2026-03-08",
+      "notes": "Monthly expiration check - Mar 2026 batch 1",
+      "items": [
+        { "item_type": "medicine", "item_name": "Azithromycin 250mg", "quantity": 20 },
+        { "item_type": "medicine", "item_name": "Ranitidine 150mg", "quantity": 25 },
+        { "item_type": "medicine", "item_name": "Vitamin D3 5000IU", "quantity": 30 }
+      ]
+    },
+    {
+      "transaction_type": "breakage",
+      "transaction_date": "2026-03-02",
+      "notes": "Equipment damaged during cleaning",
+      "items": [
+        { "item_type": "medical_device", "item_name": "Thermometer Digital", "quantity": 2 }
+      ]
+    },
+    {
+      "transaction_type": "destruction",
+      "transaction_date": "2026-03-04",
+      "notes": "Controlled destruction of expired narcotics",
+      "items": [
+        { "item_type": "medicine", "item_name": "Tramadol 50mg", "quantity": 10 }
       ]
     },
     {
@@ -402,15 +1215,6 @@
       "items": [
         { "item_type": "medicine", "item_name": "Diclofenac Gel", "quantity": 50 },
         { "item_type": "medicine", "item_name": "Ibuprofen 400mg", "quantity": 100 }
-      ]
-    },
-    {
-      "transaction_type": "prescription",
-      "doctor_name": "Dr. Lina Mansour",
-      "transaction_date": "2026-03-04",
-      "notes": "Prescription for patient Layla Rashid - dermatitis treatment",
-      "items": [
-        { "item_type": "medicine", "item_name": "Cetirizine 10mg", "quantity": 14 }
       ]
     }
   ]
