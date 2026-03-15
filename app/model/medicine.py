@@ -8,6 +8,7 @@ class Medicine(BaseModel):
 
     __tablename__ = "medicines"
 
+    item_id = Column(Integer, ForeignKey("items.id"), nullable=False, unique=True)
     code = Column(String, unique=True, nullable=False)
     name = Column(String, unique=True, nullable=False)
     category_id = Column(Integer, ForeignKey("medicine_categories.id"), nullable=True)

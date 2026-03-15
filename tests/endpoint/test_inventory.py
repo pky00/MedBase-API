@@ -4,6 +4,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.model.inventory import Inventory
+from app.model.item import Item
 from app.model.user import User
 
 
@@ -33,12 +34,19 @@ class TestGetInventory:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test filtering inventory by item type."""
+        item1 = Item(item_type="medicine", name="Filter Med", created_by=admin_user.username, updated_by=admin_user.username)
+        item2 = Item(item_type="equipment", name="Filter Equip", created_by=admin_user.username, updated_by=admin_user.username)
+        db_session.add_all([item1, item2])
+        await db_session.flush()
+        await db_session.refresh(item1)
+        await db_session.refresh(item2)
+
         inv1 = Inventory(
-            item_type="medicine", item_id=1, quantity=10,
+            item_id=item1.id, quantity=10,
             created_by=admin_user.username, updated_by=admin_user.username,
         )
         inv2 = Inventory(
-            item_type="equipment", item_id=1, quantity=5,
+            item_id=item2.id, quantity=5,
             created_by=admin_user.username, updated_by=admin_user.username,
         )
         db_session.add_all([inv1, inv2])
@@ -61,8 +69,13 @@ class TestGetInventory:
     ):
         """Test inventory pagination."""
         for i in range(5):
+            item = Item(item_type="medicine", name=f"Paginate Med {i}", created_by=admin_user.username, updated_by=admin_user.username)
+            db_session.add(item)
+            await db_session.flush()
+            await db_session.refresh(item)
+
             inv = Inventory(
-                item_type="medicine", item_id=i + 1, quantity=i,
+                item_id=item.id, quantity=i,
                 created_by=admin_user.username, updated_by=admin_user.username,
             )
             db_session.add(inv)
@@ -88,8 +101,13 @@ class TestGetInventoryById:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test getting inventory by ID."""
+        item = Item(item_type="medicine", name="ById Med", created_by=admin_user.username, updated_by=admin_user.username)
+        db_session.add(item)
+        await db_session.flush()
+        await db_session.refresh(item)
+
         inv = Inventory(
-            item_type="medicine", item_id=1, quantity=10,
+            item_id=item.id, quantity=10,
             created_by=admin_user.username, updated_by=admin_user.username,
         )
         db_session.add(inv)
@@ -115,28 +133,33 @@ class TestGetInventoryById:
 
 
 class TestGetInventoryByItem:
-    """Tests for GET /api/v1/inventory/item/{item_type}/{item_id}"""
+    """Tests for GET /api/v1/inventory/item/{item_id}"""
 
     @pytest.mark.asyncio
     async def test_get_inventory_by_item(
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
-        """Test getting inventory by item type and ID."""
+        """Test getting inventory by item ID."""
+        item = Item(item_type="equipment", name="ByItem Equip", created_by=admin_user.username, updated_by=admin_user.username)
+        db_session.add(item)
+        await db_session.flush()
+        await db_session.refresh(item)
+
         inv = Inventory(
-            item_type="equipment", item_id=42, quantity=7,
+            item_id=item.id, quantity=7,
             created_by=admin_user.username, updated_by=admin_user.username,
         )
         db_session.add(inv)
         await db_session.commit()
 
         response = await client.get(
-            "/api/v1/inventory/item/equipment/42", headers=admin_headers
+            f"/api/v1/inventory/item/{item.id}", headers=admin_headers
         )
 
         assert response.status_code == 200
         data = response.json()
         assert data["item_type"] == "equipment"
-        assert data["item_id"] == 42
+        assert data["item_id"] == item.id
         assert data["quantity"] == 7
 
     @pytest.mark.asyncio
@@ -145,41 +168,29 @@ class TestGetInventoryByItem:
     ):
         """Test getting inventory for non-existent item."""
         response = await client.get(
-            "/api/v1/inventory/item/medicine/99999", headers=admin_headers
+            "/api/v1/inventory/item/99999", headers=admin_headers
         )
         assert response.status_code == 404
-
-    @pytest.mark.asyncio
-    async def test_get_inventory_by_item_invalid_type(
-        self, client: AsyncClient, admin_headers: dict
-    ):
-        """Test getting inventory with invalid item type."""
-        response = await client.get(
-            "/api/v1/inventory/item/invalid_type/1", headers=admin_headers
-        )
-        assert response.status_code == 422
 
     @pytest.mark.asyncio
     async def test_inventory_auto_created_with_medicine(
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test that creating a medicine auto-creates an inventory record."""
-        # Create a medicine via the API
         response = await client.post(
             "/api/v1/medicines",
-            json={"name": "Auto Inventory Med"},
+            json={"code": "AINV01", "name": "Auto Inventory Med"},
             headers=admin_headers,
         )
         assert response.status_code == 201
-        medicine_id = response.json()["id"]
+        item_id = response.json()["item_id"]
 
-        # Verify inventory was created
         response = await client.get(
-            f"/api/v1/inventory/item/medicine/{medicine_id}",
+            f"/api/v1/inventory/item/{item_id}",
             headers=admin_headers,
         )
         assert response.status_code == 200
         data = response.json()
         assert data["item_type"] == "medicine"
-        assert data["item_id"] == medicine_id
+        assert data["item_id"] == item_id
         assert data["quantity"] == 0

@@ -1,5 +1,6 @@
 import logging
 from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -53,8 +54,8 @@ async def add_transaction_item(
 ):
     """Add an item to a transaction."""
     logger.info(
-        "Adding item to transaction_id=%d item_type=%s item_id=%d qty=%d by user_id=%d",
-        transaction_id, data.item_type, data.item_id, data.quantity, current_user.id,
+        "Adding item to transaction_id=%d item_id=%d qty=%d by user_id=%d",
+        transaction_id, data.item_id, data.quantity, current_user.id,
     )
 
     service = InventoryTransactionService(db)
@@ -63,7 +64,10 @@ async def add_transaction_item(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Inventory transaction not found")
 
     try:
-        await service.validate_inventory_item(data.item_type, data.item_id)
+        await service.validate_inventory_item(data.item_id)
+        # Equipment cannot be prescribed
+        if transaction.transaction_type == "prescription":
+            await service.validate_prescription_item(data.item_id)
         item = await service.create_item(
             transaction_id, data, transaction.transaction_type,
             created_by=current_user.username,
@@ -94,15 +98,20 @@ async def update_transaction_item(
         logger.warning("Transaction item not found item_id=%d", item_id)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction item not found")
 
-    # Validate new inventory item if changing type or id
+    # Validate new inventory item if changing item_id
     update_data = data.model_dump(exclude_unset=True)
-    if "item_type" in update_data or "item_id" in update_data:
-        new_item_type = update_data.get("item_type", item.item_type)
-        new_item_id = update_data.get("item_id", item.item_id)
+    if "item_id" in update_data:
         try:
-            await service.validate_inventory_item(new_item_type, new_item_id)
+            await service.validate_inventory_item(update_data["item_id"])
         except ValueError as e:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        # Check prescription restriction for equipment
+        transaction = await service.get_by_id(item.transaction_id)
+        if transaction and transaction.transaction_type == "prescription":
+            try:
+                await service.validate_prescription_item(update_data["item_id"])
+            except ValueError as e:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
     try:
         updated = await service.update_item(item_id, data, updated_by=current_user.username)

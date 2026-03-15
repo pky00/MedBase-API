@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.model.inventory_transaction import InventoryTransaction
 from app.model.inventory_transaction_item import InventoryTransactionItem
 from app.model.inventory import Inventory
+from app.model.item import Item
 from app.model.medicine import Medicine
 from app.model.medicine_category import MedicineCategory
 from app.model.equipment import Equipment
@@ -38,8 +39,19 @@ async def medicine_category(db_session: AsyncSession, admin_user: User) -> Medic
 async def medicine_with_inventory(
     db_session: AsyncSession, admin_user: User, medicine_category: MedicineCategory,
 ) -> tuple:
-    """Create a medicine with inventory record."""
+    """Create a medicine with item and inventory record."""
+    item = Item(
+        item_type="medicine",
+        name="Test Medicine",
+        created_by=admin_user.username,
+        updated_by=admin_user.username,
+    )
+    db_session.add(item)
+    await db_session.flush()
+    await db_session.refresh(item)
+
     medicine = Medicine(
+        item_id=item.id,
         code="TST-MED",
         name="Test Medicine",
         category_id=medicine_category.id,
@@ -53,8 +65,7 @@ async def medicine_with_inventory(
     await db_session.refresh(medicine)
 
     inventory = Inventory(
-        item_type="medicine",
-        item_id=medicine.id,
+        item_id=item.id,
         quantity=100,
         created_by=admin_user.username,
         updated_by=admin_user.username,
@@ -62,14 +73,14 @@ async def medicine_with_inventory(
     db_session.add(inventory)
     await db_session.commit()
     await db_session.refresh(inventory)
-    return medicine, inventory
+    return medicine, inventory, item
 
 
 @pytest.fixture
 async def equipment_with_inventory(
     db_session: AsyncSession, admin_user: User,
 ) -> tuple:
-    """Create equipment with inventory record."""
+    """Create equipment with item and inventory record."""
     cat = EquipmentCategory(
         name="Test Equip Cat",
         description="For testing",
@@ -80,7 +91,18 @@ async def equipment_with_inventory(
     await db_session.flush()
     await db_session.refresh(cat)
 
+    item = Item(
+        item_type="equipment",
+        name="Test Equipment",
+        created_by=admin_user.username,
+        updated_by=admin_user.username,
+    )
+    db_session.add(item)
+    await db_session.flush()
+    await db_session.refresh(item)
+
     equip = Equipment(
+        item_id=item.id,
         code="TST-EQP",
         name="Test Equipment",
         category_id=cat.id,
@@ -94,8 +116,7 @@ async def equipment_with_inventory(
     await db_session.refresh(equip)
 
     inventory = Inventory(
-        item_type="equipment",
-        item_id=equip.id,
+        item_id=item.id,
         quantity=10,
         created_by=admin_user.username,
         updated_by=admin_user.username,
@@ -103,7 +124,7 @@ async def equipment_with_inventory(
     db_session.add(inventory)
     await db_session.commit()
     await db_session.refresh(inventory)
-    return equip, inventory
+    return equip, inventory, item
 
 
 @pytest.fixture
@@ -116,7 +137,6 @@ async def donor_partner(db_session: AsyncSession, admin_user: User) -> Partner:
 
     partner = Partner(
         third_party_id=tp.id,
-        name="Donor Org",
         partner_type="donor",
         organization_type="NGO",
         is_active=True,
@@ -139,7 +159,6 @@ async def referral_partner(db_session: AsyncSession, admin_user: User) -> Partne
 
     partner = Partner(
         third_party_id=tp.id,
-        name="Referral Only",
         partner_type="referral",
         organization_type="hospital",
         is_active=True,
@@ -162,7 +181,6 @@ async def doctor(db_session: AsyncSession, admin_user: User) -> Doctor:
 
     doctor = Doctor(
         third_party_id=tp.id,
-        name="Dr. Test",
         specialization="General",
         type="internal",
         is_active=True,
@@ -180,7 +198,7 @@ async def purchase_transaction(
     db_session: AsyncSession, admin_user: User, medicine_with_inventory: tuple,
 ) -> InventoryTransaction:
     """Create a purchase transaction with an item."""
-    medicine, inventory = medicine_with_inventory
+    medicine, inventory, item = medicine_with_inventory
     transaction = InventoryTransaction(
         transaction_type="purchase",
         third_party_id=admin_user.third_party_id,
@@ -193,15 +211,14 @@ async def purchase_transaction(
     await db_session.flush()
     await db_session.refresh(transaction)
 
-    item = InventoryTransactionItem(
+    tx_item = InventoryTransactionItem(
         transaction_id=transaction.id,
-        item_type="medicine",
-        item_id=medicine.id,
+        item_id=item.id,
         quantity=50,
         created_by=admin_user.username,
         updated_by=admin_user.username,
     )
-    db_session.add(item)
+    db_session.add(tx_item)
 
     # Update inventory quantity
     inventory.quantity += 50
@@ -309,8 +326,8 @@ class TestCreateTransaction:
         medicine_with_inventory: tuple, db_session: AsyncSession,
     ):
         """Test creating a purchase transaction (auto-sets third_party_id to user)."""
-        medicine, inventory = medicine_with_inventory
-        medicine_id = medicine.id
+        medicine, inventory, item = medicine_with_inventory
+        item_id = item.id
         original_qty = inventory.quantity
 
         response = await client.post(
@@ -320,7 +337,7 @@ class TestCreateTransaction:
                 "transaction_date": "2026-03-15",
                 "notes": "Monthly purchase",
                 "items": [
-                    {"item_type": "medicine", "item_id": medicine_id, "quantity": 25},
+                    {"item_id": item_id, "quantity": 25},
                 ],
             },
             headers=admin_headers,
@@ -335,10 +352,7 @@ class TestCreateTransaction:
         # Verify inventory was updated
         db_session.expire_all()
         result = await db_session.execute(
-            select(Inventory).where(
-                Inventory.item_type == "medicine",
-                Inventory.item_id == medicine_id,
-            )
+            select(Inventory).where(Inventory.item_id == item_id)
         )
         inv = result.scalar_one()
         assert inv.quantity == original_qty + 25
@@ -349,8 +363,8 @@ class TestCreateTransaction:
         medicine_with_inventory: tuple, donor_partner: Partner, db_session: AsyncSession,
     ):
         """Test creating a donation transaction."""
-        medicine, inventory = medicine_with_inventory
-        medicine_id = medicine.id
+        medicine, inventory, item = medicine_with_inventory
+        item_id = item.id
         original_qty = inventory.quantity
         donor_tp_id = donor_partner.third_party_id
 
@@ -362,7 +376,7 @@ class TestCreateTransaction:
                 "transaction_date": "2026-03-15",
                 "notes": "Donation from NGO",
                 "items": [
-                    {"item_type": "medicine", "item_id": medicine_id, "quantity": 30},
+                    {"item_id": item_id, "quantity": 30},
                 ],
             },
             headers=admin_headers,
@@ -375,10 +389,7 @@ class TestCreateTransaction:
         # Verify inventory increased
         db_session.expire_all()
         result = await db_session.execute(
-            select(Inventory).where(
-                Inventory.item_type == "medicine",
-                Inventory.item_id == medicine_id,
-            )
+            select(Inventory).where(Inventory.item_id == item_id)
         )
         inv = result.scalar_one()
         assert inv.quantity == original_qty + 30
@@ -389,8 +400,8 @@ class TestCreateTransaction:
         medicine_with_inventory: tuple, doctor: Doctor, db_session: AsyncSession,
     ):
         """Test creating a prescription transaction (decreases inventory)."""
-        medicine, inventory = medicine_with_inventory
-        medicine_id = medicine.id
+        medicine, inventory, item = medicine_with_inventory
+        item_id = item.id
         original_qty = inventory.quantity
         doctor_tp_id = doctor.third_party_id
 
@@ -402,7 +413,7 @@ class TestCreateTransaction:
                 "transaction_date": "2026-03-15",
                 "notes": "Prescription for patient",
                 "items": [
-                    {"item_type": "medicine", "item_id": medicine_id, "quantity": 10},
+                    {"item_id": item_id, "quantity": 10},
                 ],
             },
             headers=admin_headers,
@@ -414,10 +425,7 @@ class TestCreateTransaction:
         # Verify inventory decreased
         db_session.expire_all()
         result = await db_session.execute(
-            select(Inventory).where(
-                Inventory.item_type == "medicine",
-                Inventory.item_id == medicine_id,
-            )
+            select(Inventory).where(Inventory.item_id == item_id)
         )
         inv = result.scalar_one()
         assert inv.quantity == original_qty - 10
@@ -428,8 +436,8 @@ class TestCreateTransaction:
         medicine_with_inventory: tuple, db_session: AsyncSession,
     ):
         """Test creating a loss transaction (auto third_party, decreases inventory)."""
-        medicine, inventory = medicine_with_inventory
-        medicine_id = medicine.id
+        medicine, inventory, item = medicine_with_inventory
+        item_id = item.id
         original_qty = inventory.quantity
 
         response = await client.post(
@@ -439,7 +447,7 @@ class TestCreateTransaction:
                 "transaction_date": "2026-03-15",
                 "notes": "Lost items",
                 "items": [
-                    {"item_type": "medicine", "item_id": medicine_id, "quantity": 5},
+                    {"item_id": item_id, "quantity": 5},
                 ],
             },
             headers=admin_headers,
@@ -451,10 +459,7 @@ class TestCreateTransaction:
         # Verify inventory decreased
         db_session.expire_all()
         result = await db_session.execute(
-            select(Inventory).where(
-                Inventory.item_type == "medicine",
-                Inventory.item_id == medicine_id,
-            )
+            select(Inventory).where(Inventory.item_id == item_id)
         )
         inv = result.scalar_one()
         assert inv.quantity == original_qty - 5
@@ -544,18 +549,42 @@ class TestCreateTransaction:
         assert "doctor" in response.json()["detail"].lower()
 
     @pytest.mark.asyncio
+    async def test_create_prescription_with_equipment_fails(
+        self, client: AsyncClient, admin_headers: dict,
+        equipment_with_inventory: tuple, doctor: Doctor,
+    ):
+        """Test that prescribing equipment fails."""
+        equip, inventory, item = equipment_with_inventory
+        doctor_tp_id = doctor.third_party_id
+
+        response = await client.post(
+            "/api/v1/inventory-transactions",
+            json={
+                "transaction_type": "prescription",
+                "third_party_id": doctor_tp_id,
+                "transaction_date": "2026-03-15",
+                "items": [
+                    {"item_id": item.id, "quantity": 1},
+                ],
+            },
+            headers=admin_headers,
+        )
+        assert response.status_code == 400
+        assert "equipment" in response.json()["detail"].lower()
+
+    @pytest.mark.asyncio
     async def test_create_transaction_insufficient_inventory_fails(
         self, client: AsyncClient, admin_headers: dict, medicine_with_inventory: tuple,
     ):
         """Test that prescribing more than available fails."""
-        medicine, inventory = medicine_with_inventory
+        medicine, inventory, item = medicine_with_inventory
         response = await client.post(
             "/api/v1/inventory-transactions",
             json={
                 "transaction_type": "loss",
                 "transaction_date": "2026-03-15",
                 "items": [
-                    {"item_type": "medicine", "item_id": medicine.id, "quantity": 99999},
+                    {"item_id": item.id, "quantity": 99999},
                 ],
             },
             headers=admin_headers,
@@ -574,7 +603,7 @@ class TestCreateTransaction:
                 "transaction_type": "purchase",
                 "transaction_date": "2026-03-15",
                 "items": [
-                    {"item_type": "medicine", "item_id": 99999, "quantity": 10},
+                    {"item_id": 99999, "quantity": 10},
                 ],
             },
             headers=admin_headers,
@@ -623,16 +652,13 @@ class TestDeleteTransaction:
         medicine_with_inventory: tuple,
     ):
         """Test deleting transaction reverses inventory changes."""
-        medicine, inventory = medicine_with_inventory
-        medicine_id = medicine.id
+        medicine, inventory, item = medicine_with_inventory
+        item_id = item.id
         transaction_id = purchase_transaction.id
         # inventory was originally 100, purchase added 50 => 150
         db_session.expire_all()
         result = await db_session.execute(
-            select(Inventory).where(
-                Inventory.item_type == "medicine",
-                Inventory.item_id == medicine_id,
-            )
+            select(Inventory).where(Inventory.item_id == item_id)
         )
         inv = result.scalar_one()
         qty_before_delete = inv.quantity
@@ -647,10 +673,7 @@ class TestDeleteTransaction:
         # Verify inventory was reversed
         db_session.expire_all()
         result = await db_session.execute(
-            select(Inventory).where(
-                Inventory.item_type == "medicine",
-                Inventory.item_id == medicine_id,
-            )
+            select(Inventory).where(Inventory.item_id == item_id)
         )
         inv = result.scalar_one()
         assert inv.quantity == qty_before_delete - 50
@@ -703,29 +726,26 @@ class TestTransactionItems:
         equipment_with_inventory: tuple, db_session: AsyncSession,
     ):
         """Test adding an item to an existing transaction."""
-        equip, inventory = equipment_with_inventory
-        equip_id = equip.id
+        equip, inventory, item = equipment_with_inventory
+        item_id = item.id
         original_qty = inventory.quantity
         transaction_id = purchase_transaction.id
 
         response = await client.post(
             f"/api/v1/inventory-transactions/{transaction_id}/items",
-            json={"item_type": "equipment", "item_id": equip_id, "quantity": 5},
+            json={"item_id": item_id, "quantity": 5},
             headers=admin_headers,
         )
         assert response.status_code == 201
         data = response.json()
         assert data["item_type"] == "equipment"
-        assert data["item_id"] == equip_id
+        assert data["item_id"] == item_id
         assert data["quantity"] == 5
 
         # Verify inventory was updated
         db_session.expire_all()
         result = await db_session.execute(
-            select(Inventory).where(
-                Inventory.item_type == "equipment",
-                Inventory.item_id == equip_id,
-            )
+            select(Inventory).where(Inventory.item_id == item_id)
         )
         inv = result.scalar_one()
         assert inv.quantity == original_qty + 5
@@ -736,13 +756,49 @@ class TestTransactionItems:
         medicine_with_inventory: tuple,
     ):
         """Test adding item to non-existent transaction."""
-        medicine, _ = medicine_with_inventory
+        medicine, _, item = medicine_with_inventory
         response = await client.post(
             "/api/v1/inventory-transactions/99999/items",
-            json={"item_type": "medicine", "item_id": medicine.id, "quantity": 5},
+            json={"item_id": item.id, "quantity": 5},
             headers=admin_headers,
         )
         assert response.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_add_equipment_to_prescription_fails(
+        self, client: AsyncClient, admin_headers: dict,
+        medicine_with_inventory: tuple, equipment_with_inventory: tuple,
+        doctor: Doctor, db_session: AsyncSession,
+    ):
+        """Test that adding equipment to a prescription transaction fails."""
+        medicine, _, med_item = medicine_with_inventory
+        equip, _, equip_item = equipment_with_inventory
+        doctor_tp_id = doctor.third_party_id
+
+        # Create a prescription transaction first
+        response = await client.post(
+            "/api/v1/inventory-transactions",
+            json={
+                "transaction_type": "prescription",
+                "third_party_id": doctor_tp_id,
+                "transaction_date": "2026-03-15",
+                "items": [
+                    {"item_id": med_item.id, "quantity": 2},
+                ],
+            },
+            headers=admin_headers,
+        )
+        assert response.status_code == 201
+        tx_id = response.json()["id"]
+
+        # Try to add equipment item
+        response = await client.post(
+            f"/api/v1/inventory-transactions/{tx_id}/items",
+            json={"item_id": equip_item.id, "quantity": 1},
+            headers=admin_headers,
+        )
+        assert response.status_code == 400
+        assert "equipment" in response.json()["detail"].lower()
 
     @pytest.mark.asyncio
     async def test_delete_transaction_item(
@@ -750,8 +806,8 @@ class TestTransactionItems:
         purchase_transaction: InventoryTransaction, medicine_with_inventory: tuple,
     ):
         """Test deleting a transaction item reverses inventory."""
-        medicine, _ = medicine_with_inventory
-        medicine_id = medicine.id
+        medicine, _, item = medicine_with_inventory
+        item_id = item.id
         transaction_id = purchase_transaction.id
 
         # Get the item id
@@ -760,21 +816,18 @@ class TestTransactionItems:
             headers=admin_headers,
         )
         items = items_response.json()
-        item_id = items[0]["id"]
+        tx_item_id = items[0]["id"]
 
         # Get current inventory qty
         db_session.expire_all()
         result = await db_session.execute(
-            select(Inventory).where(
-                Inventory.item_type == "medicine",
-                Inventory.item_id == medicine_id,
-            )
+            select(Inventory).where(Inventory.item_id == item_id)
         )
         inv = result.scalar_one()
         qty_before = inv.quantity
 
         response = await client.delete(
-            f"/api/v1/inventory-transaction-items/{item_id}",
+            f"/api/v1/inventory-transaction-items/{tx_item_id}",
             headers=admin_headers,
         )
         assert response.status_code == 200
@@ -783,10 +836,7 @@ class TestTransactionItems:
         # Verify inventory was reversed (purchase -> reversed = decrease by 50)
         db_session.expire_all()
         result = await db_session.execute(
-            select(Inventory).where(
-                Inventory.item_type == "medicine",
-                Inventory.item_id == medicine_id,
-            )
+            select(Inventory).where(Inventory.item_id == item_id)
         )
         inv = result.scalar_one()
         assert inv.quantity == qty_before - 50
@@ -806,8 +856,8 @@ class TestTransactionItems:
         db_session: AsyncSession,
     ):
         """Test updating a transaction item adjusts inventory."""
-        medicine, _ = medicine_with_inventory
-        medicine_id = medicine.id
+        medicine, _, item = medicine_with_inventory
+        item_id = item.id
         transaction_id = purchase_transaction.id
 
         # Get the item id
@@ -816,22 +866,19 @@ class TestTransactionItems:
             headers=admin_headers,
         )
         items = items_response.json()
-        item_id = items[0]["id"]
+        tx_item_id = items[0]["id"]
 
         # Get current inventory qty (100 + 50 purchase = 150)
         db_session.expire_all()
         result = await db_session.execute(
-            select(Inventory).where(
-                Inventory.item_type == "medicine",
-                Inventory.item_id == medicine_id,
-            )
+            select(Inventory).where(Inventory.item_id == item_id)
         )
         inv = result.scalar_one()
         qty_before = inv.quantity
 
         # Update quantity from 50 to 30
         response = await client.put(
-            f"/api/v1/inventory-transaction-items/{item_id}",
+            f"/api/v1/inventory-transaction-items/{tx_item_id}",
             json={"quantity": 30},
             headers=admin_headers,
         )
@@ -842,10 +889,68 @@ class TestTransactionItems:
         # Verify inventory: reverse old (150-50=100), apply new (100+30=130)
         db_session.expire_all()
         result = await db_session.execute(
-            select(Inventory).where(
-                Inventory.item_type == "medicine",
-                Inventory.item_id == medicine_id,
-            )
+            select(Inventory).where(Inventory.item_id == item_id)
         )
         inv = result.scalar_one()
         assert inv.quantity == qty_before - 50 + 30
+
+
+class TestGetTransactionsByItem:
+    """Tests for GET /api/v1/inventory-transactions/by-item/{item_id}"""
+
+    @pytest.mark.asyncio
+    async def test_get_transactions_by_item(
+        self, client: AsyncClient, admin_headers: dict,
+        purchase_transaction: InventoryTransaction, medicine_with_inventory: tuple,
+    ):
+        """Test getting transactions that include a specific item."""
+        medicine, _, item = medicine_with_inventory
+
+        response = await client.get(
+            f"/api/v1/inventory-transactions/by-item/{item.id}",
+            headers=admin_headers,
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] >= 1
+        assert len(data["items"]) >= 1
+
+    @pytest.mark.asyncio
+    async def test_get_transactions_by_item_empty(
+        self, client: AsyncClient, admin_headers: dict, db_session: AsyncSession, admin_user: User,
+    ):
+        """Test getting transactions for an item with no transactions."""
+        item = Item(item_type="medicine", name="No Tx Med", created_by=admin_user.username, updated_by=admin_user.username)
+        db_session.add(item)
+        await db_session.flush()
+        await db_session.refresh(item)
+
+        inv = Inventory(item_id=item.id, quantity=0, created_by=admin_user.username, updated_by=admin_user.username)
+        db_session.add(inv)
+        await db_session.commit()
+
+        response = await client.get(
+            f"/api/v1/inventory-transactions/by-item/{item.id}",
+            headers=admin_headers,
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] == 0
+        assert data["items"] == []
+
+    @pytest.mark.asyncio
+    async def test_get_transactions_by_item_with_type_filter(
+        self, client: AsyncClient, admin_headers: dict,
+        purchase_transaction: InventoryTransaction, medicine_with_inventory: tuple,
+    ):
+        """Test filtering transactions by type for a specific item."""
+        medicine, _, item = medicine_with_inventory
+
+        response = await client.get(
+            f"/api/v1/inventory-transactions/by-item/{item.id}",
+            params={"transaction_type": "donation"},
+            headers=admin_headers,
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] == 0

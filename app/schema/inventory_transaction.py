@@ -1,6 +1,7 @@
 from datetime import datetime, date
 from enum import StrEnum
 from typing import Optional, List
+
 from pydantic import BaseModel, Field, ConfigDict
 
 
@@ -14,18 +15,11 @@ class TransactionType(StrEnum):
     DESTRUCTION = "destruction"
 
 
-class ItemType(StrEnum):
-    MEDICINE = "medicine"
-    EQUIPMENT = "equipment"
-    MEDICAL_DEVICE = "medical_device"
-
-
 # --- Transaction Item Schemas ---
 
 class TransactionItemCreate(BaseModel):
     """Schema for creating a transaction item."""
 
-    item_type: ItemType
     item_id: int
     quantity: int = Field(..., gt=0)
 
@@ -33,7 +27,6 @@ class TransactionItemCreate(BaseModel):
 class TransactionItemUpdate(BaseModel):
     """Schema for updating a transaction item."""
 
-    item_type: Optional[ItemType] = None
     item_id: Optional[int] = None
     quantity: Optional[int] = Field(None, gt=0)
 
@@ -45,7 +38,6 @@ class TransactionItemResponse(BaseModel):
 
     id: int
     transaction_id: int
-    item_type: str
     item_id: int
     quantity: int
     is_deleted: bool
@@ -54,6 +46,7 @@ class TransactionItemResponse(BaseModel):
     updated_by: Optional[str] = None
     updated_at: datetime
     item_name: Optional[str] = None
+    item_type: Optional[str] = None
 
 
 # --- Transaction Schemas ---

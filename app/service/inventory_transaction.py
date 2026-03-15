@@ -1,17 +1,16 @@
 import logging
 from typing import Optional, List, Tuple
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
 from app.model.inventory_transaction import InventoryTransaction
 from app.model.inventory_transaction_item import InventoryTransactionItem
 from app.model.inventory import Inventory
+from app.model.item import Item
 from app.model.third_party import ThirdParty
 from app.model.partner import Partner
 from app.model.doctor import Doctor
-from app.model.medicine import Medicine
-from app.model.equipment import Equipment
-from app.model.medical_device import MedicalDevice
 from app.schema.inventory_transaction import (
     InventoryTransactionCreate,
     InventoryTransactionUpdate,
@@ -38,25 +37,24 @@ class InventoryTransactionService:
 
     # ---- Inventory quantity helpers ----
 
-    async def _adjust_inventory(self, item_type: str, item_id: int, quantity: int, transaction_type: str, updated_by: Optional[str] = None) -> None:
+    async def _adjust_inventory(self, item_id: int, quantity: int, transaction_type: str, updated_by: Optional[str] = None) -> None:
         """Adjust inventory quantity based on transaction type."""
         result = await self.db.execute(
             select(Inventory).where(
-                Inventory.item_type == item_type,
                 Inventory.item_id == item_id,
                 Inventory.is_deleted == False,
             )
         )
         inventory = result.scalar_one_or_none()
         if not inventory:
-            raise ValueError(f"Inventory record not found for {item_type} id={item_id}")
+            raise ValueError(f"Inventory record not found for item_id={item_id}")
 
         if transaction_type in INCREASE_TYPES:
             inventory.quantity += quantity
         else:
             if inventory.quantity < quantity:
                 raise ValueError(
-                    f"Insufficient inventory for {item_type} id={item_id}: "
+                    f"Insufficient inventory for item_id={item_id}: "
                     f"available={inventory.quantity}, requested={quantity}"
                 )
             inventory.quantity -= quantity
@@ -64,17 +62,16 @@ class InventoryTransactionService:
         inventory.updated_by = updated_by
         await self.db.flush()
         logger.info(
-            "Adjusted inventory item_type=%s item_id=%d by %s%d (new qty=%d)",
-            item_type, item_id,
+            "Adjusted inventory item_id=%d by %s%d (new qty=%d)",
+            item_id,
             "+" if transaction_type in INCREASE_TYPES else "-",
             quantity, inventory.quantity,
         )
 
-    async def _reverse_inventory(self, item_type: str, item_id: int, quantity: int, transaction_type: str, updated_by: Optional[str] = None) -> None:
+    async def _reverse_inventory(self, item_id: int, quantity: int, transaction_type: str, updated_by: Optional[str] = None) -> None:
         """Reverse an inventory adjustment (for delete/update)."""
         result = await self.db.execute(
             select(Inventory).where(
-                Inventory.item_type == item_type,
                 Inventory.item_id == item_id,
                 Inventory.is_deleted == False,
             )
@@ -119,26 +116,33 @@ class InventoryTransactionService:
         if not doctor:
             raise ValueError("third_party_id must belong to a doctor for prescription transactions")
 
-    async def validate_inventory_item(self, item_type: str, item_id: int) -> None:
+    async def validate_inventory_item(self, item_id: int) -> None:
         """Validate that an inventory record exists for the given item."""
         result = await self.db.execute(
             select(Inventory).where(
-                Inventory.item_type == item_type,
                 Inventory.item_id == item_id,
                 Inventory.is_deleted == False,
             )
         )
         inventory = result.scalar_one_or_none()
         if not inventory:
-            raise ValueError(f"Inventory record not found for {item_type} id={item_id}")
+            raise ValueError(f"Inventory record not found for item_id={item_id}")
+
+    async def validate_prescription_item(self, item_id: int) -> None:
+        """Validate that the item is not equipment (equipment cannot be prescribed)."""
+        result = await self.db.execute(
+            select(Item.item_type).where(Item.id == item_id)
+        )
+        item_type = result.scalar_one_or_none()
+        if item_type == "equipment":
+            raise ValueError("Equipment cannot be prescribed")
 
     async def build_item_response(self, item: InventoryTransactionItem) -> TransactionItemResponse:
         """Build a TransactionItemResponse from a model instance."""
-        item_name = await self._get_item_name(item.item_type, item.item_id)
+        item_name, item_type = await self._get_item_info(item.item_id)
         return TransactionItemResponse(
             id=item.id,
             transaction_id=item.transaction_id,
-            item_type=item.item_type,
             item_id=item.item_id,
             quantity=item.quantity,
             is_deleted=item.is_deleted,
@@ -147,6 +151,7 @@ class InventoryTransactionService:
             updated_by=item.updated_by,
             updated_at=item.updated_at,
             item_name=item_name,
+            item_type=item_type,
         )
 
     # ---- Transaction CRUD ----
@@ -192,12 +197,11 @@ class InventoryTransactionService:
 
         item_responses = []
         for item in items:
-            item_name = await self._get_item_name(item.item_type, item.item_id)
+            item_name, item_type = await self._get_item_info(item.item_id)
             item_responses.append(
                 TransactionItemResponse(
                     id=item.id,
                     transaction_id=item.transaction_id,
-                    item_type=item.item_type,
                     item_id=item.item_id,
                     quantity=item.quantity,
                     is_deleted=item.is_deleted,
@@ -206,6 +210,7 @@ class InventoryTransactionService:
                     updated_by=item.updated_by,
                     updated_at=item.updated_at,
                     item_name=item_name,
+                    item_type=item_type,
                 )
             )
 
@@ -225,21 +230,15 @@ class InventoryTransactionService:
             items=item_responses,
         )
 
-    async def _get_item_name(self, item_type: str, item_id: int) -> Optional[str]:
-        """Get the name of an inventory item by type and ID."""
-        model_map = {
-            "medicine": Medicine,
-            "equipment": Equipment,
-            "medical_device": MedicalDevice,
-        }
-        model = model_map.get(item_type)
-        if not model:
-            return None
-
+    async def _get_item_info(self, item_id: int) -> tuple:
+        """Get the name and type of an item by ID."""
         result = await self.db.execute(
-            select(model.name).where(model.id == item_id)
+            select(Item.name, Item.item_type).where(Item.id == item_id)
         )
-        return result.scalar_one_or_none()
+        row = result.one_or_none()
+        if row:
+            return row[0], row[1]
+        return None, None
 
     async def get_all(
         self,
@@ -293,6 +292,77 @@ class InventoryTransactionService:
         ]
 
         logger.debug("Queried inventory transactions: total=%d returned=%d", total, len(transactions))
+        return transactions, total
+
+    async def get_transactions_by_item(
+        self,
+        item_id: int,
+        page: int = 1,
+        size: int = 10,
+        transaction_type: Optional[str] = None,
+        sort: str = "id",
+        order: str = "asc",
+    ) -> Tuple[List[dict], int]:
+        """Get inventory transactions that include a specific item, with the transaction item details."""
+        query = (
+            select(
+                InventoryTransaction,
+                ThirdParty.name.label("third_party_name"),
+                InventoryTransactionItem.id.label("transaction_item_id"),
+                InventoryTransactionItem.quantity.label("transaction_item_quantity"),
+            )
+            .join(
+                InventoryTransactionItem,
+                (InventoryTransactionItem.transaction_id == InventoryTransaction.id)
+                & (InventoryTransactionItem.is_deleted == False),
+            )
+            .outerjoin(ThirdParty, InventoryTransaction.third_party_id == ThirdParty.id)
+            .where(
+                InventoryTransaction.is_deleted == False,
+                InventoryTransactionItem.item_id == item_id,
+            )
+        )
+
+        if transaction_type is not None:
+            query = query.where(InventoryTransaction.transaction_type == transaction_type)
+
+        count_query = select(func.count()).select_from(query.subquery())
+        total_result = await self.db.execute(count_query)
+        total = total_result.scalar()
+
+        sort_column = getattr(InventoryTransaction, sort, InventoryTransaction.id)
+        if order.lower() == "desc":
+            query = query.order_by(sort_column.desc())
+        else:
+            query = query.order_by(sort_column.asc())
+
+        offset = (page - 1) * size
+        query = query.offset(offset).limit(size)
+
+        result = await self.db.execute(query)
+        rows = result.all()
+
+        transactions = []
+        for row in rows:
+            txn = row[0]
+            transactions.append({
+                "id": txn.id,
+                "transaction_type": txn.transaction_type,
+                "third_party_id": txn.third_party_id,
+                "appointment_id": txn.appointment_id,
+                "transaction_date": txn.transaction_date,
+                "notes": txn.notes,
+                "is_deleted": txn.is_deleted,
+                "created_by": txn.created_by,
+                "created_at": txn.created_at,
+                "updated_by": txn.updated_by,
+                "updated_at": txn.updated_at,
+                "third_party_name": row[1],
+                "transaction_item_id": row[2],
+                "transaction_item_quantity": row[3],
+            })
+
+        logger.debug("Queried transactions for item_id=%d: total=%d returned=%d", item_id, total, len(transactions))
         return transactions, total
 
     async def create(
@@ -371,7 +441,7 @@ class InventoryTransactionService:
 
         for item in items:
             await self._reverse_inventory(
-                item.item_type, item.item_id, item.quantity,
+                item.item_id, item.quantity,
                 transaction.transaction_type, updated_by=deleted_by,
             )
             item.is_deleted = True
@@ -408,12 +478,11 @@ class InventoryTransactionService:
 
         item_responses = []
         for item in items:
-            item_name = await self._get_item_name(item.item_type, item.item_id)
+            item_name, item_type = await self._get_item_info(item.item_id)
             item_responses.append(
                 TransactionItemResponse(
                     id=item.id,
                     transaction_id=item.transaction_id,
-                    item_type=item.item_type,
                     item_id=item.item_id,
                     quantity=item.quantity,
                     is_deleted=item.is_deleted,
@@ -422,6 +491,7 @@ class InventoryTransactionService:
                     updated_by=item.updated_by,
                     updated_at=item.updated_at,
                     item_name=item_name,
+                    item_type=item_type,
                 )
             )
         return item_responses
@@ -436,7 +506,6 @@ class InventoryTransactionService:
         """Create a transaction item and adjust inventory."""
         item = InventoryTransactionItem(
             transaction_id=transaction_id,
-            item_type=data.item_type,
             item_id=data.item_id,
             quantity=data.quantity,
             created_by=created_by,
@@ -448,13 +517,13 @@ class InventoryTransactionService:
 
         # Adjust inventory
         await self._adjust_inventory(
-            data.item_type, data.item_id, data.quantity,
+            data.item_id, data.quantity,
             transaction_type, updated_by=created_by,
         )
 
         logger.info(
-            "Created transaction item id=%d transaction_id=%d item_type=%s item_id=%d qty=%d",
-            item.id, transaction_id, data.item_type, data.item_id, data.quantity,
+            "Created transaction item id=%d transaction_id=%d item_id=%d qty=%d",
+            item.id, transaction_id, data.item_id, data.quantity,
         )
         return item
 
@@ -476,7 +545,7 @@ class InventoryTransactionService:
 
         # Reverse old inventory impact
         await self._reverse_inventory(
-            item.item_type, item.item_id, item.quantity,
+            item.item_id, item.quantity,
             transaction.transaction_type, updated_by=updated_by,
         )
 
@@ -490,7 +559,7 @@ class InventoryTransactionService:
 
         # Apply new inventory impact
         await self._adjust_inventory(
-            item.item_type, item.item_id, item.quantity,
+            item.item_id, item.quantity,
             transaction.transaction_type, updated_by=updated_by,
         )
 
@@ -509,7 +578,7 @@ class InventoryTransactionService:
 
         # Reverse inventory
         await self._reverse_inventory(
-            item.item_type, item.item_id, item.quantity,
+            item.item_id, item.quantity,
             transaction.transaction_type, updated_by=deleted_by,
         )
 

@@ -1,13 +1,14 @@
 import logging
 from typing import Optional, List, Tuple
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, or_
 
 from app.model.equipment import Equipment
 from app.model.equipment_category import EquipmentCategory
 from app.model.inventory import Inventory
+from app.model.item import Item, ItemType
 from app.schema.equipment import EquipmentCreate, EquipmentUpdate, EquipmentDetailResponse
-from app.schema.inventory import ItemType
 from app.service.inventory import InventoryService
 
 logger = logging.getLogger("medbase.service.equipment")
@@ -49,8 +50,7 @@ class EquipmentService:
             )
             .outerjoin(
                 Inventory,
-                (Inventory.item_type == ItemType.EQUIPMENT)
-                & (Inventory.item_id == Equipment.id)
+                (Inventory.item_id == Equipment.item_id)
                 & (Inventory.is_deleted == False),
             )
             .outerjoin(
@@ -81,10 +81,8 @@ class EquipmentService:
         order: str = "asc",
     ) -> Tuple[List[EquipmentDetailResponse], int]:
         """Get all equipment with pagination, filtering, sorting, and details."""
-        # Base filter query for counting
         base_query = select(Equipment).where(Equipment.is_deleted == False)
 
-        # Apply filters
         if category_id is not None:
             base_query = base_query.where(Equipment.category_id == category_id)
         if is_active is not None:
@@ -101,18 +99,15 @@ class EquipmentService:
                 )
             )
 
-        # Get total count
         count_query = select(func.count()).select_from(base_query.subquery())
         total_result = await self.db.execute(count_query)
         total = total_result.scalar()
 
-        # Build detail query with joins
         query = (
             select(Equipment, Inventory.quantity, EquipmentCategory)
             .outerjoin(
                 Inventory,
-                (Inventory.item_type == ItemType.EQUIPMENT)
-                & (Inventory.item_id == Equipment.id)
+                (Inventory.item_id == Equipment.item_id)
                 & (Inventory.is_deleted == False),
             )
             .outerjoin(
@@ -123,7 +118,6 @@ class EquipmentService:
             .where(Equipment.is_deleted == False)
         )
 
-        # Re-apply filters to detail query
         if category_id is not None:
             query = query.where(Equipment.category_id == category_id)
         if is_active is not None:
@@ -140,14 +134,12 @@ class EquipmentService:
                 )
             )
 
-        # Apply sorting
         sort_column = getattr(Equipment, sort, Equipment.id)
         if order.lower() == "desc":
             query = query.order_by(sort_column.desc())
         else:
             query = query.order_by(sort_column.asc())
 
-        # Apply pagination
         offset = (page - 1) * size
         query = query.offset(offset).limit(size)
 
@@ -162,8 +154,20 @@ class EquipmentService:
     async def create(
         self, data: EquipmentCreate, created_by: Optional[str] = None
     ) -> Equipment:
-        """Create new equipment and its inventory record."""
+        """Create new equipment, its parent item, and its inventory record."""
+        # Create the parent item record
+        item = Item(
+            item_type=ItemType.EQUIPMENT,
+            name=data.name,
+            created_by=created_by,
+            updated_by=created_by,
+        )
+        self.db.add(item)
+        await self.db.flush()
+        await self.db.refresh(item)
+
         equipment = Equipment(
+            item_id=item.id,
             code=data.code,
             name=data.name,
             category_id=data.category_id,
@@ -180,13 +184,12 @@ class EquipmentService:
         # Auto-create inventory record
         inventory_service = InventoryService(self.db)
         await inventory_service.create(
-            item_type=ItemType.EQUIPMENT,
-            item_id=equipment.id,
+            item_id=item.id,
             quantity=0,
             created_by=created_by,
         )
 
-        logger.info("Created equipment id=%d name='%s'", equipment.id, equipment.name)
+        logger.info("Created equipment id=%d item_id=%d name='%s'", equipment.id, item.id, equipment.name)
         return equipment
 
     async def update(
@@ -201,6 +204,17 @@ class EquipmentService:
             return None
 
         update_data = data.model_dump(exclude_unset=True)
+
+        # If name is being updated, also update the parent item name
+        if "name" in update_data:
+            result = await self.db.execute(
+                select(Item).where(Item.id == equipment.item_id)
+            )
+            item = result.scalar_one_or_none()
+            if item:
+                item.name = update_data["name"]
+                item.updated_by = updated_by
+
         for field, value in update_data.items():
             setattr(equipment, field, value)
 
@@ -211,7 +225,7 @@ class EquipmentService:
         return equipment
 
     async def delete(self, equipment_id: int, deleted_by: Optional[str] = None) -> bool:
-        """Soft delete equipment and its inventory record."""
+        """Soft delete equipment, its item, and its inventory record."""
         equipment = await self.get_by_id(equipment_id)
         if not equipment:
             return False
@@ -219,9 +233,18 @@ class EquipmentService:
         equipment.is_deleted = True
         equipment.updated_by = deleted_by
 
+        # Soft-delete the parent item
+        result = await self.db.execute(
+            select(Item).where(Item.id == equipment.item_id)
+        )
+        item = result.scalar_one_or_none()
+        if item:
+            item.is_deleted = True
+            item.updated_by = deleted_by
+
         # Also soft-delete the inventory record
         inventory_service = InventoryService(self.db)
-        await inventory_service.delete(ItemType.EQUIPMENT, equipment_id, deleted_by=deleted_by)
+        await inventory_service.delete(equipment.item_id, deleted_by=deleted_by)
 
         await self.db.flush()
         logger.info("Soft-deleted equipment id=%d", equipment_id)
@@ -229,8 +252,11 @@ class EquipmentService:
 
     async def get_inventory_quantity(self, equipment_id: int) -> int:
         """Get inventory quantity for equipment."""
+        equipment = await self.get_by_id(equipment_id)
+        if not equipment:
+            return 0
         inventory_service = InventoryService(self.db)
-        inventory = await inventory_service.get_by_item(ItemType.EQUIPMENT, equipment_id)
+        inventory = await inventory_service.get_by_item(equipment.item_id)
         if inventory:
-            return inventory.quantity
+            return inventory["quantity"]
         return 0

@@ -1281,18 +1281,17 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/inventory/item/medicine/1",
+							"raw": "{{base_url}}/inventory/item/1",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"inventory",
 								"item",
-								"medicine",
 								"1"
 							]
 						},
-						"description": "Get inventory record by item type and item ID. item_type: medicine, equipment, medical_device."
+						"description": "Get inventory record by item ID."
 					},
 					"response": []
 				}
@@ -3145,6 +3144,41 @@
 					"response": []
 				},
 				{
+					"name": "Get Transactions by Item",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/inventory-transactions/by-item/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"inventory-transactions",
+								"by-item",
+								"1"
+							],
+							"query": [
+								{
+									"key": "transaction_type",
+									"value": "purchase",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Get all transactions for a specific item. Filters: transaction_type (optional)."
+					},
+					"response": []
+				},
+				{
 					"name": "Create Inventory Transaction (Purchase)",
 					"request": {
 						"method": "POST",
@@ -3156,7 +3190,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"transaction_type\": \"purchase\",\n    \"transaction_date\": \"2026-03-01\",\n    \"notes\": \"Monthly medicine restock\",\n    \"items\": [\n        {\n            \"item_type\": \"medicine\",\n            \"item_id\": 1,\n            \"quantity\": 100\n        },\n        {\n            \"item_type\": \"equipment\",\n            \"item_id\": 1,\n            \"quantity\": 5\n        }\n    ]\n}"
+							"raw": "{\n    \"transaction_type\": \"purchase\",\n    \"transaction_date\": \"2026-03-01\",\n    \"notes\": \"Monthly medicine restock\",\n    \"items\": [\n        {\n            \"item_id\": 1,\n            \"quantity\": 100\n        },\n        {\n            \"item_id\": 1,\n            \"quantity\": 5\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/inventory-transactions",
@@ -3183,7 +3217,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"transaction_type\": \"donation\",\n    \"third_party_id\": 1,\n    \"transaction_date\": \"2026-03-01\",\n    \"notes\": \"Donation from partner\",\n    \"items\": [\n        {\n            \"item_type\": \"medicine\",\n            \"item_id\": 1,\n            \"quantity\": 50\n        }\n    ]\n}"
+							"raw": "{\n    \"transaction_type\": \"donation\",\n    \"third_party_id\": 1,\n    \"transaction_date\": \"2026-03-01\",\n    \"notes\": \"Donation from partner\",\n    \"items\": [\n        {\n            \"item_id\": 1,\n            \"quantity\": 50\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/inventory-transactions",
@@ -3210,7 +3244,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"transaction_type\": \"prescription\",\n    \"third_party_id\": 1,\n    \"transaction_date\": \"2026-03-01\",\n    \"notes\": \"Patient prescription\",\n    \"items\": [\n        {\n            \"item_type\": \"medicine\",\n            \"item_id\": 1,\n            \"quantity\": 2\n        }\n    ]\n}"
+							"raw": "{\n    \"transaction_type\": \"prescription\",\n    \"third_party_id\": 1,\n    \"transaction_date\": \"2026-03-01\",\n    \"notes\": \"Patient prescription\",\n    \"items\": [\n        {\n            \"item_id\": 1,\n            \"quantity\": 2\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/inventory-transactions",
@@ -3327,7 +3361,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"item_type\": \"medicine\",\n    \"item_id\": 1,\n    \"quantity\": 10\n}"
+							"raw": "{\n    \"item_id\": 1,\n    \"quantity\": 10\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/inventory-transactions/:transaction_id/items",
@@ -3346,7 +3380,7 @@
 								}
 							]
 						},
-						"description": "Add an item to an existing inventory transaction. item_type can be: medicine, equipment, medical_device. quantity must be greater than 0."
+						"description": "Add an item to an existing inventory transaction. quantity must be greater than 0."
 					},
 					"response": []
 				},
@@ -3380,7 +3414,7 @@
 								}
 							]
 						},
-						"description": "Update a transaction item. Can update item_type, item_id, and quantity. All fields are optional."
+						"description": "Update a transaction item. Can update item_id and quantity. All fields are optional."
 					},
 					"response": []
 				},

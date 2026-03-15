@@ -1,13 +1,14 @@
 import logging
 from typing import Optional, List, Tuple
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, or_
 
 from app.model.medicine import Medicine
 from app.model.medicine_category import MedicineCategory
 from app.model.inventory import Inventory
+from app.model.item import Item, ItemType
 from app.schema.medicine import MedicineCreate, MedicineUpdate, MedicineDetailResponse
-from app.schema.inventory import ItemType
 from app.service.inventory import InventoryService
 
 logger = logging.getLogger("medbase.service.medicine")
@@ -49,8 +50,7 @@ class MedicineService:
             )
             .outerjoin(
                 Inventory,
-                (Inventory.item_type == ItemType.MEDICINE)
-                & (Inventory.item_id == Medicine.id)
+                (Inventory.item_id == Medicine.item_id)
                 & (Inventory.is_deleted == False),
             )
             .outerjoin(
@@ -108,8 +108,7 @@ class MedicineService:
             select(Medicine, Inventory.quantity, MedicineCategory)
             .outerjoin(
                 Inventory,
-                (Inventory.item_type == ItemType.MEDICINE)
-                & (Inventory.item_id == Medicine.id)
+                (Inventory.item_id == Medicine.item_id)
                 & (Inventory.is_deleted == False),
             )
             .outerjoin(
@@ -157,8 +156,20 @@ class MedicineService:
     async def create(
         self, data: MedicineCreate, created_by: Optional[str] = None
     ) -> Medicine:
-        """Create a new medicine and its inventory record."""
+        """Create a new medicine, its parent item, and its inventory record."""
+        # Create the parent item record
+        item = Item(
+            item_type=ItemType.MEDICINE,
+            name=data.name,
+            created_by=created_by,
+            updated_by=created_by,
+        )
+        self.db.add(item)
+        await self.db.flush()
+        await self.db.refresh(item)
+
         medicine = Medicine(
+            item_id=item.id,
             code=data.code,
             name=data.name,
             category_id=data.category_id,
@@ -175,13 +186,12 @@ class MedicineService:
         # Auto-create inventory record
         inventory_service = InventoryService(self.db)
         await inventory_service.create(
-            item_type=ItemType.MEDICINE,
-            item_id=medicine.id,
+            item_id=item.id,
             quantity=0,
             created_by=created_by,
         )
 
-        logger.info("Created medicine id=%d name='%s'", medicine.id, medicine.name)
+        logger.info("Created medicine id=%d item_id=%d name='%s'", medicine.id, item.id, medicine.name)
         return medicine
 
     async def update(
@@ -196,6 +206,17 @@ class MedicineService:
             return None
 
         update_data = data.model_dump(exclude_unset=True)
+
+        # If name is being updated, also update the parent item name
+        if "name" in update_data:
+            result = await self.db.execute(
+                select(Item).where(Item.id == medicine.item_id)
+            )
+            item = result.scalar_one_or_none()
+            if item:
+                item.name = update_data["name"]
+                item.updated_by = updated_by
+
         for field, value in update_data.items():
             setattr(medicine, field, value)
 
@@ -206,7 +227,7 @@ class MedicineService:
         return medicine
 
     async def delete(self, medicine_id: int, deleted_by: Optional[str] = None) -> bool:
-        """Soft delete a medicine and its inventory record."""
+        """Soft delete a medicine, its item, and its inventory record."""
         medicine = await self.get_by_id(medicine_id)
         if not medicine:
             return False
@@ -214,9 +235,18 @@ class MedicineService:
         medicine.is_deleted = True
         medicine.updated_by = deleted_by
 
+        # Soft-delete the parent item
+        result = await self.db.execute(
+            select(Item).where(Item.id == medicine.item_id)
+        )
+        item = result.scalar_one_or_none()
+        if item:
+            item.is_deleted = True
+            item.updated_by = deleted_by
+
         # Also soft-delete the inventory record
         inventory_service = InventoryService(self.db)
-        await inventory_service.delete(ItemType.MEDICINE, medicine_id, deleted_by=deleted_by)
+        await inventory_service.delete(medicine.item_id, deleted_by=deleted_by)
 
         await self.db.flush()
         logger.info("Soft-deleted medicine id=%d", medicine_id)
@@ -224,8 +254,11 @@ class MedicineService:
 
     async def get_inventory_quantity(self, medicine_id: int) -> int:
         """Get inventory quantity for a medicine."""
+        medicine = await self.get_by_id(medicine_id)
+        if not medicine:
+            return 0
         inventory_service = InventoryService(self.db)
-        inventory = await inventory_service.get_by_item(ItemType.MEDICINE, medicine_id)
+        inventory = await inventory_service.get_by_item(medicine.item_id)
         if inventory:
-            return inventory.quantity
+            return inventory["quantity"]
         return 0

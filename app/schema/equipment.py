@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import Enum
 from typing import Optional
+
 from pydantic import BaseModel, Field, ConfigDict
 
 from app.schema.equipment_category import EquipmentCategoryResponse
@@ -48,6 +49,7 @@ class EquipmentResponse(EquipmentBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    item_id: int
     is_deleted: bool
     created_by: Optional[str] = None
     created_at: datetime
@@ -69,6 +71,7 @@ class EquipmentDetailResponse(EquipmentResponse):
         return cls.model_validate(
             {
                 "id": equipment.id,
+                "item_id": equipment.item_id,
                 "code": equipment.code,
                 "name": equipment.name,
                 "category_id": equipment.category_id,

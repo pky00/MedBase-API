@@ -320,20 +320,21 @@ async def populate():
         # --- Inventory Transactions ---
         tx_service = InventoryTransactionService(db)
 
-        # Build item name -> id maps for resolving item references
+        # Build item name -> item_id maps for resolving item references
+        # item_id here refers to the parent Item table ID (not the entity ID)
         item_id_map = {}
         for m in data.get("medicines", []):
             med = await med_service.get_by_name(m["name"])
             if med:
-                item_id_map[("medicine", m["name"])] = med.id
+                item_id_map[("medicine", m["name"])] = med.item_id
         for e in data.get("equipment", []):
             eq = await equip_service.get_by_name(e["name"])
             if eq:
-                item_id_map[("equipment", e["name"])] = eq.id
+                item_id_map[("equipment", e["name"])] = eq.item_id
         for d in data.get("medical_devices", []):
             dev = await dev_service.get_by_name(d["name"])
             if dev:
-                item_id_map[("medical_device", d["name"])] = dev.id
+                item_id_map[("medical_device", d["name"])] = dev.item_id
 
         # Build partner name -> third_party_id map
         partner_tp_map = {}
@@ -380,7 +381,6 @@ async def populate():
                     print(f"  [skip] Item '{item['item_name']}' ({item['item_type']}) not found")
                     continue
                 items.append(TransactionItemCreate(
-                    item_type=item["item_type"],
                     item_id=item_id,
                     quantity=item["quantity"],
                 ))

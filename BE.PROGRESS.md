@@ -39,6 +39,7 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 | # | Feature | Started | Notes |
 |---|---------|---------|-------|
 | 20 | Final Testing & Polish | 2026-02-28 | Pending full test run in Docker environment |
+| 21 | Item Model Refactor | 2026-03-15 | Parent `items` table for medicines/equipment/medical_devices; `item_id` FK everywhere; equipment prescription prevention; by-item transaction endpoint |
 
 ---
 
@@ -348,13 +349,14 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 
 **Models:**
 - `inventory_transactions`: id, transaction_type, third_party_id (FK), transaction_date, notes, audit columns
-- `inventory_transaction_items`: id, transaction_id (FK), item_type, item_id, quantity, audit columns
+- `inventory_transaction_items`: id, transaction_id (FK), item_id (FK to items), quantity, audit columns
 
 **Business Rules:**
 - Transaction types: purchase, donation, prescription, loss, breakage, expiration, destruction
 - Purchase/donation increase inventory; all others decrease inventory
 - Donation: third_party_id must belong to a donor partner (partner_type = donor or both)
 - Prescription: third_party_id must belong to a doctor
+- Equipment cannot be prescribed
 - Purchase/loss/breakage/expiration/destruction: third_party_id auto-set to current user
 - Cannot decrease inventory below 0
 - Deleting a transaction/item reverses its inventory impact
@@ -393,6 +395,7 @@ You are the Backend Agent for MedBase. Your job is to build the FastAPI backend 
 - Phase 4 migration: `20260227_add_patients_and_patient_documents.py` (patients and patient_documents tables)
 - Phase 5 migration: `20260227_add_phase5_appointments_records_treatments.py` (appointments, vital_signs, medical_records, treatments tables)
 - Phase 6 migration: Pending — `inventory_transactions` and `inventory_transaction_items` tables (run `make migrate-create MSG="add inventory transactions"` then `make migrate`)
+- Item Refactor migration: Adds `items` table, adds `item_id` FK to medicines/equipment/medical_devices, replaces `item_type`+`item_id` columns in inventory and inventory_transaction_items with `item_id` FK to items
 
 ---
 
