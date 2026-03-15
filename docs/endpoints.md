@@ -109,7 +109,8 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 
 **Notes:**
 - Filters: `category_id`, `is_active`
-- Creating a medicine automatically creates an inventory record
+- Creating a medicine automatically creates an `item` record (parent) and an `inventory` record
+- Response includes `item_id` — the ID in the `items` table used for inventory references
 - Deleting only allowed if inventory quantity is 0
 
 ---
@@ -126,7 +127,9 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 
 **Notes:**
 - Filters: `category_id`, `is_active`, `condition`
-- Creating equipment automatically creates an inventory record
+- Creating equipment automatically creates an `item` record (parent) and an `inventory` record
+- Response includes `item_id` — the ID in the `items` table used for inventory references
+- Equipment cannot be prescribed
 - Deleting only allowed if inventory quantity is 0
 
 ---
@@ -143,7 +146,8 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 
 **Notes:**
 - Filters: `category_id`, `is_active`
-- Creating a device automatically creates an inventory record
+- Creating a device automatically creates an `item` record (parent) and an `inventory` record
+- Response includes `item_id` — the ID in the `items` table used for inventory references
 - Deleting only allowed if inventory quantity is 0
 
 ---
@@ -154,11 +158,12 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 |--------|----------|-------------|
 | GET | `/inventory` | List all inventory records |
 | GET | `/inventory/{id}` | Get inventory record by ID |
-| GET | `/inventory/item/{item_type}/{item_id}` | Get inventory by item |
+| GET | `/inventory/item/{item_id}` | Get inventory by item ID |
 
 **Notes:**
 - Filters: `item_type`
 - `item_type` values: `medicine`, `equipment`, `medical_device`
+- `item_id` refers to the `items` table ID (parent table for all item types)
 - Inventory records are created automatically when an item (medicine/equipment/device) is created
 - Quantity is modified only through inventory transactions
 - Deleted automatically with the item when quantity is 0
@@ -170,6 +175,7 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/inventory-transactions` | List all transactions |
+| GET | `/inventory-transactions/by-item/{item_id}` | Get transactions containing a specific item |
 | GET | `/inventory-transactions/{id}` | Get transaction by ID (includes items) |
 | POST | `/inventory-transactions` | Create transaction with items (updates inventory) |
 | PUT | `/inventory-transactions/{id}` | Update transaction |
@@ -183,8 +189,11 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
   - **Prescription**: `third_party_id` must be a doctor — required in request
   - **Other types** (purchase, loss, breakage, expiration, destruction): `third_party_id` is automatically set to the logged-in user's third party
 - POST can include items array to create transaction with items in one request
+- Transaction items reference `item_id` from the `items` table (not the entity table ID)
+- Equipment cannot be prescribed — adding equipment to a prescription transaction is rejected
 - Creating a transaction automatically updates inventory quantity (+ for purchase/donation, - for others)
 - This is the only way to modify inventory quantities
+- `/by-item/{item_id}` returns transactions containing a specific item along with the transaction item details, supports `transaction_type` filter and pagination
 
 ---
 
@@ -198,8 +207,9 @@ All GET (list) endpoints support: `page`, `size`, `sort`, `search`, and resource
 | DELETE | `/inventory-transaction-items/{id}` | Delete transaction item |
 
 **Notes:**
-- `item_type` values: `medicine`, `equipment`, `medical_device`
+- Transaction items reference `item_id` from the `items` table
 - Adding/removing items updates inventory automatically
+- Equipment items cannot be added to prescription transactions
 
 ---
 

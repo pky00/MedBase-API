@@ -8,6 +8,7 @@ class Equipment(BaseModel):
 
     __tablename__ = "equipment"
 
+    item_id = Column(Integer, ForeignKey("items.id"), nullable=False, unique=True)
     code = Column(String, unique=True, nullable=False)
     name = Column(String, unique=True, nullable=False)
     category_id = Column(Integer, ForeignKey("equipment_categories.id"), nullable=True)

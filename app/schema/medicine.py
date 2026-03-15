@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Optional
+
 from pydantic import BaseModel, Field, ConfigDict
 
 from app.schema.medicine_category import MedicineCategoryResponse
@@ -38,6 +39,7 @@ class MedicineResponse(MedicineBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    item_id: int
     is_deleted: bool
     created_by: Optional[str] = None
     created_at: datetime
@@ -59,6 +61,7 @@ class MedicineDetailResponse(MedicineResponse):
         return cls.model_validate(
             {
                 "id": medicine.id,
+                "item_id": medicine.item_id,
                 "code": medicine.code,
                 "name": medicine.name,
                 "category_id": medicine.category_id,

@@ -1,7 +1,8 @@
 import logging
 from datetime import date, datetime, timedelta
+
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, case, extract, cast, String
+from sqlalchemy import select, func
 
 from app.model.patient import Patient
 from app.model.appointment import Appointment
@@ -10,9 +11,7 @@ from app.model.inventory_transaction import InventoryTransaction
 from app.model.inventory_transaction_item import InventoryTransactionItem
 from app.model.partner import Partner
 from app.model.doctor import Doctor
-from app.model.medicine import Medicine
-from app.model.equipment import Equipment
-from app.model.medical_device import MedicalDevice
+from app.model.item import Item
 from app.model.third_party import ThirdParty
 from app.schema.statistics import (
     SummaryStats,
@@ -75,15 +74,16 @@ class StatisticsService:
         total_items = row[0]
         total_quantity = row[1]
 
-        # Items by type
+        # Items by type (join with Item to get item_type)
         result = await self.db.execute(
             select(
-                Inventory.item_type,
+                Item.item_type,
                 func.count(Inventory.id),
                 func.coalesce(func.sum(Inventory.quantity), 0),
             )
+            .join(Item, Inventory.item_id == Item.id)
             .where(Inventory.is_deleted == False)
-            .group_by(Inventory.item_type)
+            .group_by(Item.item_type)
         )
         items_by_type = [
             InventoryByType(item_type=r[0], count=r[1], total_quantity=r[2])
@@ -92,7 +92,8 @@ class StatisticsService:
 
         # Low stock items
         low_stock_query = (
-            select(Inventory)
+            select(Inventory, Item.name, Item.item_type)
+            .join(Item, Inventory.item_id == Item.id)
             .where(
                 Inventory.is_deleted == False,
                 Inventory.quantity <= LOW_STOCK_THRESHOLD,
@@ -101,16 +102,16 @@ class StatisticsService:
             .limit(20)
         )
         result = await self.db.execute(low_stock_query)
-        low_stock_records = result.scalars().all()
+        low_stock_rows = result.all()
 
         low_stock_items = []
-        for inv in low_stock_records:
-            name = await self._get_item_name(inv.item_type, inv.item_id)
+        for row in low_stock_rows:
+            inv = row[0]
             low_stock_items.append(
                 LowStockItem(
-                    item_type=inv.item_type,
+                    item_type=row[2],
                     item_id=inv.item_id,
-                    item_name=name or "Unknown",
+                    item_name=row[1] or "Unknown",
                     quantity=inv.quantity,
                 )
             )
@@ -281,18 +282,3 @@ class StatisticsService:
             query = query.where(f)
         result = await self.db.execute(query)
         return result.scalar()
-
-    async def _get_item_name(self, item_type: str, item_id: int) -> str:
-        """Get item name by type and id."""
-        model_map = {
-            "medicine": Medicine,
-            "equipment": Equipment,
-            "medical_device": MedicalDevice,
-        }
-        model = model_map.get(item_type)
-        if not model:
-            return "Unknown"
-        result = await self.db.execute(
-            select(model.name).where(model.id == item_id)
-        )
-        return result.scalar_one_or_none() or "Unknown"

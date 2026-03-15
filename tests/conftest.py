@@ -16,6 +16,7 @@ from app.model.user import User
 from app.model.medicine_category import MedicineCategory  # noqa: F401
 from app.model.equipment_category import EquipmentCategory  # noqa: F401
 from app.model.medical_device_category import MedicalDeviceCategory  # noqa: F401
+from app.model.item import Item  # noqa: F401
 from app.model.medicine import Medicine  # noqa: F401
 from app.model.equipment import Equipment  # noqa: F401
 from app.model.medical_device import MedicalDevice  # noqa: F401

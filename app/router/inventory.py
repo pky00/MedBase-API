@@ -1,5 +1,6 @@
 import logging
 from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,7 +8,7 @@ from app.utility.database import get_db
 from app.utility.auth import get_current_user
 from app.service.inventory import InventoryService
 from app.schema.inventory import InventoryResponse
-from app.schema.inventory import ItemType
+from app.schema.item import ItemType
 from app.schema.base import PaginatedResponse
 from app.model.user import User
 
@@ -63,24 +64,23 @@ async def get_inventory(
     return inventory
 
 
-@router.get("/item/{item_type}/{item_id}", response_model=InventoryResponse)
+@router.get("/item/{item_id}", response_model=InventoryResponse)
 async def get_inventory_by_item(
-    item_type: ItemType,
     item_id: int,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get inventory record by item type and item ID."""
+    """Get inventory record by item ID."""
     logger.info(
-        "Fetching inventory for item_type='%s' item_id=%d by user_id=%d",
-        item_type, item_id, current_user.id,
+        "Fetching inventory for item_id=%d by user_id=%d",
+        item_id, current_user.id,
     )
 
     service = InventoryService(db)
-    inventory = await service.get_by_item(item_type, item_id)
+    inventory = await service.get_by_item(item_id)
 
     if not inventory:
-        logger.warning("Inventory record not found for item_type='%s' item_id=%d", item_type, item_id)
+        logger.warning("Inventory record not found for item_id=%d", item_id)
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Inventory record not found",

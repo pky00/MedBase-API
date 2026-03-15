@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 from datetime import date
+
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -50,6 +51,30 @@ async def get_transactions(
     )
 
     logger.info("Returning %d inventory transactions (total=%d)", len(transactions), total)
+    return PaginatedResponse(items=transactions, total=total, page=page, size=size)
+
+
+@router.get("/by-item/{item_id}", response_model=PaginatedResponse[dict])
+async def get_transactions_by_item(
+    item_id: int,
+    page: int = Query(1, ge=1, description="Page number"),
+    size: int = Query(10, ge=1, le=100, description="Page size"),
+    transaction_type: Optional[TransactionType] = Query(None, description="Filter by transaction type"),
+    sort: str = Query("id", description="Sort field"),
+    order: str = Query("asc", description="Sort order (asc/desc)"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Get inventory transactions that include a specific item, with the transaction item details."""
+    logger.info("Listing transactions for item_id=%d page=%d size=%d by user_id=%d", item_id, page, size, current_user.id)
+
+    service = InventoryTransactionService(db)
+    transactions, total = await service.get_transactions_by_item(
+        item_id=item_id, page=page, size=size,
+        transaction_type=transaction_type, sort=sort, order=order,
+    )
+
+    logger.info("Returning %d transactions for item_id=%d (total=%d)", len(transactions), item_id, total)
     return PaginatedResponse(items=transactions, total=total, page=page, size=size)
 
 
@@ -117,9 +142,15 @@ async def create_transaction(
     if data.items:
         for item in data.items:
             try:
-                await service.validate_inventory_item(item.item_type, item.item_id)
+                await service.validate_inventory_item(item.item_id)
             except ValueError as e:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+            # Equipment cannot be prescribed
+            if data.transaction_type == "prescription":
+                try:
+                    await service.validate_prescription_item(item.item_id)
+                except ValueError as e:
+                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
     try:
         transaction = await service.create(data, third_party_id, created_by=current_user.username)

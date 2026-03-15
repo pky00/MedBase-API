@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.model.medicine import Medicine
 from app.model.medicine_category import MedicineCategory
 from app.model.inventory import Inventory
+from app.model.item import Item
 from app.model.user import User
 
 
@@ -52,8 +53,13 @@ class TestGetMedicines:
         db_session: AsyncSession, medicine_category: MedicineCategory
     ):
         """Test filtering medicines by category."""
+        item = Item(item_type="medicine", name="Amoxicillin", created_by=admin_user.username, updated_by=admin_user.username)
+        db_session.add(item)
+        await db_session.flush()
+        await db_session.refresh(item)
+
         med = Medicine(
-            code="AMX001", name="Amoxicillin", category_id=medicine_category.id,
+            item_id=item.id, code="AMX001", name="Amoxicillin", category_id=medicine_category.id,
             created_by=admin_user.username, updated_by=admin_user.username,
         )
         db_session.add(med)
@@ -68,16 +74,23 @@ class TestGetMedicines:
         assert response.status_code == 200
         data = response.json()
         assert data["total"] >= 1
-        for item in data["items"]:
-            assert item["category_id"] == medicine_category.id
+        for item_resp in data["items"]:
+            assert item_resp["category_id"] == medicine_category.id
 
     @pytest.mark.asyncio
     async def test_get_medicines_with_search(
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test searching medicines."""
-        med1 = Medicine(code="AMX002", name="Amoxicillin", description="Antibiotic", created_by=admin_user.username, updated_by=admin_user.username)
-        med2 = Medicine(code="IBU001", name="Ibuprofen", description="Painkiller", created_by=admin_user.username, updated_by=admin_user.username)
+        item1 = Item(item_type="medicine", name="Amoxicillin", created_by=admin_user.username, updated_by=admin_user.username)
+        item2 = Item(item_type="medicine", name="Ibuprofen", created_by=admin_user.username, updated_by=admin_user.username)
+        db_session.add_all([item1, item2])
+        await db_session.flush()
+        await db_session.refresh(item1)
+        await db_session.refresh(item2)
+
+        med1 = Medicine(item_id=item1.id, code="AMX002", name="Amoxicillin", description="Antibiotic", created_by=admin_user.username, updated_by=admin_user.username)
+        med2 = Medicine(item_id=item2.id, code="IBU001", name="Ibuprofen", description="Painkiller", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add_all([med1, med2])
         await db_session.commit()
 
@@ -97,8 +110,15 @@ class TestGetMedicines:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test filtering by active status."""
-        med1 = Medicine(code="ACT001", name="Active Med", is_active=True, created_by=admin_user.username, updated_by=admin_user.username)
-        med2 = Medicine(code="INA001", name="Inactive Med", is_active=False, created_by=admin_user.username, updated_by=admin_user.username)
+        item1 = Item(item_type="medicine", name="Active Med", created_by=admin_user.username, updated_by=admin_user.username)
+        item2 = Item(item_type="medicine", name="Inactive Med", created_by=admin_user.username, updated_by=admin_user.username)
+        db_session.add_all([item1, item2])
+        await db_session.flush()
+        await db_session.refresh(item1)
+        await db_session.refresh(item2)
+
+        med1 = Medicine(item_id=item1.id, code="ACT001", name="Active Med", is_active=True, created_by=admin_user.username, updated_by=admin_user.username)
+        med2 = Medicine(item_id=item2.id, code="INA001", name="Inactive Med", is_active=False, created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add_all([med1, med2])
         await db_session.commit()
 
@@ -110,8 +130,8 @@ class TestGetMedicines:
 
         assert response.status_code == 200
         data = response.json()
-        for item in data["items"]:
-            assert item["is_active"] is True
+        for item_resp in data["items"]:
+            assert item_resp["is_active"] is True
 
 
 class TestGetMedicine:
@@ -123,7 +143,6 @@ class TestGetMedicine:
         db_session: AsyncSession, medicine_category: MedicineCategory
     ):
         """Test getting medicine by ID includes inventory and category info."""
-        # Create medicine via API (auto-creates inventory)
         response = await client.post(
             "/api/v1/medicines",
             json={
@@ -138,7 +157,6 @@ class TestGetMedicine:
         assert response.status_code == 201
         medicine_id = response.json()["id"]
 
-        # Get by ID
         response = await client.get(
             f"/api/v1/medicines/{medicine_id}", headers=admin_headers
         )
@@ -148,6 +166,7 @@ class TestGetMedicine:
         assert data["name"] == "Amoxicillin"
         assert data["category"]["name"] == "Antibiotics"
         assert data["inventory_quantity"] == 0
+        assert "item_id" in data
 
     @pytest.mark.asyncio
     async def test_get_medicine_not_found(self, client: AsyncClient, admin_headers: dict):
@@ -187,6 +206,7 @@ class TestCreateMedicine:
         assert data["name"] == "Amoxicillin"
         assert data["category_id"] == medicine_category.id
         assert data["unit"] == "tablets"
+        assert "item_id" in data
 
         # Verify medicine in database
         result = await db_session.execute(
@@ -196,13 +216,20 @@ class TestCreateMedicine:
         assert db_med is not None
         assert db_med.name == "Amoxicillin"
         assert db_med.created_by == admin_user.username
+        assert db_med.item_id is not None
 
-        # Verify inventory record was auto-created
+        # Verify item record was created
         result = await db_session.execute(
-            select(Inventory).where(
-                Inventory.item_type == "medicine",
-                Inventory.item_id == data["id"],
-            )
+            select(Item).where(Item.id == db_med.item_id)
+        )
+        db_item = result.scalar_one_or_none()
+        assert db_item is not None
+        assert db_item.item_type == "medicine"
+        assert db_item.name == "Amoxicillin"
+
+        # Verify inventory record was auto-created using item_id
+        result = await db_session.execute(
+            select(Inventory).where(Inventory.item_id == db_med.item_id)
         )
         inventory = result.scalar_one_or_none()
         assert inventory is not None
@@ -242,7 +269,12 @@ class TestCreateMedicine:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test creating medicine with duplicate name fails."""
-        med = Medicine(code="DUP001", name="Duplicate Med", created_by=admin_user.username, updated_by=admin_user.username)
+        item = Item(item_type="medicine", name="Duplicate Med", created_by=admin_user.username, updated_by=admin_user.username)
+        db_session.add(item)
+        await db_session.flush()
+        await db_session.refresh(item)
+
+        med = Medicine(item_id=item.id, code="DUP001", name="Duplicate Med", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(med)
         await db_session.commit()
 
@@ -277,7 +309,12 @@ class TestUpdateMedicine:
         """Test updating a medicine and verify in database."""
         admin_username = admin_user.username
 
-        med = Medicine(code="OLD001", name="Old Name", unit="tablets", created_by=admin_username, updated_by=admin_username)
+        item = Item(item_type="medicine", name="Old Name", created_by=admin_username, updated_by=admin_username)
+        db_session.add(item)
+        await db_session.flush()
+        await db_session.refresh(item)
+
+        med = Medicine(item_id=item.id, code="OLD001", name="Old Name", unit="tablets", created_by=admin_username, updated_by=admin_username)
         db_session.add(med)
         await db_session.commit()
         await db_session.refresh(med)
@@ -318,7 +355,12 @@ class TestUpdateMedicine:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test updating medicine with non-existent category."""
-        med = Medicine(code="TST002", name="Test Med", created_by=admin_user.username, updated_by=admin_user.username)
+        item = Item(item_type="medicine", name="Test Med", created_by=admin_user.username, updated_by=admin_user.username)
+        db_session.add(item)
+        await db_session.flush()
+        await db_session.refresh(item)
+
+        med = Medicine(item_id=item.id, code="TST002", name="Test Med", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(med)
         await db_session.commit()
         await db_session.refresh(med)
@@ -339,7 +381,7 @@ class TestDeleteMedicine:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test deleting medicine (soft delete) when inventory is 0."""
-        # Create via API to auto-create inventory
+        # Create via API to auto-create item + inventory
         response = await client.post(
             "/api/v1/medicines",
             json={"code": "DEL001", "name": "To Delete"},
@@ -347,6 +389,7 @@ class TestDeleteMedicine:
         )
         assert response.status_code == 201
         med_id = response.json()["id"]
+        item_id = response.json()["item_id"]
 
         # Delete
         response = await client.delete(
@@ -367,10 +410,7 @@ class TestDeleteMedicine:
 
         # Verify inventory also soft deleted
         result = await db_session.execute(
-            select(Inventory).where(
-                Inventory.item_type == "medicine",
-                Inventory.item_id == med_id,
-            )
+            select(Inventory).where(Inventory.item_id == item_id)
         )
         inv = result.scalar_one_or_none()
         assert inv is not None
@@ -381,14 +421,18 @@ class TestDeleteMedicine:
         self, client: AsyncClient, admin_user: User, admin_headers: dict, db_session: AsyncSession
     ):
         """Test cannot delete medicine when inventory quantity > 0."""
-        # Create medicine with inventory > 0
-        med = Medicine(code="STK001", name="Has Stock", created_by=admin_user.username, updated_by=admin_user.username)
+        item = Item(item_type="medicine", name="Has Stock", created_by=admin_user.username, updated_by=admin_user.username)
+        db_session.add(item)
+        await db_session.flush()
+        await db_session.refresh(item)
+
+        med = Medicine(item_id=item.id, code="STK001", name="Has Stock", created_by=admin_user.username, updated_by=admin_user.username)
         db_session.add(med)
         await db_session.flush()
         await db_session.refresh(med)
 
         inv = Inventory(
-            item_type="medicine", item_id=med.id, quantity=10,
+            item_id=item.id, quantity=10,
             created_by=admin_user.username, updated_by=admin_user.username,
         )
         db_session.add(inv)
