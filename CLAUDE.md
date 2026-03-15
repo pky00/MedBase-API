@@ -82,6 +82,7 @@ Before finishing any feature, update `BE.PROGRESS.md`:
 
 ### Layer Separation
 - **No model or query code in routers** — routers handle HTTP concerns only (request/response, auth, validation). All database queries and model operations belong in the service layer.
+- **Always use Pydantic models for router response types** — never use `dict` or other raw types in `response_model`. Every endpoint must have a dedicated Pydantic schema in the `schema/` layer.
 
 ### Project Structure
 - `main.py` at root

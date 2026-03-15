@@ -13,6 +13,7 @@ from app.schema.inventory_transaction import (
     InventoryTransactionUpdate,
     InventoryTransactionResponse,
     InventoryTransactionListResponse,
+    TransactionByItemResponse,
     TransactionType,
 )
 from app.schema.base import PaginatedResponse, MessageResponse
@@ -54,7 +55,7 @@ async def get_transactions(
     return PaginatedResponse(items=transactions, total=total, page=page, size=size)
 
 
-@router.get("/by-item/{item_id}", response_model=PaginatedResponse[dict])
+@router.get("/by-item/{item_id}", response_model=PaginatedResponse[TransactionByItemResponse])
 async def get_transactions_by_item(
     item_id: int,
     page: int = Query(1, ge=1, description="Page number"),

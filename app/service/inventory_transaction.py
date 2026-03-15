@@ -16,6 +16,7 @@ from app.schema.inventory_transaction import (
     InventoryTransactionUpdate,
     InventoryTransactionListResponse,
     InventoryTransactionResponse,
+    TransactionByItemResponse,
     TransactionItemCreate,
     TransactionItemUpdate,
     TransactionItemResponse,
@@ -302,7 +303,7 @@ class InventoryTransactionService:
         transaction_type: Optional[str] = None,
         sort: str = "id",
         order: str = "asc",
-    ) -> Tuple[List[dict], int]:
+    ) -> Tuple[List[TransactionByItemResponse], int]:
         """Get inventory transactions that include a specific item, with the transaction item details."""
         query = (
             select(
@@ -342,25 +343,7 @@ class InventoryTransactionService:
         result = await self.db.execute(query)
         rows = result.all()
 
-        transactions = []
-        for row in rows:
-            txn = row[0]
-            transactions.append({
-                "id": txn.id,
-                "transaction_type": txn.transaction_type,
-                "third_party_id": txn.third_party_id,
-                "appointment_id": txn.appointment_id,
-                "transaction_date": txn.transaction_date,
-                "notes": txn.notes,
-                "is_deleted": txn.is_deleted,
-                "created_by": txn.created_by,
-                "created_at": txn.created_at,
-                "updated_by": txn.updated_by,
-                "updated_at": txn.updated_at,
-                "third_party_name": row[1],
-                "transaction_item_id": row[2],
-                "transaction_item_quantity": row[3],
-            })
+        transactions = [TransactionByItemResponse.from_row(row) for row in rows]
 
         logger.debug("Queried transactions for item_id=%d: total=%d returned=%d", item_id, total, len(transactions))
         return transactions, total
