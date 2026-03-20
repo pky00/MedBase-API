@@ -1,4 +1,4 @@
-name: Deploy to Lightsail
+name: Deploy to Lightsail DEV
 
 on:
   push:
@@ -68,7 +68,9 @@ jobs:
                   \"LIGHTSAIL_SECRET_KEY\": \"${{ secrets.LIGHTSAIL_SECRET_KEY }}\",
                   \"LIGHTSAIL_ENDPOINT\": \"${{ secrets.LIGHTSAIL_ENDPOINT }}\",
                   \"LIGHTSAIL_REGION\": \"${{ secrets.LIGHTSAIL_REGION }}\",
-                  \"CORS_ORIGINS\": \"${{ secrets.CORS_ORIGINS }}\"
+                  \"CORS_ORIGINS\": \"${{ secrets.CORS_ORIGINS }}\",
+                  \"DOCS_USERNAME\": \"${{ secrets.DOCS_USERNAME }}\",
+                  \"DOCS_PASSWORD\": \"${{ secrets.DOCS_PASSWORD }}\"
                 }
               }
             }" \
