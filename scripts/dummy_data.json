@@ -4,42 +4,42 @@
       "username": "dr_entry",
       "name": "Dr. Entry Clerk",
       "email": "entry@medbase.com",
-      "password": "password123",
+      "password": "Password123!",
       "role": "user"
     },
     {
       "username": "nurse_sara",
       "name": "Nurse Sara Ahmed",
       "email": "sara@medbase.com",
-      "password": "password123",
+      "password": "Password123!",
       "role": "user"
     },
     {
       "username": "nurse_lina",
       "name": "Nurse Lina Barakat",
       "email": "lina.b@medbase.com",
-      "password": "password123",
+      "password": "Password123!",
       "role": "user"
     },
     {
       "username": "clerk_hana",
       "name": "Hana Jaber",
       "email": "hana@medbase.com",
-      "password": "password123",
+      "password": "Password123!",
       "role": "user"
     },
     {
       "username": "clerk_rami",
       "name": "Rami Nassar",
       "email": "rami@medbase.com",
-      "password": "password123",
+      "password": "Password123!",
       "role": "user"
     },
     {
       "username": "nurse_dina",
       "name": "Nurse Dina Khalil",
       "email": "dina@medbase.com",
-      "password": "password123",
+      "password": "Password123!",
       "role": "user"
     }
   ],

@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.utility.database import get_db
 from app.utility.auth import get_current_admin_user
+from app.utility.security import validate_password_strength
 from app.service.user import UserService
 from app.service.third_party import ThirdPartyService
 from app.schema.user import UserCreate, UserUpdate, UserResponse
@@ -113,6 +114,11 @@ async def create_user(
         user_data.username, user_data.email, user_data.role, current_user.id
     )
 
+    # Validate password complexity
+    pw_error = validate_password_strength(user_data.password)
+    if pw_error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=pw_error)
+
     user_service = UserService(db)
 
     # Check if username already exists
@@ -179,6 +185,12 @@ async def update_user(
     All fields are optional. Only provided fields will be updated.
     """
     logger.info("Updating user_id=%d by admin_id=%d", user_id, current_user.id)
+
+    # Validate password complexity if being updated
+    if user_data.password:
+        pw_error = validate_password_strength(user_data.password)
+        if pw_error:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=pw_error)
 
     user_service = UserService(db)
 

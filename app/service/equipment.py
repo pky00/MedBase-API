@@ -134,6 +134,9 @@ class EquipmentService:
                 )
             )
 
+        ALLOWED_SORT = {"id", "code", "name", "category_id", "condition", "is_active", "created_at"}
+        if sort not in ALLOWED_SORT:
+            sort = "id"
         sort_column = getattr(Equipment, sort, Equipment.id)
         if order.lower() == "desc":
             query = query.order_by(sort_column.desc())

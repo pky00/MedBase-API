@@ -98,6 +98,48 @@ async def upload_patient_document(
         patient_id, file.filename, current_user.id,
     )
 
+    # Validate file type
+    ALLOWED_EXTENSIONS = {
+        "pdf", "jpg", "jpeg", "png", "gif", "bmp", "webp",
+        "doc", "docx", "xls", "xlsx", "csv", "txt", "rtf",
+        "dicom", "dcm",
+    }
+    ALLOWED_CONTENT_TYPES = {
+        "application/pdf",
+        "image/jpeg", "image/png", "image/gif", "image/bmp", "image/webp",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "text/csv", "text/plain", "application/rtf",
+        "application/dicom", "application/octet-stream",
+    }
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+
+    if file.filename:
+        ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
+        if ext not in ALLOWED_EXTENSIONS:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"File type '.{ext}' is not allowed. Allowed types: {', '.join(sorted(ALLOWED_EXTENSIONS))}",
+            )
+
+    if file.content_type and file.content_type not in ALLOWED_CONTENT_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Content type '{file.content_type}' is not allowed",
+        )
+
+    # Validate file size by reading and checking length
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"File size exceeds maximum of {MAX_FILE_SIZE // (1024 * 1024)} MB",
+        )
+    # Reset file position so the service can read it again
+    await file.seek(0)
+
     # Verify patient exists
     patient_service = PatientService(db)
     patient = await patient_service.get_by_id(patient_id)

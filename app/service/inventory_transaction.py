@@ -275,6 +275,9 @@ class InventoryTransactionService:
         total_result = await self.db.execute(count_query)
         total = total_result.scalar()
 
+        ALLOWED_SORT = {"id", "transaction_type", "transaction_date", "created_at"}
+        if sort not in ALLOWED_SORT:
+            sort = "id"
         sort_column = getattr(InventoryTransaction, sort, InventoryTransaction.id)
         if order.lower() == "desc":
             query = query.order_by(sort_column.desc())
@@ -331,6 +334,9 @@ class InventoryTransactionService:
         total_result = await self.db.execute(count_query)
         total = total_result.scalar()
 
+        ALLOWED_SORT = {"id", "transaction_type", "transaction_date", "created_at"}
+        if sort not in ALLOWED_SORT:
+            sort = "id"
         sort_column = getattr(InventoryTransaction, sort, InventoryTransaction.id)
         if order.lower() == "desc":
             query = query.order_by(sort_column.desc())

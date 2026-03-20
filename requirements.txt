@@ -26,5 +26,8 @@ httpx==0.26.0
 # Storage (S3-compatible / Lightsail)
 aioboto3==13.4.0
 
+# Rate Limiting
+slowapi==0.1.9
+
 # Utilities
 python-dotenv==1.0.1

@@ -85,6 +85,9 @@ class UserService:
 
         # Apply sorting
         tp_sort_map = {"email": ThirdParty.email, "name": ThirdParty.name}
+        ALLOWED_SORT = {"id", "username", "email", "name", "role", "is_active", "created_at"}
+        if sort not in ALLOWED_SORT:
+            sort = "id"
         sort_column = tp_sort_map.get(sort, getattr(User, sort, User.id))
         if order.lower() == "desc":
             query = query.order_by(sort_column.desc())
@@ -170,6 +173,22 @@ class UserService:
         user.updated_by = deleted_by
         await self.db.flush()
         logger.info("Soft-deleted user id=%d", user_id)
+        return True
+
+    async def reset_password(
+        self,
+        user_id: int,
+        new_password: str,
+        updated_by: Optional[str] = None,
+    ) -> bool:
+        """Reset a user's password."""
+        user = await self.get_by_id(user_id)
+        if not user:
+            return False
+        user.password_hash = get_password_hash(new_password)
+        user.updated_by = updated_by
+        await self.db.flush()
+        logger.info("Password reset for user id=%d by=%s", user_id, updated_by)
         return True
 
     async def authenticate(self, username: str, password: str) -> Optional[User]:

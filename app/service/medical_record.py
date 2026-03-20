@@ -89,6 +89,9 @@ class MedicalRecordService:
         total_result = await self.db.execute(count_query)
         total = total_result.scalar()
 
+        ALLOWED_SORT = {"id", "appointment_id", "follow_up_date", "created_at"}
+        if sort not in ALLOWED_SORT:
+            sort = "id"
         sort_column = getattr(MedicalRecord, sort, MedicalRecord.id)
         if order.lower() == "desc":
             query = query.order_by(sort_column.desc())

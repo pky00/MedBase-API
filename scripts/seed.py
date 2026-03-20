@@ -28,7 +28,7 @@ async def seed_admin():
             name="Admin",
             username="admin",
             email="admin@medbase.com",
-            password="admin123",  # Change in production!
+            password="Admin123!",  # Change in production!
             role="admin",
             is_active=True
         )

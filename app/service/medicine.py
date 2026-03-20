@@ -135,6 +135,9 @@ class MedicineService:
             )
 
         # Apply sorting
+        ALLOWED_SORT = {"id", "code", "name", "category_id", "unit", "is_active", "created_at"}
+        if sort not in ALLOWED_SORT:
+            sort = "id"
         sort_column = getattr(Medicine, sort, Medicine.id)
         if order.lower() == "desc":
             query = query.order_by(sort_column.desc())

@@ -129,6 +129,9 @@ class MedicalDeviceService:
                 )
             )
 
+        ALLOWED_SORT = {"id", "code", "name", "category_id", "serial_number", "is_active", "created_at"}
+        if sort not in ALLOWED_SORT:
+            sort = "id"
         sort_column = getattr(MedicalDevice, sort, MedicalDevice.id)
         if order.lower() == "desc":
             query = query.order_by(sort_column.desc())

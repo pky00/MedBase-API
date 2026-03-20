@@ -62,6 +62,9 @@ class PatientDocumentService:
         total_result = await self.db.execute(count_query)
         total = total_result.scalar()
 
+        ALLOWED_SORT = {"id", "document_name", "document_type", "upload_date", "created_at"}
+        if sort not in ALLOWED_SORT:
+            sort = "id"
         sort_column = getattr(PatientDocument, sort, PatientDocument.id)
         if order.lower() == "desc":
             query = query.order_by(sort_column.desc())
