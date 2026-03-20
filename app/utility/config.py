@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     LIGHTSAIL_SECRET_KEY: str = ""
     LIGHTSAIL_ENDPOINT: str = ""
     LIGHTSAIL_REGION: str = ""
+
+    # Docs Protection
+    DOCS_USERNAME: str = "admin"
+    DOCS_PASSWORD: str = ""
     
     class Config:
         env_file = ".env"

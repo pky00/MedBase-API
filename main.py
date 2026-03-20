@@ -1,9 +1,12 @@
 import logging
+import secrets
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.docs import get_redoc_html
+from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
+from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -51,16 +54,17 @@ async def lifespan(app: FastAPI):
     logger.info("MedBase API shutting down")
 
 
-# Conditionally disable docs in production
-is_production = settings.ENV.upper() in ("PRODUCTION", "PROD")
+# Docs are always served via custom password-protected routes (not built-in)
+is_local = settings.ENV.upper() == "LOCAL"
+docs_password_set = bool(settings.DOCS_PASSWORD)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="MedBase - Clinic Management System API",
     version="1.0.0",
-    docs_url=None if is_production else "/docs",
+    docs_url="/docs" if is_local and not docs_password_set else None,
     redoc_url=None,
-    openapi_url=None if is_production else "/openapi.json",
+    openapi_url="/openapi.json" if is_local and not docs_password_set else None,
     lifespan=lifespan
 )
 
@@ -68,8 +72,64 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Custom ReDoc endpoint (disabled in production)
-if not is_production:
+# --- Password-protected docs (PROD, DEV, or LOCAL with DOCS_PASSWORD set) ---
+if docs_password_set or not is_local:
+    docs_security = HTTPBasic()
+
+    def _verify_docs_credentials(
+        credentials: HTTPBasicCredentials = Depends(docs_security),
+    ) -> str:
+        if not docs_password_set:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="API docs are disabled (no DOCS_PASSWORD configured)",
+            )
+        username_ok = secrets.compare_digest(
+            credentials.username.encode(), settings.DOCS_USERNAME.encode()
+        )
+        password_ok = secrets.compare_digest(
+            credentials.password.encode(), settings.DOCS_PASSWORD.encode()
+        )
+        if not (username_ok and password_ok):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid docs credentials",
+                headers={"WWW-Authenticate": "Basic"},
+            )
+        return credentials.username
+
+    def _custom_openapi():
+        if app.openapi_schema:
+            return app.openapi_schema
+        schema = get_openapi(
+            title=app.title,
+            version=app.version,
+            description=app.description,
+            routes=app.routes,
+        )
+        app.openapi_schema = schema
+        return schema
+
+    @app.get("/openapi.json", include_in_schema=False)
+    async def openapi_json(_: str = Depends(_verify_docs_credentials)):
+        return JSONResponse(_custom_openapi())
+
+    @app.get("/docs", include_in_schema=False)
+    async def swagger_ui(_: str = Depends(_verify_docs_credentials)):
+        return get_swagger_ui_html(
+            openapi_url="/openapi.json",
+            title=f"{app.title} - Swagger UI",
+        )
+
+    @app.get("/redoc", include_in_schema=False)
+    async def redoc_html(_: str = Depends(_verify_docs_credentials)):
+        return get_redoc_html(
+            openapi_url="/openapi.json",
+            title=f"{app.title} - ReDoc",
+            redoc_js_url="https://cdn.jsdelivr.net/npm/redoc@2.1.5/bundles/redoc.standalone.js",
+        )
+else:
+    # LOCAL without DOCS_PASSWORD — open redoc (swagger already handled by FastAPI)
     @app.get("/redoc", include_in_schema=False)
     async def redoc_html():
         return get_redoc_html(
