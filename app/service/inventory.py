@@ -98,6 +98,9 @@ class InventoryService:
         total = total_result.scalar()
 
         # Apply sorting
+        ALLOWED_SORT = {"id", "item_id", "quantity", "created_at"}
+        if sort not in ALLOWED_SORT:
+            sort = "id"
         sort_column = getattr(Inventory, sort, Inventory.id)
         if order.lower() == "desc":
             query = query.order_by(sort_column.desc())

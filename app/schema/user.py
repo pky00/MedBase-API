@@ -20,7 +20,7 @@ class UserCreate(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
     name: Optional[str] = Field(None, min_length=1, max_length=255, description="Full name for third party record")
     email: Optional[EmailStr] = Field(None, description="Email for third party record")
-    password: str = Field(..., min_length=6, max_length=100)
+    password: str = Field(..., min_length=8, max_length=100)
     role: UserRole = UserRole.USER
     is_active: bool = True
 
@@ -29,7 +29,7 @@ class UserUpdate(BaseModel):
     """Schema for updating a user."""
 
     username: Optional[str] = Field(None, min_length=3, max_length=50)
-    password: Optional[str] = Field(None, min_length=6, max_length=100)
+    password: Optional[str] = Field(None, min_length=8, max_length=100)
     role: Optional[UserRole] = None
     is_active: Optional[bool] = None
 

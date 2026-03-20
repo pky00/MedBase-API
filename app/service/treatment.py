@@ -94,6 +94,9 @@ class TreatmentService:
         total_result = await self.db.execute(count_query)
         total = total_result.scalar()
 
+        ALLOWED_SORT = {"id", "patient_id", "treatment_type", "treatment_date", "status", "cost", "created_at"}
+        if sort not in ALLOWED_SORT:
+            sort = "id"
         sort_column = getattr(Treatment, sort, Treatment.id)
         if order.lower() == "desc":
             query = query.order_by(sort_column.desc())

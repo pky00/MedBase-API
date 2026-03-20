@@ -1,11 +1,11 @@
 import logging
-from typing import Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.utility.database import get_db
 from app.utility.security import decode_access_token
+from app.utility.token_blacklist import token_blacklist
 from app.model.user import User
 from app.service.user import UserService
 from app.schema.user import UserRole
@@ -25,39 +25,50 @@ async def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     logger.info("Authenticating token (first 20 chars): %s...", token[:20] if len(token) > 20 else token)
     payload = decode_access_token(token)
     if payload is None:
         logger.warning("Token decode failed - invalid or expired token")
         raise credentials_exception
-    
+
+    # Check if token has been blacklisted (logged out)
+    jti = payload.get("jti")
+    if jti and token_blacklist.is_blacklisted(jti):
+        logger.warning("Token has been revoked (blacklisted) jti=%s", jti)
+        raise credentials_exception
+
+    # Reject refresh tokens used as access tokens
+    if payload.get("type") == "refresh":
+        logger.warning("Refresh token used as access token")
+        raise credentials_exception
+
     logger.info("Token payload: sub=%s username=%s", payload.get("sub"), payload.get("username"))
     user_id_str = payload.get("sub")
     if user_id_str is None:
         logger.warning("No 'sub' claim in token payload")
         raise credentials_exception
-    
+
     try:
         user_id = int(user_id_str)
     except (ValueError, TypeError):
         logger.warning("Invalid 'sub' claim format: %s", user_id_str)
         raise credentials_exception
-    
+
     user_service = UserService(db)
     user = await user_service.get_by_id(user_id)
-    
+
     if user is None:
         logger.warning("User not found in database for id=%s", user_id)
         raise credentials_exception
-    
+
     if not user.is_active:
         logger.warning("User account is inactive id=%s", user_id)
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User account is deactivated"
         )
-    
+
     return user
 
 

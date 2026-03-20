@@ -133,6 +133,9 @@ class AppointmentService:
         total_result = await self.db.execute(count_query)
         total = total_result.scalar()
 
+        ALLOWED_SORT = {"id", "code", "patient_id", "doctor_id", "appointment_date", "status", "type", "location", "created_at"}
+        if sort not in ALLOWED_SORT:
+            sort = "id"
         sort_column = getattr(Appointment, sort, Appointment.id)
         if order.lower() == "desc":
             query = query.order_by(sort_column.desc())

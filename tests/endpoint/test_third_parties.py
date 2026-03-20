@@ -70,7 +70,7 @@ class TestGetThirdParties:
                 "username": "tp_test_user",
                 "name": "TP Test User",
                 "email": "tp_test@test.com",
-                "password": "testpass123",
+                "password": "TestPass123!",
                 "role": "user",
             },
             headers=admin_headers,

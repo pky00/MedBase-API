@@ -104,6 +104,9 @@ class PatientService:
         total = total_result.scalar()
 
         tp_sort_map = {"name": ThirdParty.name, "phone": ThirdParty.phone, "email": ThirdParty.email}
+        ALLOWED_SORT = {"id", "name", "phone", "email", "date_of_birth", "gender", "is_active", "created_at"}
+        if sort not in ALLOWED_SORT:
+            sort = "id"
         sort_column = tp_sort_map.get(sort, getattr(Patient, sort, Patient.id))
         if order.lower() == "desc":
             query = query.order_by(sort_column.desc())

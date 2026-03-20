@@ -1,5 +1,5 @@
 # Dockerfile
-FROM continuumio/miniconda3:latest
+FROM continuumio/miniconda3:24.7.1-0
 
 WORKDIR /app
 
@@ -15,6 +15,12 @@ SHELL ["conda", "run", "-n", "medbase", "/bin/bash", "-c"]
 
 # Copy application code
 COPY . .
+
+# Create non-root user and set ownership
+RUN groupadd -r medbase && useradd -r -g medbase -d /app -s /sbin/nologin medbase && \
+    chown -R medbase:medbase /app
+
+USER medbase
 
 # Expose port
 EXPOSE 8000

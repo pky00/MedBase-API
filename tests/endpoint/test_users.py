@@ -140,7 +140,7 @@ class TestCreateUser:
             "username": "newuser",
             "name": "New User",
             "email": "newuser@test.com",
-            "password": "newpass123",
+            "password": "NewPass123!",
             "role": "user",
             "is_active": True
         }
@@ -173,7 +173,7 @@ class TestCreateUser:
         assert db_user.is_deleted is False
         assert db_user.created_by == admin_user.username
         assert db_user.updated_by == admin_user.username
-        assert verify_password("newpass123", db_user.password_hash) is True
+        assert verify_password("NewPass123!", db_user.password_hash) is True
 
         # Verify third_party email
         tp_result = await db_session.execute(
@@ -189,7 +189,7 @@ class TestCreateUser:
             "username": "testadmin",  # Already exists
             "name": "Another Name",
             "email": "another@test.com",
-            "password": "newpass123",
+            "password": "NewPass123!",
             "role": "user"
         }
 
@@ -209,7 +209,7 @@ class TestCreateUser:
             "username": "newusername",
             "name": "New Username",
             "email": "testadmin@test.com",  # Already exists
-            "password": "newpass123",
+            "password": "NewPass123!",
             "role": "user"
         }
 
@@ -231,7 +231,7 @@ class TestCreateUser:
             "username": "tpnameuser",
             "name": "Third Party Full Name",
             "email": "tpname@test.com",
-            "password": "testpass123",
+            "password": "TestPass123!",
             "role": "user"
         }
 
@@ -261,7 +261,7 @@ class TestCreateUser:
             "username": "uniqueuser",
             "name": "Existing TP Name",
             "email": "unique@test.com",
-            "password": "testpass123",
+            "password": "TestPass123!",
             "role": "user"
         }
 
@@ -276,7 +276,7 @@ class TestCreateUser:
             "username": "newuser",
             "name": "New User",
             "email": "newuser@test.com",
-            "password": "newpass123",
+            "password": "NewPass123!",
             "role": "invalid_role"
         }
 
@@ -300,7 +300,7 @@ class TestUpdateUser:
         admin_username = admin_user.username  # Save before expire_all
 
         # Create a user to update
-        user = await _create_test_user(db_session, "toupdate", "toupdate@test.com", "testpass123", "user")
+        user = await _create_test_user(db_session, "toupdate", "toupdate@test.com", "TestPass123!", "user")
         user_id = user.id
 
         update_data = {
@@ -335,10 +335,10 @@ class TestUpdateUser:
     ):
         """Test updating user password and verify in database."""
         # Create a user to update
-        user = await _create_test_user(db_session, "passupdate", "passupdate@test.com", "oldpass123", "user")
+        user = await _create_test_user(db_session, "passupdate", "passupdate@test.com", "OldPass123!", "user")
         user_id = user.id
 
-        update_data = {"password": "newpass456"}
+        update_data = {"password": "NewPass456!"}
 
         response = await client.put(
             f"/api/v1/users/{user_id}",
@@ -356,8 +356,8 @@ class TestUpdateUser:
         db_user = result.scalar_one_or_none()
 
         assert db_user is not None
-        assert verify_password("newpass456", db_user.password_hash) is True
-        assert verify_password("oldpass123", db_user.password_hash) is False
+        assert verify_password("NewPass456!", db_user.password_hash) is True
+        assert verify_password("OldPass123!", db_user.password_hash) is False
 
     @pytest.mark.asyncio
     async def test_update_user_not_found(self, client: AsyncClient, admin_headers: dict):
@@ -382,7 +382,7 @@ class TestDeleteUser:
         admin_username = admin_user.username  # Save before expire_all
 
         # Create a user to delete
-        user = await _create_test_user(db_session, "todelete", "todelete@test.com", "testpass123", "user")
+        user = await _create_test_user(db_session, "todelete", "todelete@test.com", "TestPass123!", "user")
         user_id = user.id
 
         response = await client.delete(

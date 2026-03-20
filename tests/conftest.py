@@ -32,6 +32,8 @@ from app.model.treatment import Treatment  # noqa: F401
 from app.model.inventory_transaction import InventoryTransaction  # noqa: F401
 from app.model.inventory_transaction_item import InventoryTransactionItem  # noqa: F401
 from main import app
+from app.utility.token_blacklist import token_blacklist
+from app.utility.rate_limit import limiter
 
 
 # Test database URL
@@ -87,11 +89,15 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
         yield db_session
     
     app.dependency_overrides[get_db] = override_get_db
-    
+
+    # Reset rate limiter and token blacklist state between tests
+    limiter.reset()
+    token_blacklist._blacklist.clear()
+
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
-    
+
     app.dependency_overrides.clear()
 
 
@@ -129,7 +135,7 @@ async def _create_user_with_third_party(
 async def admin_user(db_session: AsyncSession) -> User:
     """Create an admin user for testing."""
     return await _create_user_with_third_party(
-        db_session, "testadmin", "testadmin@test.com", "testpass123", "admin"
+        db_session, "testadmin", "testadmin@test.com", "TestPass123!", "admin"
     )
 
 
@@ -137,7 +143,7 @@ async def admin_user(db_session: AsyncSession) -> User:
 async def regular_user(db_session: AsyncSession) -> User:
     """Create a regular user for testing."""
     return await _create_user_with_third_party(
-        db_session, "testuser", "testuser@test.com", "testpass123", "user"
+        db_session, "testuser", "testuser@test.com", "TestPass123!", "user"
     )
 
 
@@ -146,7 +152,7 @@ async def admin_token(client: AsyncClient, admin_user: User) -> str:
     """Get JWT token for admin user."""
     response = await client.post(
         "/api/v1/auth/login",
-        data={"username": "testadmin", "password": "testpass123"}
+        data={"username": "testadmin", "password": "TestPass123!"}
     )
     return response.json()["access_token"]
 
@@ -156,7 +162,7 @@ async def user_token(client: AsyncClient, regular_user: User) -> str:
     """Get JWT token for regular user."""
     response = await client.post(
         "/api/v1/auth/login",
-        data={"username": "testuser", "password": "testpass123"}
+        data={"username": "testuser", "password": "TestPass123!"}
     )
     return response.json()["access_token"]
 
