@@ -62,11 +62,13 @@ jobs:
                   \"ALGORITHM\": \"${{ secrets.ALGORITHM }}\",
                   \"ACCESS_TOKEN_EXPIRE_MINUTES\": \"${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}\",
                   \"DEBUG\": \"false\",
+                  \"ENV\": \"${{ secrets.ENV }}\",
                   \"LIGHTSAIL_BUCKET_NAME\": \"${{ secrets.LIGHTSAIL_BUCKET_NAME }}\",
                   \"LIGHTSAIL_ACCESS_KEY\": \"${{ secrets.LIGHTSAIL_ACCESS_KEY }}\",
                   \"LIGHTSAIL_SECRET_KEY\": \"${{ secrets.LIGHTSAIL_SECRET_KEY }}\",
                   \"LIGHTSAIL_ENDPOINT\": \"${{ secrets.LIGHTSAIL_ENDPOINT }}\",
-                  \"LIGHTSAIL_REGION\": \"${{ secrets.LIGHTSAIL_REGION }}\"
+                  \"LIGHTSAIL_REGION\": \"${{ secrets.LIGHTSAIL_REGION }}\",
+                  \"CORS_ORIGINS\": \"${{ secrets.CORS_ORIGINS }}\"
                 }
               }
             }" \

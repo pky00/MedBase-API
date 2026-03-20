@@ -68,10 +68,17 @@ async def redoc_html():
 app.add_middleware(RequestLoggingMiddleware)
 
 # CORS middleware
+if settings.ENV == "LOCAL":
+    cors_origins = ["*"]
+    cors_credentials = False
+else:
+    cors_origins = [origin.strip() for origin in settings.CORS_ORIGINS.split(",")]
+    cors_credentials = True
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[origin.strip() for origin in settings.CORS_ORIGINS.split(",")],
-    allow_credentials=True,
+    allow_origins=cors_origins,
+    allow_credentials=cors_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
