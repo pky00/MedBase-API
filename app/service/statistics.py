@@ -2,7 +2,7 @@ import logging
 from datetime import date, datetime, timedelta
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, literal_column
 
 from app.model.patient import Patient
 from app.model.appointment import Appointment
@@ -165,17 +165,18 @@ class StatisticsService:
 
         # By month (last 6 months)
         six_months_ago = today - timedelta(days=180)
+        month_expr = func.to_char(Appointment.appointment_date, literal_column("'YYYY-MM'"))
         result = await self.db.execute(
             select(
-                func.to_char(Appointment.appointment_date, 'YYYY-MM').label("month"),
+                month_expr.label("month"),
                 func.count(Appointment.id),
             )
             .where(
                 Appointment.is_deleted == False,
                 Appointment.appointment_date >= six_months_ago,
             )
-            .group_by(func.to_char(Appointment.appointment_date, 'YYYY-MM'))
-            .order_by(func.to_char(Appointment.appointment_date, 'YYYY-MM'))
+            .group_by(month_expr)
+            .order_by(month_expr)
         )
         by_month = [
             AppointmentsByMonth(month=r[0], count=r[1])
