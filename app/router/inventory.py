@@ -27,7 +27,22 @@ async def get_inventory_list(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get all inventory records with pagination and filtering."""
+    """
+    List all inventory records with pagination and filtering.
+
+    Returns inventory records showing current quantity for each item.
+    Each record includes the item type and item name.
+
+    **Filters:**
+    - **item_type**: `medicine`, `equipment`, `medical_device`
+
+    **Sorting:** Default `id asc`. Sortable fields validated server-side.
+
+    Inventory records are read-only — quantities are modified only through inventory transactions.
+
+    **Errors:**
+    - `401`: Not authenticated
+    """
     logger.info("Listing inventory page=%d size=%d by user_id=%d", page, size, current_user.id)
 
     service = InventoryService(db)
@@ -48,7 +63,15 @@ async def get_inventory(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get inventory record by ID."""
+    """
+    Get a single inventory record by its inventory ID.
+
+    Returns the inventory record with item type and item name.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Inventory record not found
+    """
     logger.info("Fetching inventory_id=%d by user_id=%d", inventory_id, current_user.id)
 
     service = InventoryService(db)
@@ -70,7 +93,15 @@ async def get_inventory_by_item(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get inventory record by item ID."""
+    """
+    Get the inventory record for a specific item.
+
+    The `item_id` refers to the parent `items` table ID (not the medicine/equipment/device table ID).
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Inventory record not found for this item
+    """
     logger.info(
         "Fetching inventory for item_id=%d by user_id=%d",
         item_id, current_user.id,

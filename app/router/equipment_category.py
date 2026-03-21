@@ -29,7 +29,16 @@ async def get_equipment_categories(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get all equipment categories with pagination and sorting."""
+    """
+    List all equipment categories with pagination and sorting.
+
+    **Search:** Searches in name and description.
+
+    **Sorting:** Default `id asc`. Sortable fields validated server-side.
+
+    **Errors:**
+    - `401`: Not authenticated
+    """
     logger.info("Listing equipment categories page=%d size=%d by user_id=%d", page, size, current_user.id)
 
     service = EquipmentCategoryService(db)
@@ -50,7 +59,13 @@ async def get_equipment_category(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get equipment category by ID."""
+    """
+    Get a single equipment category by ID.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Equipment category not found
+    """
     logger.info("Fetching equipment category_id=%d by user_id=%d", category_id, current_user.id)
 
     service = EquipmentCategoryService(db)
@@ -72,7 +87,16 @@ async def create_equipment_category(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Create a new equipment category."""
+    """
+    Create a new equipment category.
+
+    **Business Rules:**
+    - Category name must be unique
+
+    **Errors:**
+    - `400`: Category name already exists
+    - `401`: Not authenticated
+    """
     logger.info(
         "Creating equipment category name='%s' by user_id=%d",
         data.name, current_user.id,
@@ -102,7 +126,19 @@ async def update_equipment_category(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update an equipment category."""
+    """
+    Update an existing equipment category.
+
+    All fields are optional — only provided fields are updated.
+
+    **Business Rules:**
+    - Name must remain unique if changed
+
+    **Errors:**
+    - `400`: Category name already exists
+    - `401`: Not authenticated
+    - `404`: Equipment category not found
+    """
     logger.info("Updating equipment category_id=%d by user_id=%d", category_id, current_user.id)
 
     service = EquipmentCategoryService(db)
@@ -136,7 +172,16 @@ async def delete_equipment_category(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete an equipment category (soft delete). Cannot delete if equipment items are linked."""
+    """
+    Soft-delete an equipment category.
+
+    Cannot delete if equipment is still linked to this category.
+
+    **Errors:**
+    - `400`: Cannot delete category with linked equipment
+    - `401`: Not authenticated
+    - `404`: Equipment category not found
+    """
     logger.info("Deleting equipment category_id=%d by user_id=%d", category_id, current_user.id)
 
     service = EquipmentCategoryService(db)

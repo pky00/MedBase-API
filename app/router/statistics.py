@@ -23,7 +23,12 @@ async def get_summary(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get summary statistics for the dashboard."""
+    """
+    Get summary statistics for the dashboard.
+
+    Returns total counts for: patients, appointments, inventory items, transactions,
+    partners, doctors, plus active counts for patients, partners, and doctors.
+    """
     logger.info("Fetching dashboard summary by user_id=%d", current_user.id)
     service = StatisticsService(db)
     return await service.get_summary()
@@ -34,7 +39,13 @@ async def get_inventory_stats(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get inventory statistics (low stock alerts, items by type)."""
+    """
+    Get inventory statistics.
+
+    Returns total items count, total quantity across all items, low stock alerts
+    (items with quantity below threshold), and item counts grouped by type
+    (medicine, equipment, medical device).
+    """
     logger.info("Fetching inventory stats by user_id=%d", current_user.id)
     service = StatisticsService(db)
     return await service.get_inventory_stats()
@@ -45,7 +56,12 @@ async def get_appointment_stats(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get appointment statistics (today, upcoming, by status, by month)."""
+    """
+    Get appointment statistics.
+
+    Returns: today's appointment count, upcoming appointments count, appointments
+    grouped by status, appointments grouped by month, and total completed/cancelled counts.
+    """
     logger.info("Fetching appointment stats by user_id=%d", current_user.id)
     service = StatisticsService(db)
     return await service.get_appointment_stats()
@@ -56,7 +72,12 @@ async def get_transaction_stats(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get transaction statistics (by type, recent transactions)."""
+    """
+    Get inventory transaction statistics.
+
+    Returns: total transaction count, transactions grouped by type with item totals,
+    and a list of recent transactions with third party names and item counts.
+    """
     logger.info("Fetching transaction stats by user_id=%d", current_user.id)
     service = StatisticsService(db)
     return await service.get_transaction_stats()

@@ -33,7 +33,22 @@ async def get_patients(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get all patients with pagination, filtering, and sorting."""
+    """
+    List all patients with pagination, filtering, and sorting.
+
+    Returns a paginated list of patients with their third party details (name, phone, email).
+
+    **Filters:**
+    - **is_active**: `true` / `false`
+    - **gender**: `male`, `female`
+
+    **Search:** Searches in name (via third party), phone, and email.
+
+    **Sorting:** Default `id asc`. Sortable fields validated server-side.
+
+    **Errors:**
+    - `401`: Not authenticated
+    """
     logger.info("Listing patients page=%d size=%d by user_id=%d", page, size, current_user.id)
 
     service = PatientService(db)
@@ -53,7 +68,19 @@ async def get_patient(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get patient by ID."""
+    """
+    Get a single patient by ID.
+
+    Use the `with_documents` query parameter to include the patient's uploaded documents
+    in the response.
+
+    **Query Parameters:**
+    - **with_documents**: Set to `true` to include patient documents list
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Patient not found
+    """
     logger.info("Fetching patient_id=%d by user_id=%d", patient_id, current_user.id)
 
     service = PatientService(db)
@@ -82,7 +109,20 @@ async def create_patient(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Create a new patient. Auto-creates a third_party record if third_party_id not provided."""
+    """
+    Create a new patient.
+
+    If `third_party_id` is provided, links to an existing third party record.
+    Otherwise, a new third party is auto-created using the provided `name`, `phone`, and `email`.
+
+    **Business Rules:**
+    - Name must be unique across all third parties (when creating new)
+    - `name` is required when `third_party_id` is not provided
+
+    **Errors:**
+    - `400`: Name already exists, name required, or third party not found
+    - `401`: Not authenticated
+    """
     logger.info(
         "Creating patient name='%s' by user_id=%d",
         data.name, current_user.id,
@@ -130,7 +170,15 @@ async def update_patient(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update a patient."""
+    """
+    Update an existing patient.
+
+    All fields are optional — only provided fields are updated.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Patient not found
+    """
     logger.info("Updating patient_id=%d by user_id=%d", patient_id, current_user.id)
 
     service = PatientService(db)
@@ -151,7 +199,15 @@ async def delete_patient(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a patient (soft delete)."""
+    """
+    Soft-delete a patient.
+
+    The patient record is marked as deleted but remains in the database.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Patient not found
+    """
     logger.info("Deleting patient_id=%d by user_id=%d", patient_id, current_user.id)
 
     service = PatientService(db)

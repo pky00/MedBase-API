@@ -29,7 +29,16 @@ async def get_medicine_categories(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get all medicine categories with pagination and sorting."""
+    """
+    List all medicine categories with pagination and sorting.
+
+    **Search:** Searches in name and description.
+
+    **Sorting:** Default `id asc`. Sortable fields validated server-side.
+
+    **Errors:**
+    - `401`: Not authenticated
+    """
     logger.info("Listing medicine categories page=%d size=%d by user_id=%d", page, size, current_user.id)
 
     service = MedicineCategoryService(db)
@@ -50,7 +59,13 @@ async def get_medicine_category(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get medicine category by ID."""
+    """
+    Get a single medicine category by ID.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Medicine category not found
+    """
     logger.info("Fetching medicine category_id=%d by user_id=%d", category_id, current_user.id)
 
     service = MedicineCategoryService(db)
@@ -72,7 +87,16 @@ async def create_medicine_category(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Create a new medicine category."""
+    """
+    Create a new medicine category.
+
+    **Business Rules:**
+    - Category name must be unique
+
+    **Errors:**
+    - `400`: Category name already exists
+    - `401`: Not authenticated
+    """
     logger.info(
         "Creating medicine category name='%s' by user_id=%d",
         data.name, current_user.id,
@@ -102,7 +126,19 @@ async def update_medicine_category(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update a medicine category."""
+    """
+    Update an existing medicine category.
+
+    All fields are optional — only provided fields are updated.
+
+    **Business Rules:**
+    - Name must remain unique if changed
+
+    **Errors:**
+    - `400`: Category name already exists
+    - `401`: Not authenticated
+    - `404`: Medicine category not found
+    """
     logger.info("Updating medicine category_id=%d by user_id=%d", category_id, current_user.id)
 
     service = MedicineCategoryService(db)
@@ -136,7 +172,16 @@ async def delete_medicine_category(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a medicine category (soft delete). Cannot delete if medicines are linked."""
+    """
+    Soft-delete a medicine category.
+
+    Cannot delete if medicines are still linked to this category.
+
+    **Errors:**
+    - `400`: Cannot delete category with linked medicines
+    - `401`: Not authenticated
+    - `404`: Medicine category not found
+    """
     logger.info("Deleting medicine category_id=%d by user_id=%d", category_id, current_user.id)
 
     service = MedicineCategoryService(db)

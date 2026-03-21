@@ -100,6 +100,60 @@
 						"description": "Get current authenticated user info."
 					},
 					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"description": "Refresh token"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/refresh",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"refresh"
+							]
+						},
+						"description": "Refresh access token using refresh token in Authorization header."
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": 2,\n    \"new_password\": \"NewPass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/admin/reset-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"admin",
+								"reset-password"
+							]
+						},
+						"description": "Admin reset password for a user. Admin only."
+					},
+					"response": []
 				}
 			]
 		},
@@ -3440,6 +3494,87 @@
 							]
 						},
 						"description": "Delete a transaction item (soft delete). Reverses the inventory change for this item."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Statistics",
+			"item": [
+				{
+					"name": "Get Summary Statistics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/statistics/summary",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"statistics",
+								"summary"
+							]
+						},
+						"description": "Get summary statistics for the dashboard."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Inventory Statistics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/statistics/inventory",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"statistics",
+								"inventory"
+							]
+						},
+						"description": "Get inventory statistics."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Appointment Statistics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/statistics/appointments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"statistics",
+								"appointments"
+							]
+						},
+						"description": "Get appointment statistics."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Transaction Statistics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/statistics/transactions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"statistics",
+								"transactions"
+							]
+						},
+						"description": "Get transaction statistics."
 					},
 					"response": []
 				}

@@ -37,7 +37,20 @@ async def get_treatments(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """List all treatments."""
+    """
+    List all treatments with pagination and filtering.
+
+    **Filters:**
+    - **patient_id**: Filter by patient
+    - **partner_id**: Filter by partner (referral organization)
+    - **appointment_id**: Filter by linked appointment
+    - **status**: `pending`, `completed`
+
+    **Sorting:** Default `id asc`. Sortable fields validated server-side.
+
+    **Errors:**
+    - `401`: Not authenticated
+    """
     logger.info("Listing treatments page=%d size=%d by user_id=%d", page, size, current_user.id)
 
     service = TreatmentService(db)
@@ -57,7 +70,15 @@ async def get_treatment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get treatment by ID."""
+    """
+    Get a single treatment by ID.
+
+    Returns the treatment with resolved patient and partner names.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Treatment not found
+    """
     logger.info("Fetching treatment_id=%d by user_id=%d", treatment_id, current_user.id)
 
     service = TreatmentService(db)
@@ -75,7 +96,21 @@ async def create_treatment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Create a new treatment."""
+    """
+    Create a new treatment.
+
+    Treatments represent medical procedures performed by referral partners.
+    Can optionally be linked to an appointment.
+
+    **Business Rules:**
+    - Patient must exist
+    - Partner must exist and have `partner_type` of `referral` or `both`
+    - Appointment must exist if `appointment_id` is provided
+
+    **Errors:**
+    - `400`: Patient not found, partner not found, partner not referral type, or appointment not found
+    - `401`: Not authenticated
+    """
     logger.info("Creating treatment patient_id=%d partner_id=%d by user_id=%d",
                 data.patient_id, data.partner_id, current_user.id)
 
@@ -121,7 +156,21 @@ async def update_treatment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update a treatment."""
+    """
+    Update an existing treatment.
+
+    All fields are optional — only provided fields are updated.
+
+    **Business Rules:**
+    - Patient must exist if changed
+    - Partner must exist and be referral type if changed
+    - Appointment must exist if changed
+
+    **Errors:**
+    - `400`: Referenced entity not found, or partner not referral type
+    - `401`: Not authenticated
+    - `404`: Treatment not found
+    """
     logger.info("Updating treatment_id=%d by user_id=%d", treatment_id, current_user.id)
 
     service = TreatmentService(db)
@@ -168,7 +217,15 @@ async def update_treatment_status(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update treatment status."""
+    """
+    Update only the status of a treatment.
+
+    **Valid statuses:** `pending`, `completed`
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Treatment not found
+    """
     logger.info("Updating treatment status treatment_id=%d status=%s by user_id=%d",
                 treatment_id, data.status, current_user.id)
 
@@ -189,7 +246,15 @@ async def delete_treatment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a treatment (soft delete)."""
+    """
+    Soft-delete a treatment.
+
+    The treatment record is marked as deleted but remains in the database.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Treatment not found
+    """
     logger.info("Deleting treatment_id=%d by user_id=%d", treatment_id, current_user.id)
 
     service = TreatmentService(db)

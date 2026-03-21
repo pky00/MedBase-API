@@ -69,28 +69,7 @@ Copy the example and fill in your values:
 cp .env.example .env
 ```
 
-Edit `.env` with your database credentials:
-
-```env
-# Database
-DATABASE_URL=postgresql+asyncpg://user:password@your-rds-host:5432/medbase
-TEST_DATABASE_URL=postgresql+asyncpg://user:password@your-rds-host:5432/medbase_test
-
-# JWT Authentication
-SECRET_KEY=your-secret-key-here
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=60
-
-# Application
-DEBUG=false
-
-# Lightsail Bucket (S3-compatible file storage)
-LIGHTSAIL_BUCKET_NAME=your-bucket-name
-LIGHTSAIL_ACCESS_KEY=your-access-key
-LIGHTSAIL_SECRET_KEY=your-secret-key
-LIGHTSAIL_ENDPOINT=your-bucket-name.s3.your-region.amazonaws.com
-LIGHTSAIL_REGION=your-region
-```
+See `.env.example` for all required environment variables and their descriptions.
 
 ### 3. Build the Docker image
 
@@ -182,20 +161,9 @@ The project follows a **4-layer pattern**:
 
 ## API Endpoints
 
-### Authentication
+All endpoints are fully documented via docstrings in each router file, which auto-generate interactive API docs:
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/v1/auth/login` | Login and get JWT token |
-| POST | `/api/v1/auth/logout` | Logout |
-| GET | `/api/v1/auth/me` | Get current user info |
-
-### Users (Admin only)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/users` | List users (paginated, filterable) |
-| GET | `/api/v1/users/{id}` | Get user by ID |
-| POST | `/api/v1/users` | Create user |
-| PUT | `/api/v1/users/{id}` | Update user |
-| DELETE | `/api/v1/users/{id}` | Soft delete user |
+- **Swagger UI**: http://localhost:8000/docs (interactive testing)
+- **ReDoc**: http://localhost:8000/redoc (browsable reference)
+- **OpenAPI JSON**: http://localhost:8000/openapi.json (machine-readable spec)
+- **Production OpenAPI**: https://dev-api.medbaseclinic.com/openapi.json

@@ -25,7 +25,15 @@ async def get_vitals_for_appointment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get vital signs for an appointment."""
+    """
+    Get the vital signs record for an appointment.
+
+    Each appointment can have at most one vital signs record.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Appointment not found, or vital signs not recorded for this appointment
+    """
     logger.info("Fetching vitals for appointment_id=%d by user_id=%d", appointment_id, current_user.id)
 
     # Validate appointment exists
@@ -51,7 +59,24 @@ async def create_vitals_for_appointment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Add vital signs to an appointment. One vital signs record per appointment."""
+    """
+    Record vital signs for an appointment.
+
+    All vital sign fields are optional. Only one vital signs record is allowed per appointment.
+
+    **Business Rules:**
+    - Appointment must exist
+    - Cannot add vital signs to a completed appointment
+    - Only one vital signs record per appointment
+
+    **Field ranges:** BP systolic/diastolic 0-300, heart rate 0-300, temperature 0-50,
+    respiratory rate 0-100, weight 0-1000 kg, height 0-300 cm.
+
+    **Errors:**
+    - `400`: Appointment is completed, or vital signs already exist for this appointment
+    - `401`: Not authenticated
+    - `404`: Appointment not found
+    """
     logger.info("Creating vitals for appointment_id=%d by user_id=%d", appointment_id, current_user.id)
 
     # Validate appointment exists
@@ -90,7 +115,19 @@ async def update_vital_signs(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update vital signs."""
+    """
+    Update vital signs.
+
+    All fields are optional — only provided fields are updated.
+
+    **Business Rules:**
+    - Cannot edit vital signs if the appointment is completed
+
+    **Errors:**
+    - `400`: Cannot edit vital signs of a completed appointment
+    - `401`: Not authenticated
+    - `404`: Vital signs not found
+    """
     logger.info("Updating vital_sign_id=%d by user_id=%d", vital_sign_id, current_user.id)
 
     service = VitalSignService(db)
@@ -119,7 +156,15 @@ async def delete_vital_signs(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete vital signs (soft delete)."""
+    """
+    Soft-delete vital signs.
+
+    The record is marked as deleted but remains in the database.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Vital signs not found
+    """
     logger.info("Deleting vital_sign_id=%d by user_id=%d", vital_sign_id, current_user.id)
 
     service = VitalSignService(db)

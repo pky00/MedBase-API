@@ -44,7 +44,24 @@ async def get_appointments(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get all appointments with pagination, filtering, and sorting."""
+    """
+    List all appointments with pagination, filtering, and sorting.
+
+    Returns a paginated list of appointments. Supports filtering by patient, doctor, partner,
+    status, type, location, and date. Search looks in patient, doctor, and partner names.
+
+    **Filters:**
+    - **status**: `scheduled`, `in_progress`, `completed`, `cancelled`
+    - **type**: `scheduled`, `walk_in`
+    - **location**: `internal`, `external`
+    - **appointment_date**: ISO format `YYYY-MM-DD`
+    - **patient_id**, **doctor_id**, **partner_id**: Filter by related entity
+
+    **Sorting:** Default `id asc`. Sortable fields validated server-side.
+
+    **Errors:**
+    - `401`: Not authenticated
+    """
     logger.info("Listing appointments page=%d size=%d by user_id=%d", page, size, current_user.id)
 
     service = AppointmentService(db)
@@ -66,7 +83,16 @@ async def get_appointment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get appointment by ID (includes vitals, record)."""
+    """
+    Get a single appointment by ID with full details.
+
+    Returns the appointment along with its vital signs and medical record (if they exist).
+    Includes resolved names for patient, doctor, and partner.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Appointment not found
+    """
     logger.info("Fetching appointment_id=%d by user_id=%d", appointment_id, current_user.id)
 
     service = AppointmentService(db)
@@ -84,7 +110,24 @@ async def create_appointment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Create a new appointment."""
+    """
+    Create a new appointment.
+
+    Validates that the referenced patient, doctor (if provided), and partner (if provided) exist.
+    External appointments (`location: "external"`) require a `partner_id`.
+
+    A short code is auto-generated for the appointment.
+
+    **Business Rules:**
+    - Patient must exist and not be deleted
+    - Doctor must exist if provided
+    - Partner must exist if provided
+    - External location requires `partner_id`
+
+    **Errors:**
+    - `400`: Patient/doctor/partner not found, or external appointment missing partner_id
+    - `401`: Not authenticated
+    """
     logger.info("Creating appointment patient_id=%d by user_id=%d", data.patient_id, current_user.id)
 
     # Validate patient exists
@@ -130,7 +173,21 @@ async def update_appointment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update an appointment."""
+    """
+    Update an existing appointment.
+
+    All fields are optional — only provided fields are updated.
+    Cannot update an appointment that has been completed.
+
+    **Business Rules:**
+    - Cannot update a completed appointment
+    - Patient, doctor, and partner are validated if changed
+
+    **Errors:**
+    - `400`: Cannot update completed appointment, or referenced entity not found
+    - `401`: Not authenticated
+    - `404`: Appointment not found
+    """
     logger.info("Updating appointment_id=%d by user_id=%d", appointment_id, current_user.id)
 
     service = AppointmentService(db)
@@ -178,7 +235,17 @@ async def update_appointment_status(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update appointment status."""
+    """
+    Update only the status of an appointment.
+
+    **Valid statuses:** `scheduled`, `in_progress`, `completed`, `cancelled`
+
+    Used by the appointment flow wizard to transition between states.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Appointment not found
+    """
     logger.info("Updating appointment status appointment_id=%d status=%s by user_id=%d",
                 appointment_id, data.status, current_user.id)
 
@@ -199,7 +266,16 @@ async def delete_appointment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete an appointment (soft delete)."""
+    """
+    Soft-delete an appointment.
+
+    The appointment is marked as deleted but remains in the database.
+    Related vital signs and medical records are not affected.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Appointment not found
+    """
     logger.info("Deleting appointment_id=%d by user_id=%d", appointment_id, current_user.id)
 
     service = AppointmentService(db)

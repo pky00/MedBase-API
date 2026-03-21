@@ -20,7 +20,14 @@ router = APIRouter(tags=["Patient Documents"])
 async def get_patient_document_types(
     current_user: User = Depends(get_current_user),
 ):
-    """Return all available patient document types."""
+    """
+    Get all available patient document types.
+
+    Returns a list of valid document type values and their display labels.
+
+    **Document types:** lab_report, imaging, prescription, referral, insurance,
+    identification, consent_form, medical_history, discharge_summary, other.
+    """
     logger.info("Listing patient document types by user_id=%d", current_user.id)
     return [{"value": t.value, "label": t.value.replace("_", " ").title()} for t in PatientDocumentType]
 
@@ -39,7 +46,18 @@ async def get_patient_documents(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """List documents for a patient."""
+    """
+    List documents for a specific patient.
+
+    **Filters:**
+    - **document_type**: Filter by document type
+
+    **Sorting:** Default `id asc`. Sortable fields validated server-side.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Patient not found
+    """
     logger.info("Listing documents for patient_id=%d by user_id=%d", patient_id, current_user.id)
 
     # Verify patient exists
@@ -66,7 +84,16 @@ async def get_patient_document(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get document by ID."""
+    """
+    Get a single patient document by ID.
+
+    Returns the document metadata including a presigned URL for downloading the file.
+    The presigned URL expires after 5 minutes.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Document not found
+    """
     logger.info("Fetching document_id=%d by user_id=%d", document_id, current_user.id)
 
     service = PatientDocumentService(db)
@@ -92,7 +119,24 @@ async def upload_patient_document(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Upload a document for a patient. Accepts multipart/form-data."""
+    """
+    Upload a document for a patient.
+
+    Accepts multipart/form-data with a file upload. Optionally provide a custom
+    `document_name` and `document_type`.
+
+    **File restrictions:**
+    - **Max size:** 10 MB
+    - **Allowed extensions:** pdf, jpg, jpeg, png, gif, bmp, webp, doc, docx, xls, xlsx, csv, txt, rtf, dicom, dcm
+    - **Allowed content types:** application/pdf, image/*, application/msword, spreadsheet formats, text/plain, etc.
+
+    Files are stored in an S3-compatible Lightsail bucket under `patient-documents/{patient_id}/`.
+
+    **Errors:**
+    - `400`: Invalid file type, file too large, or invalid content type
+    - `401`: Not authenticated
+    - `404`: Patient not found
+    """
     logger.info(
         "Uploading document for patient_id=%d filename='%s' by user_id=%d",
         patient_id, file.filename, current_user.id,
@@ -165,7 +209,15 @@ async def delete_patient_document(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a patient document (soft delete)."""
+    """
+    Soft-delete a patient document.
+
+    The document record is marked as deleted. The actual file in storage is also removed.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Document not found
+    """
     logger.info("Deleting document_id=%d by user_id=%d", document_id, current_user.id)
 
     service = PatientDocumentService(db)

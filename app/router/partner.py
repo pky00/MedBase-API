@@ -35,7 +35,23 @@ async def get_partners(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get all partners with pagination, filtering, and sorting."""
+    """
+    List all partners with pagination, filtering, and sorting.
+
+    Returns a paginated list of partners with their third party details (name, phone, email).
+
+    **Filters:**
+    - **partner_type**: `donor`, `referral`, `both`
+    - **organization_type**: `NGO`, `organization`, `individual`, `hospital`, `medical_center`
+    - **is_active**: `true` / `false`
+
+    **Search:** Searches in name, contact person, email, and phone.
+
+    **Sorting:** Default `id asc`. Sortable fields validated server-side.
+
+    **Errors:**
+    - `401`: Not authenticated
+    """
     logger.info("Listing partners page=%d size=%d by user_id=%d", page, size, current_user.id)
 
     service = PartnerService(db)
@@ -55,7 +71,15 @@ async def get_partner(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get partner by ID."""
+    """
+    Get a single partner by ID.
+
+    Returns partner info including third party details (name, phone, email).
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Partner not found
+    """
     logger.info("Fetching partner_id=%d by user_id=%d", partner_id, current_user.id)
 
     service = PartnerService(db)
@@ -74,7 +98,25 @@ async def create_partner(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Create a new partner. Auto-creates a third_party record if third_party_id not provided."""
+    """
+    Create a new partner.
+
+    If `third_party_id` is provided, links to an existing third party record.
+    Otherwise, a new third party is auto-created using the provided `name`, `phone`, and `email`.
+
+    **Business Rules:**
+    - Name must be unique across all third parties (when creating new)
+    - `name` is required when `third_party_id` is not provided
+
+    **Partner types determine capabilities:**
+    - `donor`: Can make donation inventory transactions
+    - `referral`: Can receive treatments
+    - `both`: Can do both
+
+    **Errors:**
+    - `400`: Name already exists, name required, or third party not found
+    - `401`: Not authenticated
+    """
     logger.info("Creating partner name='%s' by user_id=%d", data.name, current_user.id)
 
     service = PartnerService(db)
@@ -113,7 +155,15 @@ async def update_partner(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update a partner."""
+    """
+    Update an existing partner.
+
+    All fields are optional — only provided fields are updated.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Partner not found
+    """
     logger.info("Updating partner_id=%d by user_id=%d", partner_id, current_user.id)
 
     service = PartnerService(db)
@@ -134,7 +184,15 @@ async def delete_partner(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a partner (soft delete)."""
+    """
+    Soft-delete a partner.
+
+    The partner record is marked as deleted but remains in the database.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Partner not found
+    """
     logger.info("Deleting partner_id=%d by user_id=%d", partner_id, current_user.id)
 
     service = PartnerService(db)

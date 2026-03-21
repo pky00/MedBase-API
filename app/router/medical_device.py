@@ -33,7 +33,22 @@ async def get_medical_devices(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get all medical devices with pagination, filtering, and sorting."""
+    """
+    List all medical devices with pagination, filtering, and sorting.
+
+    Returns medical devices with inventory quantity and category details.
+
+    **Filters:**
+    - **category_id**: Filter by medical device category
+    - **is_active**: `true` / `false`
+
+    **Search:** Searches in name and description.
+
+    **Sorting:** Default `id asc`. Sortable fields validated server-side.
+
+    **Errors:**
+    - `401`: Not authenticated
+    """
     logger.info("Listing medical devices page=%d size=%d by user_id=%d", page, size, current_user.id)
 
     service = MedicalDeviceService(db)
@@ -60,7 +75,15 @@ async def get_medical_device(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get medical device by ID (includes inventory quantity and category name)."""
+    """
+    Get a single medical device by ID with details.
+
+    Returns the medical device along with its current inventory quantity and category name.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Medical device not found
+    """
     logger.info("Fetching medical device_id=%d by user_id=%d", device_id, current_user.id)
 
     service = MedicalDeviceService(db)
@@ -84,8 +107,17 @@ async def create_medical_device(
 ):
     """
     Create a new medical device.
-    
-    Automatically creates an inventory record with quantity 0.
+
+    Automatically creates a parent `items` record and an `inventory` record with quantity 0.
+    The returned `item_id` is used for inventory transaction references.
+
+    **Business Rules:**
+    - Medical device name must be unique
+    - Category must exist if `category_id` is provided
+
+    **Errors:**
+    - `400`: Name already exists or category not found
+    - `401`: Not authenticated
     """
     logger.info(
         "Creating medical device name='%s' by user_id=%d",
@@ -127,7 +159,20 @@ async def update_medical_device(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update a medical device."""
+    """
+    Update an existing medical device.
+
+    All fields are optional — only provided fields are updated.
+
+    **Business Rules:**
+    - Name must remain unique if changed
+    - Category must exist if `category_id` is changed
+
+    **Errors:**
+    - `400`: Name already exists or category not found
+    - `401`: Not authenticated
+    - `404`: Medical device not found
+    """
     logger.info("Updating medical device_id=%d by user_id=%d", device_id, current_user.id)
 
     service = MedicalDeviceService(db)
@@ -172,7 +217,17 @@ async def delete_medical_device(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a medical device (soft delete). Only allowed if inventory quantity is 0."""
+    """
+    Soft-delete a medical device.
+
+    Can only delete if the medical device's inventory quantity is 0. Use inventory transactions
+    to reduce quantity before deleting.
+
+    **Errors:**
+    - `400`: Cannot delete with non-zero inventory quantity
+    - `401`: Not authenticated
+    - `404`: Medical device not found
+    """
     logger.info("Deleting medical device_id=%d by user_id=%d", device_id, current_user.id)
 
     service = MedicalDeviceService(db)

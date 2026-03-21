@@ -29,7 +29,16 @@ async def get_medical_device_categories(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get all medical device categories with pagination and sorting."""
+    """
+    List all medical device categories with pagination and sorting.
+
+    **Search:** Searches in name and description.
+
+    **Sorting:** Default `id asc`. Sortable fields validated server-side.
+
+    **Errors:**
+    - `401`: Not authenticated
+    """
     logger.info("Listing medical device categories page=%d size=%d by user_id=%d", page, size, current_user.id)
 
     service = MedicalDeviceCategoryService(db)
@@ -50,7 +59,13 @@ async def get_medical_device_category(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get medical device category by ID."""
+    """
+    Get a single medical device category by ID.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Medical device category not found
+    """
     logger.info("Fetching medical device category_id=%d by user_id=%d", category_id, current_user.id)
 
     service = MedicalDeviceCategoryService(db)
@@ -72,7 +87,16 @@ async def create_medical_device_category(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Create a new medical device category."""
+    """
+    Create a new medical device category.
+
+    **Business Rules:**
+    - Category name must be unique
+
+    **Errors:**
+    - `400`: Category name already exists
+    - `401`: Not authenticated
+    """
     logger.info(
         "Creating medical device category name='%s' by user_id=%d",
         data.name, current_user.id,
@@ -102,7 +126,19 @@ async def update_medical_device_category(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update a medical device category."""
+    """
+    Update an existing medical device category.
+
+    All fields are optional — only provided fields are updated.
+
+    **Business Rules:**
+    - Name must remain unique if changed
+
+    **Errors:**
+    - `400`: Category name already exists
+    - `401`: Not authenticated
+    - `404`: Medical device category not found
+    """
     logger.info("Updating medical device category_id=%d by user_id=%d", category_id, current_user.id)
 
     service = MedicalDeviceCategoryService(db)
@@ -136,7 +172,16 @@ async def delete_medical_device_category(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a medical device category (soft delete). Cannot delete if medical devices are linked."""
+    """
+    Soft-delete a medical device category.
+
+    Cannot delete if medical devices are still linked to this category.
+
+    **Errors:**
+    - `400`: Cannot delete category with linked medical devices
+    - `401`: Not authenticated
+    - `404`: Medical device category not found
+    """
     logger.info("Deleting medical device category_id=%d by user_id=%d", category_id, current_user.id)
 
     service = MedicalDeviceCategoryService(db)

@@ -35,7 +35,23 @@ async def get_equipment_list(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get all equipment with pagination, filtering, and sorting."""
+    """
+    List all equipment with pagination, filtering, and sorting.
+
+    Returns equipment with inventory quantity and category details.
+
+    **Filters:**
+    - **category_id**: Filter by equipment category
+    - **is_active**: `true` / `false`
+    - **condition**: Filter by condition (`new`, `good`, `fair`, `poor`)
+
+    **Search:** Searches in name and description.
+
+    **Sorting:** Default `id asc`. Sortable fields validated server-side.
+
+    **Errors:**
+    - `401`: Not authenticated
+    """
     logger.info("Listing equipment page=%d size=%d by user_id=%d", page, size, current_user.id)
 
     service = EquipmentService(db)
@@ -63,7 +79,15 @@ async def get_equipment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get equipment by ID (includes inventory quantity and category name)."""
+    """
+    Get a single equipment by ID with details.
+
+    Returns the equipment along with its current inventory quantity and category name.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Equipment not found
+    """
     logger.info("Fetching equipment_id=%d by user_id=%d", equipment_id, current_user.id)
 
     service = EquipmentService(db)
@@ -86,9 +110,19 @@ async def create_equipment(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Create new equipment.
-    
-    Automatically creates an inventory record with quantity 0.
+    Create a new equipment.
+
+    Automatically creates a parent `items` record and an `inventory` record with quantity 0.
+    The returned `item_id` is used for inventory transaction references.
+    Equipment cannot be prescribed via inventory transactions.
+
+    **Business Rules:**
+    - Equipment name must be unique
+    - Category must exist if `category_id` is provided
+
+    **Errors:**
+    - `400`: Name already exists or category not found
+    - `401`: Not authenticated
     """
     logger.info(
         "Creating equipment name='%s' by user_id=%d",
@@ -130,7 +164,20 @@ async def update_equipment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update equipment."""
+    """
+    Update an existing equipment.
+
+    All fields are optional — only provided fields are updated.
+
+    **Business Rules:**
+    - Name must remain unique if changed
+    - Category must exist if `category_id` is changed
+
+    **Errors:**
+    - `400`: Name already exists or category not found
+    - `401`: Not authenticated
+    - `404`: Equipment not found
+    """
     logger.info("Updating equipment_id=%d by user_id=%d", equipment_id, current_user.id)
 
     service = EquipmentService(db)
@@ -175,7 +222,17 @@ async def delete_equipment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete equipment (soft delete). Only allowed if inventory quantity is 0."""
+    """
+    Soft-delete an equipment.
+
+    Can only delete if the equipment's inventory quantity is 0. Use inventory transactions
+    to reduce quantity before deleting.
+
+    **Errors:**
+    - `400`: Cannot delete with non-zero inventory quantity
+    - `401`: Not authenticated
+    - `404`: Equipment not found
+    """
     logger.info("Deleting equipment_id=%d by user_id=%d", equipment_id, current_user.id)
 
     service = EquipmentService(db)

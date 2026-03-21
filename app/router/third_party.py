@@ -30,7 +30,25 @@ async def get_third_parties(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get all third parties with pagination and filtering."""
+    """
+    List all third parties with pagination and filtering.
+
+    Third parties are the base identity records shared by users, doctors, patients, and partners.
+
+    **Filters:**
+    - **is_active**: `true` / `false`
+    - **exclude_patients**: Exclude third parties already linked to a patient
+    - **exclude_doctors**: Exclude third parties already linked to a doctor
+    - **exclude_partners**: Exclude third parties already linked to a partner
+    - **exclude_users**: Exclude third parties already linked to a user
+
+    **Search:** Searches in name, email, and phone.
+
+    The exclusion filters are useful when selecting a third party to link to a new entity.
+
+    **Errors:**
+    - `401`: Not authenticated
+    """
     logger.info("Listing third parties page=%d size=%d by user_id=%d", page, size, current_user.id)
 
     service = ThirdPartyService(db)
@@ -51,7 +69,13 @@ async def get_third_party(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get third party by ID."""
+    """
+    Get a single third party by ID.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Third party not found
+    """
     logger.info("Fetching third_party_id=%d by user_id=%d", third_party_id, current_user.id)
 
     service = ThirdPartyService(db)
@@ -74,7 +98,19 @@ async def update_third_party(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update a third party record."""
+    """
+    Update a third party record.
+
+    All fields are optional — only provided fields are updated.
+
+    **Business Rules:**
+    - Name must remain unique if changed
+
+    **Errors:**
+    - `400`: Name already exists
+    - `401`: Not authenticated
+    - `404`: Third party not found
+    """
     logger.info("Updating third_party_id=%d by user_id=%d", third_party_id, current_user.id)
 
     service = ThirdPartyService(db)

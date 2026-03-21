@@ -29,7 +29,15 @@ async def get_transaction_items(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """List items for a transaction."""
+    """
+    List all items in an inventory transaction.
+
+    Returns each item with its quantity, item name, and item type.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Inventory transaction not found
+    """
     logger.info("Listing items for transaction_id=%d by user_id=%d", transaction_id, current_user.id)
 
     service = InventoryTransactionService(db)
@@ -52,7 +60,22 @@ async def add_transaction_item(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Add an item to a transaction."""
+    """
+    Add an item to an existing inventory transaction.
+
+    The `item_id` must reference the parent `items` table ID.
+    Automatically updates inventory quantity based on the transaction type.
+
+    **Business Rules:**
+    - Item must exist in the items table
+    - Equipment items cannot be added to prescription transactions
+    - Cannot decrease inventory below 0
+
+    **Errors:**
+    - `400`: Item not found, equipment in prescription, or insufficient inventory
+    - `401`: Not authenticated
+    - `404`: Inventory transaction not found
+    """
     logger.info(
         "Adding item to transaction_id=%d item_id=%d qty=%d by user_id=%d",
         transaction_id, data.item_id, data.quantity, current_user.id,
@@ -89,7 +112,21 @@ async def update_transaction_item(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update a transaction item."""
+    """
+    Update a transaction item (quantity or item_id).
+
+    If changing the item, the new item is validated. Inventory is adjusted accordingly.
+
+    **Business Rules:**
+    - New item must exist if changing item_id
+    - Equipment cannot be used in prescription transactions
+    - Cannot decrease inventory below 0
+
+    **Errors:**
+    - `400`: Item not found, equipment in prescription, or insufficient inventory
+    - `401`: Not authenticated
+    - `404`: Transaction item not found
+    """
     logger.info("Updating transaction item_id=%d by user_id=%d", item_id, current_user.id)
 
     service = InventoryTransactionService(db)
@@ -131,7 +168,15 @@ async def delete_transaction_item(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a transaction item (soft delete, reverses inventory)."""
+    """
+    Soft-delete a transaction item.
+
+    **Automatically reverses the inventory impact** of this item.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Transaction item not found
+    """
     logger.info("Deleting transaction item_id=%d by user_id=%d", item_id, current_user.id)
 
     service = InventoryTransactionService(db)

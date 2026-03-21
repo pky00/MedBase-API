@@ -40,7 +40,22 @@ async def get_transactions(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """List all inventory transactions."""
+    """
+    List all inventory transactions with pagination and filtering.
+
+    Returns transactions without their individual items (use GET by ID for items).
+
+    **Filters:**
+    - **transaction_type**: `purchase`, `donation`, `prescription`, `loss`, `breakage`, `expiration`, `destruction`
+    - **third_party_id**: Filter by the person/entity involved
+    - **appointment_id**: Filter by linked appointment
+    - **transaction_date**: Filter by exact date (ISO format `YYYY-MM-DD`)
+
+    **Sorting:** Default `id asc`. Sortable fields validated server-side.
+
+    **Errors:**
+    - `401`: Not authenticated
+    """
     logger.info("Listing inventory transactions page=%d size=%d by user_id=%d", page, size, current_user.id)
 
     service = InventoryTransactionService(db)
@@ -66,7 +81,20 @@ async def get_transactions_by_item(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get inventory transactions that include a specific item, with the transaction item details."""
+    """
+    Get all transactions that include a specific item.
+
+    Returns transactions with the specific transaction item details (quantity for that item).
+    The `item_id` refers to the parent `items` table ID.
+
+    **Filters:**
+    - **transaction_type**: Filter by transaction type
+
+    **Sorting:** Default `id asc`. Sortable fields validated server-side.
+
+    **Errors:**
+    - `401`: Not authenticated
+    """
     logger.info("Listing transactions for item_id=%d page=%d size=%d by user_id=%d", item_id, page, size, current_user.id)
 
     service = InventoryTransactionService(db)
@@ -85,7 +113,16 @@ async def get_transaction(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get inventory transaction by ID (includes items)."""
+    """
+    Get a single inventory transaction by ID with its items.
+
+    Returns the full transaction including all transaction items with their quantities,
+    item names, and item types.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Inventory transaction not found
+    """
     logger.info("Fetching inventory transaction_id=%d by user_id=%d", transaction_id, current_user.id)
 
     service = InventoryTransactionService(db)
@@ -103,7 +140,28 @@ async def create_transaction(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Create an inventory transaction with optional items."""
+    """
+    Create a new inventory transaction with optional items.
+
+    The `third_party_id` behavior depends on the transaction type:
+    - **purchase, loss, breakage, expiration, destruction**: Auto-set to current user's third party
+    - **donation**: Must provide `third_party_id` of a partner with `partner_type` of `donor` or `both`
+    - **prescription**: Must provide `third_party_id` of a doctor
+
+    Items can be included in the request to create them along with the transaction.
+    Each item's `item_id` must reference the parent `items` table (not medicine/equipment/device ID).
+
+    **Business Rules:**
+    - Donation third_party must be a donor-type partner
+    - Prescription third_party must be a doctor
+    - Equipment items cannot be added to prescription transactions
+    - Creating items automatically updates inventory quantities (+ for purchase/donation, - for others)
+    - Cannot decrease inventory below 0
+
+    **Errors:**
+    - `400`: Invalid third_party for transaction type, item not found, equipment in prescription, or insufficient inventory
+    - `401`: Not authenticated
+    """
     logger.info(
         "Creating inventory transaction type=%s by user_id=%d",
         data.transaction_type, current_user.id,
@@ -171,7 +229,16 @@ async def update_transaction(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update an inventory transaction (date and notes only)."""
+    """
+    Update an inventory transaction (date and notes only).
+
+    Only `transaction_date` and `notes` can be updated. The transaction type, third party,
+    and items cannot be changed through this endpoint.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Inventory transaction not found
+    """
     logger.info("Updating inventory transaction_id=%d by user_id=%d", transaction_id, current_user.id)
 
     service = InventoryTransactionService(db)
@@ -193,7 +260,16 @@ async def delete_transaction(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete an inventory transaction (soft delete, reverses inventory)."""
+    """
+    Soft-delete an inventory transaction.
+
+    **Automatically reverses the inventory impact** of the transaction: quantities that were
+    added are subtracted, and quantities that were subtracted are added back.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Inventory transaction not found
+    """
     logger.info("Deleting inventory transaction_id=%d by user_id=%d", transaction_id, current_user.id)
 
     service = InventoryTransactionService(db)

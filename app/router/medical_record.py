@@ -31,7 +31,18 @@ async def get_medical_records(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """List all medical records."""
+    """
+    List all medical records with pagination and filtering.
+
+    **Filters:**
+    - **patient_id**: Filter by patient
+    - **appointment_id**: Filter by appointment
+
+    **Sorting:** Default `id asc`. Sortable fields validated server-side.
+
+    **Errors:**
+    - `401`: Not authenticated
+    """
     logger.info("Listing medical records page=%d size=%d by user_id=%d", page, size, current_user.id)
 
     service = MedicalRecordService(db)
@@ -50,7 +61,15 @@ async def get_medical_record(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get medical record by ID."""
+    """
+    Get a single medical record by ID.
+
+    Returns the record with the associated patient name.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Medical record not found
+    """
     logger.info("Fetching medical_record_id=%d by user_id=%d", record_id, current_user.id)
 
     service = MedicalRecordService(db)
@@ -68,7 +87,15 @@ async def get_medical_record_for_appointment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get medical record for an appointment."""
+    """
+    Get the medical record for a specific appointment.
+
+    Each appointment can have at most one medical record.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Appointment not found, or no medical record for this appointment
+    """
     logger.info("Fetching medical record for appointment_id=%d by user_id=%d", appointment_id, current_user.id)
 
     # Validate appointment exists
@@ -94,7 +121,21 @@ async def create_medical_record_for_appointment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Create medical record for an appointment. One medical record per appointment."""
+    """
+    Create a medical record for an appointment.
+
+    Only one medical record is allowed per appointment.
+
+    **Business Rules:**
+    - Appointment must exist
+    - Cannot add a medical record to a completed appointment
+    - Only one medical record per appointment
+
+    **Errors:**
+    - `400`: Appointment is completed, or record already exists for this appointment
+    - `401`: Not authenticated
+    - `404`: Appointment not found
+    """
     logger.info("Creating medical record for appointment_id=%d by user_id=%d", appointment_id, current_user.id)
 
     # Validate appointment exists
@@ -133,7 +174,19 @@ async def update_medical_record(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update a medical record."""
+    """
+    Update a medical record.
+
+    All fields are optional — only provided fields are updated.
+
+    **Business Rules:**
+    - Cannot edit a medical record if the appointment is completed
+
+    **Errors:**
+    - `400`: Cannot edit record of a completed appointment
+    - `401`: Not authenticated
+    - `404`: Medical record not found
+    """
     logger.info("Updating medical_record_id=%d by user_id=%d", record_id, current_user.id)
 
     service = MedicalRecordService(db)
@@ -162,7 +215,15 @@ async def delete_medical_record(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a medical record (soft delete)."""
+    """
+    Soft-delete a medical record.
+
+    The record is marked as deleted but remains in the database.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Medical record not found
+    """
     logger.info("Deleting medical_record_id=%d by user_id=%d", record_id, current_user.id)
 
     service = MedicalRecordService(db)

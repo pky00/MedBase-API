@@ -33,7 +33,22 @@ async def get_medicines(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get all medicines with pagination, filtering, and sorting."""
+    """
+    List all medicines with pagination, filtering, and sorting.
+
+    Returns medicines with inventory quantity and category details.
+
+    **Filters:**
+    - **category_id**: Filter by medicine category
+    - **is_active**: `true` / `false`
+
+    **Search:** Searches in name and description.
+
+    **Sorting:** Default `id asc`. Sortable fields validated server-side.
+
+    **Errors:**
+    - `401`: Not authenticated
+    """
     logger.info("Listing medicines page=%d size=%d by user_id=%d", page, size, current_user.id)
 
     service = MedicineService(db)
@@ -60,7 +75,15 @@ async def get_medicine(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get medicine by ID (includes inventory quantity and category name)."""
+    """
+    Get a single medicine by ID with details.
+
+    Returns the medicine along with its current inventory quantity and category name.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Medicine not found
+    """
     logger.info("Fetching medicine_id=%d by user_id=%d", medicine_id, current_user.id)
 
     service = MedicineService(db)
@@ -84,8 +107,17 @@ async def create_medicine(
 ):
     """
     Create a new medicine.
-    
-    Automatically creates an inventory record with quantity 0.
+
+    Automatically creates a parent `items` record and an `inventory` record with quantity 0.
+    The returned `item_id` is used for inventory transaction references.
+
+    **Business Rules:**
+    - Medicine name must be unique
+    - Category must exist if `category_id` is provided
+
+    **Errors:**
+    - `400`: Name already exists or category not found
+    - `401`: Not authenticated
     """
     logger.info(
         "Creating medicine name='%s' by user_id=%d",
@@ -127,7 +159,20 @@ async def update_medicine(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update a medicine."""
+    """
+    Update an existing medicine.
+
+    All fields are optional — only provided fields are updated.
+
+    **Business Rules:**
+    - Name must remain unique if changed
+    - Category must exist if `category_id` is changed
+
+    **Errors:**
+    - `400`: Name already exists or category not found
+    - `401`: Not authenticated
+    - `404`: Medicine not found
+    """
     logger.info("Updating medicine_id=%d by user_id=%d", medicine_id, current_user.id)
 
     service = MedicineService(db)
@@ -172,7 +217,17 @@ async def delete_medicine(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a medicine (soft delete). Only allowed if inventory quantity is 0."""
+    """
+    Soft-delete a medicine.
+
+    Can only delete if the medicine's inventory quantity is 0. Use inventory transactions
+    to reduce quantity before deleting.
+
+    **Errors:**
+    - `400`: Cannot delete with non-zero inventory quantity
+    - `401`: Not authenticated
+    - `404`: Medicine not found
+    """
     logger.info("Deleting medicine_id=%d by user_id=%d", medicine_id, current_user.id)
 
     service = MedicineService(db)

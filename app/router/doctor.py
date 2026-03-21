@@ -36,7 +36,23 @@ async def get_doctors(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get all doctors with pagination, filtering, and sorting."""
+    """
+    List all doctors with pagination, filtering, and sorting.
+
+    Returns a paginated list of doctors with their third party details (name, phone, email).
+
+    **Filters:**
+    - **type**: `internal`, `external`, `partner_provided`
+    - **is_active**: `true` / `false`
+    - **partner_id**: Filter by associated partner
+
+    **Search:** Searches in name, specialization, email, and phone.
+
+    **Sorting:** Default `id asc`. Sortable fields validated server-side.
+
+    **Errors:**
+    - `401`: Not authenticated
+    """
     logger.info("Listing doctors page=%d size=%d by user_id=%d", page, size, current_user.id)
 
     service = DoctorService(db)
@@ -64,7 +80,16 @@ async def get_doctor(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get doctor by ID (includes partner name if applicable)."""
+    """
+    Get a single doctor by ID with details.
+
+    Returns doctor info including third party details (name, phone, email) and
+    the associated partner name if the doctor is partner-provided.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Doctor not found
+    """
     logger.info("Fetching doctor_id=%d by user_id=%d", doctor_id, current_user.id)
 
     service = DoctorService(db)
@@ -86,7 +111,21 @@ async def create_doctor(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Create a new doctor."""
+    """
+    Create a new doctor.
+
+    If `third_party_id` is provided, links to an existing third party record.
+    Otherwise, a new third party is auto-created using the provided `name`, `phone`, and `email`.
+
+    **Business Rules:**
+    - Name must be unique across all third parties (when creating new)
+    - If `type` is `partner_provided`, `partner_id` is required
+    - Partner must exist if `partner_id` is provided
+
+    **Errors:**
+    - `400`: Name already exists, third party not found, or partner_provided missing partner_id
+    - `401`: Not authenticated
+    """
     logger.info(
         "Creating doctor name='%s' type='%s' by user_id=%d",
         data.name, data.type, current_user.id,
@@ -157,7 +196,20 @@ async def update_doctor(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update a doctor."""
+    """
+    Update an existing doctor.
+
+    All fields are optional — only provided fields are updated.
+
+    **Business Rules:**
+    - If type becomes `partner_provided`, `partner_id` must be set
+    - Partner must exist if `partner_id` is provided
+
+    **Errors:**
+    - `400`: partner_provided type without partner_id, or partner not found
+    - `401`: Not authenticated
+    - `404`: Doctor not found
+    """
     logger.info("Updating doctor_id=%d by user_id=%d", doctor_id, current_user.id)
 
     service = DoctorService(db)
@@ -203,7 +255,15 @@ async def delete_doctor(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a doctor (soft delete)."""
+    """
+    Soft-delete a doctor.
+
+    The doctor record is marked as deleted but remains in the database.
+
+    **Errors:**
+    - `401`: Not authenticated
+    - `404`: Doctor not found
+    """
     logger.info("Deleting doctor_id=%d by user_id=%d", doctor_id, current_user.id)
 
     service = DoctorService(db)
